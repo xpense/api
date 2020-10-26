@@ -1,14 +1,13 @@
 package main
 
 import (
+	"expense-api/handlers"
 	"expense-api/model"
 	"expense-api/repository"
 	"fmt"
 	"log"
 	"os"
 	"time"
-
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -49,43 +48,22 @@ func main() {
 		panic(fmt.Sprintf("couldn't establish postgres connection: %v", err))
 	}
 
-	if err := db.AutoMigrate(); err != nil {
+	if err := db.AutoMigrate(model.Transaction{}); err != nil {
 		panic(fmt.Sprintf("error setting up database: %v", err))
 	}
 
+	repository := repository.New(db)
+
 	r := gin.Default()
 
-	expenses := repository.NewDB()
-
-	r.GET("/admin/overview/expense", func(c *gin.Context) {
-		c.JSON(http.StatusOK, expenses)
-	})
-
-	r.POST("/:user/expense", func(c *gin.Context) {
-		user := c.Param("user")
-
-		var json model.Transaction
-		if err := c.ShouldBindJSON(&json); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		t, err := model.NewTransaction(json.Timestamp, json.Amount, json.Type)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		expenses.AddTransaction(user, t)
-
-		c.JSON(http.StatusOK, gin.H{
-			"id": t.ID,
-		})
-	})
+	transaction := r.Group("/transaction")
+	{
+		transaction.GET("/", handlers.GetTransactions(repository))
+		transaction.POST("/", handlers.CreateTransaction(repository))
+		transaction.GET("/:id", handlers.GetTransaction(repository))
+		transaction.PATCH("/:id", handlers.UpdateTransaction(repository))
+		transaction.DELETE("/:id", handlers.DeleteTransaction(repository))
+	}
 
 	r.Run(port)
 }

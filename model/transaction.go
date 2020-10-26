@@ -10,38 +10,14 @@ var (
 	ErrorType   = errors.New("invalid transaction Type; please use either 'income' or 'expense'")
 )
 
-type TransactionType string
-
-const (
-	Income  TransactionType = "income"
-	Expense TransactionType = "expense"
-)
-
-type Transaction struct {
-	Model
-	Timestamp time.Time       `json:"timestamp,omitempty"`
-	Amount    uint64          `json:"amount"`
-	Type      TransactionType `json:"type"`
-}
-
-func NewTransaction(timestamp time.Time, amount uint64, transactionType TransactionType) (*Transaction, error) {
+func TransactionValidateCreateBody(timestamp time.Time, amount uint64, transactionType TransactionType) error {
 	if amount == 0 {
-		return nil, ErrorAmount
+		return ErrorAmount
 	}
 
 	if transactionType != Income && transactionType != Expense {
-		return nil, ErrorType
+		return ErrorType
 	}
 
-	transaction := &Transaction{
-		Amount:    amount,
-		Type:      transactionType,
-		Timestamp: timestamp,
-	}
-
-	if timestamp.IsZero() {
-		transaction.Timestamp = time.Now()
-	}
-
-	return transaction, nil
+	return nil
 }

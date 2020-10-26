@@ -1,26 +1,24 @@
 package repository
 
-import "expense-api/model"
+import (
+	"expense-api/model"
+	"time"
 
-type DB struct {
-	TotalTransactions uint64                          `json:"total_transactions"`
-	UserTransactions  map[string][]*model.Transaction `json:"user_transactions"`
+	"gorm.io/gorm"
+)
+
+type Repository interface {
+	TransactionCreate(timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error)
+	TransactionUpdate(id uint, timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error)
+	TransactionGet(id uint) (*model.Transaction, error)
+	TransactionDelete(id uint) error
+	TransactionList() ([]*model.Transaction, error)
 }
 
-func NewDB() DB {
-	return DB{
-		TotalTransactions: 0,
-		UserTransactions:  map[string][]*model.Transaction{},
-	}
+type repository struct {
+	db *gorm.DB
 }
 
-func (db *DB) AddTransaction(user string, newTransaction *model.Transaction) {
-	userTransactions, ok := db.UserTransactions[user]
-
-	if !ok {
-		db.UserTransactions[user] = []*model.Transaction{}
-	}
-
-	db.UserTransactions[user] = append(userTransactions, newTransaction)
-	db.TotalTransactions++
+func New(db *gorm.DB) Repository {
+	return &repository{db}
 }
