@@ -1,15 +1,14 @@
 package main
 
 import (
-	"expense-api/handlers"
 	"expense-api/model"
 	"expense-api/repository"
+	"expense-api/router"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -54,16 +53,7 @@ func main() {
 
 	repository := repository.New(db)
 
-	r := gin.Default()
-
-	transaction := r.Group("/transaction")
-	{
-		transaction.GET("/", handlers.GetTransactions(repository))
-		transaction.POST("/", handlers.CreateTransaction(repository))
-		transaction.GET("/:id", handlers.GetTransaction(repository))
-		transaction.PATCH("/:id", handlers.UpdateTransaction(repository))
-		transaction.DELETE("/:id", handlers.DeleteTransaction(repository))
-	}
+	r := router.Setup(repository)
 
 	r.Run(port)
 }

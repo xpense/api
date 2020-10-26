@@ -11,7 +11,7 @@ var (
 )
 
 func TransactionValidateCreateBody(timestamp time.Time, amount uint64, transactionType TransactionType) error {
-	if amount == 0 {
+	if amount <= 0 {
 		return ErrorAmount
 	}
 

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"expense-api/model"
 	"time"
 
@@ -14,6 +15,11 @@ type Repository interface {
 	TransactionDelete(id uint) error
 	TransactionList() ([]*model.Transaction, error)
 }
+
+var (
+	ErrorRecordNotFound = errors.New("resource not found")
+	ErrorOther          = errors.New("an error occurred")
+)
 
 type repository struct {
 	db *gorm.DB

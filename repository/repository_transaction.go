@@ -2,7 +2,6 @@ package repository
 
 import (
 	"expense-api/model"
-	"fmt"
 	"time"
 )
 
@@ -18,7 +17,7 @@ func (r *repository) TransactionCreate(timestamp time.Time, amount uint64, trans
 	}
 
 	if tx := r.db.Create(transaction); tx.Error != nil {
-		return nil, tx.Error
+		return nil, ErrorOther
 	}
 
 	return transaction, nil
@@ -43,7 +42,7 @@ func (r *repository) TransactionUpdate(id uint, timestamp time.Time, amount uint
 	}
 
 	if tx := r.db.Save(transaction); tx.Error != nil {
-		return nil, tx.Error
+		return nil, ErrorOther
 	}
 
 	return transaction, nil
@@ -53,8 +52,7 @@ func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
 	var transaction model.Transaction
 
 	if tx := r.db.First(&transaction); tx.Error != nil {
-		fmt.Printf("in get: %v\n", tx.Error)
-		return nil, tx.Error
+		return nil, ErrorOther
 	}
 
 	return &transaction, nil
@@ -67,7 +65,7 @@ func (r *repository) TransactionDelete(id uint) error {
 	}
 
 	if tx := r.db.Delete(transaction); tx.Error != nil {
-		return tx.Error
+		return ErrorOther
 	}
 
 	return nil
@@ -77,7 +75,7 @@ func (r *repository) TransactionList() ([]*model.Transaction, error) {
 	var transactions []*model.Transaction
 
 	if tx := r.db.Find(&transactions); tx.Error != nil {
-		return nil, tx.Error
+		return nil, ErrorOther
 	}
 
 	return transactions, nil

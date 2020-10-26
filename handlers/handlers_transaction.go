@@ -3,12 +3,10 @@ package handlers
 import (
 	"expense-api/model"
 	"expense-api/repository"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func CreateTransaction(r repository.Repository) func(*gin.Context) {
@@ -74,7 +72,7 @@ func DeleteTransaction(r repository.Repository) func(*gin.Context) {
 		}
 
 		if err := r.TransactionDelete(uint(id)); err != nil {
-			if err == gorm.ErrRecordNotFound {
+			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
 				return
 			}
@@ -98,11 +96,10 @@ func GetTransaction(r repository.Repository) func(*gin.Context) {
 
 		transaction, err := r.TransactionGet(uint(id))
 		if err != nil {
-			if err == gorm.ErrRecordNotFound {
+			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
 				return
 			}
-			fmt.Printf("%v\n", err)
 			ctx.Status(http.StatusInternalServerError)
 			return
 		}
@@ -115,7 +112,7 @@ func GetTransactions(r repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		transactions, err := r.TransactionList()
 		if err != nil {
-			if err == gorm.ErrRecordNotFound {
+			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
 				return
 			}
