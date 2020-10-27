@@ -124,6 +124,85 @@ func TestGetTransaction(t *testing.T) {
 	})
 }
 
+func TestUpdateTransaction(t *testing.T) {
+	spy := NewRepositorySpy()
+	r := router.Setup(spy)
+
+	transaction, _ := spy.TransactionCreate(time.Now(), 1000, model.Expense)
+
+	newTransactionRequest := func(id int, transaction *model.Transaction) *http.Request {
+		url := fmt.Sprintf("/transaction/%d", id)
+		body := createRequestBody(transaction)
+		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+
+		return req
+	}
+
+	t.Run("Update non-existent transaction", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(10, &model.Transaction{Amount: 1100})
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusNotFound)
+	})
+
+	t.Run("Update existing transaction with invalid type", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(int(transaction.ID), &model.Transaction{Amount: 2, Type: "invalid"})
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusBadRequest)
+	})
+
+	t.Run("Update existing transaction with valid arguments", func(t *testing.T) {
+		got := &model.Transaction{Amount: 2000, Type: model.Income}
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(int(transaction.ID), got)
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusOK)
+
+		if got.Amount != transaction.Amount || got.Type != transaction.Type {
+			t.Errorf("Trnsaction fields not updated properly!")
+		}
+	})
+}
+
+func TestDeleteTransaction(t *testing.T) {
+	spy := NewRepositorySpy()
+	r := router.Setup(spy)
+
+	transaction, _ := spy.TransactionCreate(time.Now(), 1000, model.Expense)
+
+	newTransactionRequest := func(id int) *http.Request {
+		url := fmt.Sprintf("/transaction/%d", id)
+		req, _ := http.NewRequest(http.MethodDelete, url, nil)
+		return req
+	}
+
+	t.Run("Delete non-existent transaction", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(10)
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusNotFound)
+	})
+
+	t.Run("Delete existing transaction", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(int(transaction.ID))
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusNoContent)
+	})
+}
+
 func TestListTransactions(t *testing.T) {
 	spy := NewRepositorySpy()
 	r := router.Setup(spy)
