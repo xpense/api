@@ -51,7 +51,7 @@ func (r *repository) TransactionUpdate(id uint, timestamp time.Time, amount uint
 func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
 	var transaction model.Transaction
 
-	if tx := r.db.First(&transaction); tx.Error != nil {
+	if tx := r.db.First(&transaction, id); tx.Error != nil {
 		return nil, ErrorOther
 	}
 
