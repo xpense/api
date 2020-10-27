@@ -23,7 +23,7 @@ func (r *repository) TransactionCreate(timestamp time.Time, amount uint64, trans
 	return transaction, nil
 }
 
-func (r *repository) TransactionUpdate(id uint, timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error) {
+func (r *repository) TransactionUpdate(id uint, timestamp time.Time, amount uint64, tType model.TransactionType) (*model.Transaction, error) {
 	transaction, err := r.TransactionGet(id)
 	if err != nil {
 		return nil, err
@@ -37,8 +37,8 @@ func (r *repository) TransactionUpdate(id uint, timestamp time.Time, amount uint
 		transaction.Amount = amount
 	}
 
-	if transactionType == model.Income || transaction.Type == model.Expense {
-		transaction.Type = transactionType
+	if tType == model.Income || tType == model.Expense {
+		transaction.Type = tType
 	}
 
 	if tx := r.db.Save(transaction); tx.Error != nil {
