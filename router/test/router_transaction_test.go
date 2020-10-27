@@ -1,42 +1,17 @@
-package router
+package test
 
 import (
 	"bytes"
 	"encoding/json"
 	"expense-api/model"
-	"expense-api/repository"
+	"expense-api/router"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"sort"
 	"testing"
 	"time"
 )
-
-type RepositorySpy struct {
-	transactions map[uint]*model.Transaction
-}
-
-func NewRepositorySpy() *RepositorySpy {
-	return &RepositorySpy{
-		transactions: map[uint]*model.Transaction{},
-	}
-}
-
-func (r *RepositorySpy) transactionSlice() []*model.Transaction {
-	res := make([]*model.Transaction, 0, len(r.transactions))
-
-	for _, t := range r.transactions {
-		res = append(res, t)
-	}
-
-	sort.Slice(res, func(i, j int) bool {
-		return res[i].ID < res[j].ID
-	})
-
-	return res
-}
 
 type TransactionListResponse struct {
 	Count   int                  `json:"count"`
@@ -50,81 +25,9 @@ func newTransactionListResponse(slice []*model.Transaction) *TransactionListResp
 	}
 }
 
-func (r *RepositorySpy) TransactionCreate(timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error) {
-	id := uint(len(r.transactions)) + 1
-
-	t := &model.Transaction{}
-
-	t.ID = id
-	if !timestamp.IsZero() {
-		t.Timestamp = timestamp.Round(0)
-	}
-
-	if amount > 0 {
-		t.Amount = amount
-	}
-
-	if transactionType == model.Income || t.Type == model.Expense {
-		t.Type = transactionType
-	}
-
-	r.transactions[id] = t
-
-	return t, nil
-}
-
-func (r *RepositorySpy) TransactionUpdate(id uint, timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error) {
-	t, err := r.TransactionGet(id)
-	if err != nil {
-		return nil, err
-	}
-
-	if !timestamp.IsZero() {
-		t.Timestamp = timestamp
-	}
-
-	if amount > 0 {
-		t.Amount = amount
-	}
-
-	if transactionType == model.Income || t.Type == model.Expense {
-		t.Type = transactionType
-	}
-
-	return t, nil
-}
-
-func (r *RepositorySpy) TransactionGet(id uint) (*model.Transaction, error) {
-	t, ok := r.transactions[id]
-	if !ok {
-		return nil, repository.ErrorRecordNotFound
-	}
-
-	return t, nil
-}
-
-func (r *RepositorySpy) TransactionDelete(id uint) error {
-	if _, err := r.TransactionGet(id); err != nil {
-		return err
-	}
-
-	delete(r.transactions, id)
-	return nil
-}
-
-func (r *RepositorySpy) TransactionList() ([]*model.Transaction, error) {
-	transactions := make([]*model.Transaction, 0, len(r.transactions))
-
-	for _, t := range r.transactions {
-		transactions = append(transactions, t)
-	}
-
-	return transactions, nil
-}
-
 func TestCreateTransaction(t *testing.T) {
 	spy := NewRepositorySpy()
-	r := Setup(spy)
+	r := router.Setup(spy)
 
 	newTransactionRequest := func(transaction *model.Transaction) *http.Request {
 		body := createRequestBody(transaction)
@@ -167,7 +70,7 @@ func TestCreateTransaction(t *testing.T) {
 
 func TestGetTransaction(t *testing.T) {
 	spy := NewRepositorySpy()
-	r := Setup(spy)
+	r := router.Setup(spy)
 
 	firstTransaction, _ := spy.TransactionCreate(time.Now(), 1000, model.Expense)
 
@@ -223,9 +126,7 @@ func TestGetTransaction(t *testing.T) {
 
 func TestListTransactions(t *testing.T) {
 	spy := NewRepositorySpy()
-	r := Setup(spy)
-
-	// firstTransaction, _ := spy.TransactionCreate(time.Now(), 1000, model.Expense)
+	r := router.Setup(spy)
 
 	newTransactionRequest := func() *http.Request {
 		req, _ := http.NewRequest(http.MethodGet, "/transaction/", nil)
@@ -271,19 +172,6 @@ func TestListTransactions(t *testing.T) {
 			t.Errorf("expected %+v, got %+v", *expected, got)
 		}
 	})
-}
-
-func assertStatusCode(t *testing.T, res *httptest.ResponseRecorder, expectedStatusCode int) {
-	t.Helper()
-
-	if res.Code != expectedStatusCode {
-		t.Errorf("expected status %v, got %v", expectedStatusCode, res.Code)
-	}
-}
-
-func createRequestBody(model interface{}) []byte {
-	body, _ := json.Marshal(model)
-	return body
 }
 
 func parseSingleTransactionBody(t *testing.T, res *httptest.ResponseRecorder, jsonResponse *model.Transaction) {
