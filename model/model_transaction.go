@@ -11,12 +11,22 @@ var (
 )
 
 func TransactionValidateCreateBody(timestamp time.Time, amount uint64, transactionType TransactionType) error {
-	if amount <= 0 {
+	if amount == 0 {
 		return ErrorAmount
 	}
 
 	if transactionType != Income && transactionType != Expense {
 		return ErrorType
+	}
+
+	return nil
+}
+
+func TransactionValidateUpdateBody(transaction *Transaction) error {
+	if transaction.Type != "" {
+		if transaction.Type != Income && transaction.Type != Expense {
+			return ErrorType
+		}
 	}
 
 	return nil

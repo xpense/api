@@ -51,8 +51,18 @@ func UpdateTransaction(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
+		if err := model.TransactionValidateUpdateBody(&tRequest); err != nil {
+			ctx.Status(http.StatusBadRequest)
+			return
+		}
+
 		tResponse, err := r.TransactionUpdate(uint(id), tRequest.Timestamp, tRequest.Amount, tRequest.Type)
 		if err != nil {
+			if err == repository.ErrorRecordNotFound {
+				ctx.Status(http.StatusNotFound)
+				return
+			}
+
 			ctx.Status(http.StatusInternalServerError)
 			return
 		}
