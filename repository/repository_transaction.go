@@ -3,6 +3,8 @@ package repository
 import (
 	"expense-api/model"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func (r *repository) TransactionCreate(timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error) {
@@ -52,6 +54,9 @@ func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
 	var transaction model.Transaction
 
 	if tx := r.db.First(&transaction, id); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, ErrorRecordNotFound
+		}
 		return nil, ErrorOther
 	}
 
@@ -75,6 +80,9 @@ func (r *repository) TransactionList() ([]*model.Transaction, error) {
 	var transactions []*model.Transaction
 
 	if tx := r.db.Find(&transactions); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, ErrorRecordNotFound
+		}
 		return nil, ErrorOther
 	}
 

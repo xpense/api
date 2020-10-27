@@ -108,7 +108,7 @@ func GetTransaction(r repository.Repository) func(*gin.Context) {
 	}
 }
 
-func GetTransactions(r repository.Repository) func(*gin.Context) {
+func ListTransactions(r repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		transactions, err := r.TransactionList()
 		if err != nil {
@@ -120,15 +120,7 @@ func GetTransactions(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		type response struct {
-			Count   int                  `json:"count"`
-			Entries []*model.Transaction `json:"entries"`
-		}
-
-		res := &response{
-			Count:   len(transactions),
-			Entries: transactions,
-		}
+		res := NewListResponse(transactions)
 
 		ctx.JSON(http.StatusOK, res)
 	}

@@ -11,7 +11,7 @@ func Setup(r repository.Repository) *gin.Engine {
 	router := gin.Default()
 	transaction := router.Group("/transaction")
 	{
-		transaction.GET("/", handlers.GetTransactions(r))
+		transaction.GET("/", handlers.ListTransactions(r))
 		transaction.POST("/", handlers.CreateTransaction(r))
 		transaction.GET("/:id", handlers.GetTransaction(r))
 		transaction.PATCH("/:id", handlers.UpdateTransaction(r))

@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"expense-api/model"
 	"expense-api/repository"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 )
@@ -15,20 +18,46 @@ type RepositorySpy struct {
 	transactions map[uint]*model.Transaction
 }
 
-func NewRepositorySpy() repository.Repository {
+func NewRepositorySpy() *RepositorySpy {
 	return &RepositorySpy{
 		transactions: map[uint]*model.Transaction{},
 	}
 }
 
+func (r *RepositorySpy) transactionSlice() []*model.Transaction {
+	res := make([]*model.Transaction, 0, len(r.transactions))
+
+	for _, t := range r.transactions {
+		res = append(res, t)
+	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].ID < res[j].ID
+	})
+
+	return res
+}
+
+type TransactionListResponse struct {
+	Count   int                  `json:"count"`
+	Entries []*model.Transaction `json:"entries"`
+}
+
+func newTransactionListResponse(slice []*model.Transaction) *TransactionListResponse {
+	return &TransactionListResponse{
+		Count:   len(slice),
+		Entries: slice,
+	}
+}
+
 func (r *RepositorySpy) TransactionCreate(timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error) {
-	id := uint(len(r.transactions))
+	id := uint(len(r.transactions)) + 1
 
 	t := &model.Transaction{}
 
 	t.ID = id
 	if !timestamp.IsZero() {
-		t.Timestamp = timestamp
+		t.Timestamp = timestamp.Round(0)
 	}
 
 	if amount > 0 {
@@ -97,7 +126,7 @@ func TestCreateTransaction(t *testing.T) {
 	spy := NewRepositorySpy()
 	r := Setup(spy)
 
-	newCreateTransactionRequest := func(transaction *model.Transaction) *http.Request {
+	newTransactionRequest := func(transaction *model.Transaction) *http.Request {
 		body := createRequestBody(transaction)
 		req, _ := http.NewRequest(http.MethodPost, "/transaction/", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -107,7 +136,7 @@ func TestCreateTransaction(t *testing.T) {
 
 	t.Run("Create transaction with amount = 0", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := newCreateTransactionRequest(&model.Transaction{Amount: 0})
+		req := newTransactionRequest(&model.Transaction{Amount: 0})
 
 		r.ServeHTTP(res, req)
 
@@ -116,7 +145,7 @@ func TestCreateTransaction(t *testing.T) {
 
 	t.Run("Create transaction with invalid transaction type", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := newCreateTransactionRequest(&model.Transaction{Amount: 1000, Type: "invalid"})
+		req := newTransactionRequest(&model.Transaction{Amount: 1000, Type: "invalid"})
 
 		r.ServeHTTP(res, req)
 
@@ -125,15 +154,121 @@ func TestCreateTransaction(t *testing.T) {
 
 	t.Run("Create transaction with valid data", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := newCreateTransactionRequest(&model.Transaction{Amount: 1000, Type: model.Expense})
+		req := newTransactionRequest(&model.Transaction{Amount: 1000, Type: model.Expense})
 
 		r.ServeHTTP(res, req)
 
 		assertStatusCode(t, res, http.StatusCreated)
 
 		var jsonResponse model.Transaction
-		if err := json.NewDecoder(res.Body).Decode(&jsonResponse); err != nil {
-			t.Errorf("couldn't parse json response")
+		parseSingleTransactionBody(t, res, &jsonResponse)
+	})
+}
+
+func TestGetTransaction(t *testing.T) {
+	spy := NewRepositorySpy()
+	r := Setup(spy)
+
+	firstTransaction, _ := spy.TransactionCreate(time.Now(), 1000, model.Expense)
+
+	newTransactionRequest := func(id int) *http.Request {
+		url := fmt.Sprintf("/transaction/%d", id)
+		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		return req
+	}
+
+	t.Run("Get transaction with a negative id", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(-10)
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusBadRequest)
+	})
+
+	t.Run("Get transaction with id = 0", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(0)
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusBadRequest)
+	})
+
+	t.Run("Get transaction with non-existent id", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(10)
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusNotFound)
+	})
+
+	t.Run("Get transaction with valid id", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest(1)
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusOK)
+
+		var jsonResponse model.Transaction
+		parseSingleTransactionBody(t, res, &jsonResponse)
+
+		if !reflect.DeepEqual(jsonResponse, *firstTransaction) {
+			t.Errorf("expected %+v, got %+v", *firstTransaction, jsonResponse)
+		}
+	})
+}
+
+func TestListTransactions(t *testing.T) {
+	spy := NewRepositorySpy()
+	r := Setup(spy)
+
+	// firstTransaction, _ := spy.TransactionCreate(time.Now(), 1000, model.Expense)
+
+	newTransactionRequest := func() *http.Request {
+		req, _ := http.NewRequest(http.MethodGet, "/transaction/", nil)
+		return req
+	}
+
+	t.Run("List transactions when there are no transactions", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		req := newTransactionRequest()
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusOK)
+
+		expected := newTransactionListResponse(spy.transactionSlice())
+
+		var got TransactionListResponse
+		parseListTransactionBody(t, res, &got)
+
+		if !reflect.DeepEqual(got, *expected) {
+			t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
+		}
+	})
+
+	t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
+		spy.TransactionCreate(time.Now(), 1000, model.Expense)
+
+		res := httptest.NewRecorder()
+		req := newTransactionRequest()
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusOK)
+
+		slice := spy.transactionSlice()
+
+		expected := newTransactionListResponse(slice)
+
+		var got TransactionListResponse
+		parseListTransactionBody(t, res, &got)
+
+		if !reflect.DeepEqual(got, *expected) {
+			t.Errorf("expected %+v, got %+v", *expected, got)
 		}
 	})
 }
@@ -149,4 +284,20 @@ func assertStatusCode(t *testing.T, res *httptest.ResponseRecorder, expectedStat
 func createRequestBody(model interface{}) []byte {
 	body, _ := json.Marshal(model)
 	return body
+}
+
+func parseSingleTransactionBody(t *testing.T, res *httptest.ResponseRecorder, jsonResponse *model.Transaction) {
+	t.Helper()
+
+	if err := json.NewDecoder(res.Body).Decode(jsonResponse); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func parseListTransactionBody(t *testing.T, res *httptest.ResponseRecorder, jsonResponse *TransactionListResponse) {
+	t.Helper()
+
+	if err := json.NewDecoder(res.Body).Decode(jsonResponse); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
 }
