@@ -23,3 +23,12 @@ type Transaction struct {
 	Amount    uint64          `json:"amount"`
 	Type      TransactionType `json:"type"`
 }
+
+type User struct {
+	Model
+	FirstName string `json:"firstName" gorm:"not null"`
+	LastName  string `json:"lastName" gorm:"not null"`
+	Email     string `json:"email" gorm:"unique, not null"`
+	Password  string `json:"password" gorm:"not null"`
+	Salt      string `json:"salt" gorm:"not null"`
+}

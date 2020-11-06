@@ -47,7 +47,7 @@ func main() {
 		panic(fmt.Sprintf("couldn't establish postgres connection: %v", err))
 	}
 
-	if err := db.AutoMigrate(model.Transaction{}); err != nil {
+	if err := db.AutoMigrate(model.Transaction{}, model.User{}); err != nil {
 		panic(fmt.Sprintf("error setting up database: %v", err))
 	}
 

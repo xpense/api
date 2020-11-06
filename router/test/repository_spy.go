@@ -102,3 +102,21 @@ func (r *RepositorySpy) TransactionList() ([]*model.Transaction, error) {
 
 	return transactions, nil
 }
+
+// ---------------- USER -----------------
+
+func (r *RepositorySpy) UserCreate(firstName, LastName, Email, Password, Salt string) (*model.User, error) {
+	return nil, nil
+}
+
+func (r *RepositorySpy) UserUpdate(id uint, firstName, LastName, Email string) (*model.User, error) {
+	return nil, nil
+}
+
+func (r *RepositorySpy) UserDelete(id uint) error {
+	return nil
+}
+
+func (r *RepositorySpy) UserGet(id uint) (*model.User, error) {
+	return nil, nil
+}

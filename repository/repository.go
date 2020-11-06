@@ -14,6 +14,10 @@ type Repository interface {
 	TransactionGet(id uint) (*model.Transaction, error)
 	TransactionDelete(id uint) error
 	TransactionList() ([]*model.Transaction, error)
+	UserCreate(firstName, LastName, Email, Password, Salt string) (*model.User, error)
+	UserUpdate(id uint, firstName, LastName, Email string) (*model.User, error)
+	UserDelete(id uint) error
+	UserGet(id uint) (*model.User, error)
 }
 
 var (

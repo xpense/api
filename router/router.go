@@ -18,5 +18,13 @@ func Setup(r repository.Repository) *gin.Engine {
 		transaction.DELETE("/:id", handlers.DeleteTransaction(r))
 	}
 
+	user := router.Group("/user")
+	{
+		user.POST("/", handlers.CreateUser(r))
+		user.GET("/:id", handlers.GetUser(r))
+		user.PATCH("/:id", handlers.UpdateUserInfo(r))
+		user.DELETE("/:id", handlers.DeleteUser(r))
+	}
+
 	return router
 }
