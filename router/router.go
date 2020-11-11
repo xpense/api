@@ -3,12 +3,13 @@ package router
 import (
 	"expense-api/handlers"
 	"expense-api/repository"
+	"expense-api/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 // Setup creates a new gin router
-func Setup(repo repository.Repository) *gin.Engine {
+func Setup(repo repository.Repository, hasher utils.PasswordHasher) *gin.Engine {
 	router := gin.Default()
 
 	transaction := router.Group("/transaction")
@@ -22,7 +23,7 @@ func Setup(repo repository.Repository) *gin.Engine {
 
 	user := router.Group("/user")
 	{
-		user.POST("/", handlers.CreateUser(repo))
+		user.POST("/", handlers.CreateUser(repo, hasher))
 		user.GET("/:id", handlers.GetUser(repo))
 		user.PATCH("/:id", handlers.UpdateUserInfo(repo))
 		user.DELETE("/:id", handlers.DeleteUser(repo))

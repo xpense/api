@@ -3,6 +3,7 @@ package main
 import (
 	"expense-api/repository"
 	"expense-api/router"
+	"expense-api/utils"
 	"fmt"
 	"log"
 	"os"
@@ -49,7 +50,8 @@ func main() {
 	}
 
 	repository := repository.New(db)
-	r := router.Setup(repository)
+	hasher := utils.NewPasswordHasher()
 
+	r := router.Setup(repository, hasher)
 	r.Run(port)
 }

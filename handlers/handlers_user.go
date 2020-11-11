@@ -31,7 +31,7 @@ func UserModelToResponse(u *model.User) *User {
 	}
 }
 
-func CreateUser(repo repository.Repository) func(*gin.Context) {
+func CreateUser(repo repository.Repository, hasher utils.PasswordHasher) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		var userBody model.User
 		if err := ctx.Bind(&userBody); err != nil {
@@ -51,13 +51,13 @@ func CreateUser(repo repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		salt, err := utils.GenerateSalt()
+		salt, err := hasher.GenerateSalt()
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return
 		}
 
-		hashedPassword, err := utils.HashPassword(userBody.Password, salt)
+		hashedPassword, err := hasher.HashPassword(userBody.Password, salt)
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return
