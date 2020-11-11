@@ -7,23 +7,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Setup(r repository.Repository) *gin.Engine {
+// Setup creates a new gin router
+func Setup(repo repository.Repository) *gin.Engine {
 	router := gin.Default()
+
 	transaction := router.Group("/transaction")
 	{
-		transaction.GET("/", handlers.ListTransactions(r))
-		transaction.POST("/", handlers.CreateTransaction(r))
-		transaction.GET("/:id", handlers.GetTransaction(r))
-		transaction.PATCH("/:id", handlers.UpdateTransaction(r))
-		transaction.DELETE("/:id", handlers.DeleteTransaction(r))
+		transaction.GET("/", handlers.ListTransactions(repo))
+		transaction.POST("/", handlers.CreateTransaction(repo))
+		transaction.GET("/:id", handlers.GetTransaction(repo))
+		transaction.PATCH("/:id", handlers.UpdateTransaction(repo))
+		transaction.DELETE("/:id", handlers.DeleteTransaction(repo))
 	}
 
 	user := router.Group("/user")
 	{
-		user.POST("/", handlers.CreateUser(r))
-		user.GET("/:id", handlers.GetUser(r))
-		user.PATCH("/:id", handlers.UpdateUserInfo(r))
-		user.DELETE("/:id", handlers.DeleteUser(r))
+		user.POST("/", handlers.CreateUser(repo))
+		user.GET("/:id", handlers.GetUser(repo))
+		user.PATCH("/:id", handlers.UpdateUserInfo(repo))
+		user.DELETE("/:id", handlers.DeleteUser(repo))
 	}
 
 	return router

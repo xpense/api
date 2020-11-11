@@ -31,7 +31,7 @@ func UserModelToResponse(u *model.User) *User {
 	}
 }
 
-func CreateUser(r repository.Repository) func(*gin.Context) {
+func CreateUser(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		var userBody model.User
 		if err := ctx.Bind(&userBody); err != nil {
@@ -63,7 +63,7 @@ func CreateUser(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		userModel, err := r.UserCreate(
+		userModel, err := repo.UserCreate(
 			userBody.FirstName,
 			userBody.LastName,
 			userBody.Email,
@@ -80,7 +80,7 @@ func CreateUser(r repository.Repository) func(*gin.Context) {
 	}
 }
 
-func UpdateUserInfo(r repository.Repository) func(*gin.Context) {
+func UpdateUserInfo(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		idStr := ctx.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -106,7 +106,7 @@ func UpdateUserInfo(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		userModel, err := r.UserUpdate(uint(id), userBody.FirstName, userBody.LastName, userBody.Email)
+		userModel, err := repo.UserUpdate(uint(id), userBody.FirstName, userBody.LastName, userBody.Email)
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
@@ -118,11 +118,11 @@ func UpdateUserInfo(r repository.Repository) func(*gin.Context) {
 		}
 
 		userResponse := UserModelToResponse(userModel)
-		ctx.JSON(http.StatusCreated, userResponse)
+		ctx.JSON(http.StatusOK, userResponse)
 	}
 }
 
-func DeleteUser(r repository.Repository) func(*gin.Context) {
+func DeleteUser(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		idStr := ctx.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -131,7 +131,7 @@ func DeleteUser(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		if err := r.UserDelete(uint(id)); err != nil {
+		if err := repo.UserDelete(uint(id)); err != nil {
 			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
 				return
@@ -145,7 +145,7 @@ func DeleteUser(r repository.Repository) func(*gin.Context) {
 	}
 }
 
-func GetUser(r repository.Repository) func(*gin.Context) {
+func GetUser(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		idStr := ctx.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -154,7 +154,7 @@ func GetUser(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		userModel, err := r.UserGet(uint(id))
+		userModel, err := repo.UserGet(uint(id))
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
@@ -166,6 +166,6 @@ func GetUser(r repository.Repository) func(*gin.Context) {
 		}
 
 		userResponse := UserModelToResponse(userModel)
-		ctx.JSON(http.StatusCreated, userResponse)
+		ctx.JSON(http.StatusOK, userResponse)
 	}
 }

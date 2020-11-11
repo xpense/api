@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateTransaction(r repository.Repository) func(*gin.Context) {
+func CreateTransaction(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		var tRequest model.Transaction
 		if err := ctx.Bind(&tRequest); err != nil {
@@ -25,7 +25,7 @@ func CreateTransaction(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		tResponse, err := r.TransactionCreate(tRequest.Timestamp, tRequest.Amount, tRequest.Type)
+		tResponse, err := repo.TransactionCreate(tRequest.Timestamp, tRequest.Amount, tRequest.Type)
 		if err != nil {
 			ctx.Status(http.StatusInternalServerError)
 			return
@@ -35,7 +35,7 @@ func CreateTransaction(r repository.Repository) func(*gin.Context) {
 	}
 }
 
-func UpdateTransaction(r repository.Repository) func(*gin.Context) {
+func UpdateTransaction(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		idStr := ctx.Param("id")
 
@@ -56,7 +56,7 @@ func UpdateTransaction(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		tResponse, err := r.TransactionUpdate(uint(id), tRequest.Timestamp, tRequest.Amount, tRequest.Type)
+		tResponse, err := repo.TransactionUpdate(uint(id), tRequest.Timestamp, tRequest.Amount, tRequest.Type)
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
@@ -71,7 +71,7 @@ func UpdateTransaction(r repository.Repository) func(*gin.Context) {
 	}
 }
 
-func DeleteTransaction(r repository.Repository) func(*gin.Context) {
+func DeleteTransaction(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		idStr := ctx.Param("id")
 
@@ -81,7 +81,7 @@ func DeleteTransaction(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		if err := r.TransactionDelete(uint(id)); err != nil {
+		if err := repo.TransactionDelete(uint(id)); err != nil {
 			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
 				return
@@ -94,7 +94,7 @@ func DeleteTransaction(r repository.Repository) func(*gin.Context) {
 	}
 }
 
-func GetTransaction(r repository.Repository) func(*gin.Context) {
+func GetTransaction(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		idStr := ctx.Param("id")
 
@@ -104,7 +104,7 @@ func GetTransaction(r repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		transaction, err := r.TransactionGet(uint(id))
+		transaction, err := repo.TransactionGet(uint(id))
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
@@ -118,9 +118,9 @@ func GetTransaction(r repository.Repository) func(*gin.Context) {
 	}
 }
 
-func ListTransactions(r repository.Repository) func(*gin.Context) {
+func ListTransactions(repo repository.Repository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
-		transactions, err := r.TransactionList()
+		transactions, err := repo.TransactionList()
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
 				ctx.Status(http.StatusNotFound)
