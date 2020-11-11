@@ -6,16 +6,17 @@ import (
 )
 
 var (
-	ErrorName  = errors.New("first and/or last name missing")
-	ErrorEmail = errors.New("invalid email address")
+	ErrorName      = errors.New("first and/or last name missing")
+	ErrorEmail     = errors.New("invalid email address")
+	ErrorEmptyBody = errors.New("empty body")
 )
 
-func UserValidateInfo(firstName, lastName, email string) error {
-	if firstName == "" || lastName == "" {
-		return ErrorName
+func UserValidateUpdateBody(firstName, lastName, email string) error {
+	if firstName == "" && lastName == "" && email == "" {
+		return ErrorEmptyBody
 	}
 
-	if !utils.IsEmailValid(email) {
+	if email != "" && !utils.IsEmailValid(email) {
 		return ErrorEmail
 	}
 
@@ -23,8 +24,12 @@ func UserValidateInfo(firstName, lastName, email string) error {
 }
 
 func UserValidateCreateBody(firstName, lastName, email, password string) error {
-	if err := UserValidateInfo(firstName, lastName, email); err != nil {
-		return err
+	if firstName == "" || lastName == "" {
+		return ErrorName
+	}
+
+	if !utils.IsEmailValid(email) {
+		return ErrorEmail
 	}
 
 	_, err := utils.IsPasswordStrong(password)

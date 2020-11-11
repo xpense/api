@@ -95,7 +95,7 @@ func UpdateUserInfo(repo repository.Repository) func(*gin.Context) {
 			return
 		}
 
-		if err := model.UserValidateInfo(
+		if err := model.UserValidateUpdateBody(
 			userBody.FirstName,
 			userBody.LastName,
 			userBody.Email,
