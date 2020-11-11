@@ -1,7 +1,6 @@
 package main
 
 import (
-	"expense-api/model"
 	"expense-api/repository"
 	"expense-api/router"
 	"fmt"
@@ -31,28 +30,25 @@ func main() {
 
 	postgresURI := os.Getenv("POSTGRES_CONNECTION")
 
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
-			SlowThreshold: time.Second,
-			LogLevel:      logger.Info,
-			Colorful:      true,
-		},
-	)
-
 	db, err := gorm.Open(postgres.Open(postgresURI), &gorm.Config{
-		Logger: newLogger,
+		Logger: logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold: time.Second,
+				LogLevel:      logger.Info,
+				Colorful:      true,
+			},
+		),
 	})
 	if err != nil {
 		panic(fmt.Sprintf("couldn't establish postgres connection: %v", err))
 	}
 
-	if err := db.AutoMigrate(model.Transaction{}, model.User{}); err != nil {
+	if err := repository.Migrate(db); err != nil {
 		panic(fmt.Sprintf("error setting up database: %v", err))
 	}
 
 	repository := repository.New(db)
-
 	r := router.Setup(repository)
 
 	r.Run(port)
