@@ -6,6 +6,7 @@ import (
 	"expense-api/model"
 	"expense-api/repository"
 	"expense-api/router"
+	"expense-api/router/test/spies"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -17,8 +18,8 @@ import (
 )
 
 func TestCreateTransaction(t *testing.T) {
-	repoSpy := &RepositorySpy{}
-	hasherSpy := &PasswordHasherSpy{}
+	repoSpy := &spies.RepositorySpy{}
+	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, hasherSpy)
 
@@ -68,8 +69,8 @@ func TestCreateTransaction(t *testing.T) {
 }
 
 func TestGetTransaction(t *testing.T) {
-	repoSpy := &RepositorySpy{}
-	hasherSpy := &PasswordHasherSpy{}
+	repoSpy := &spies.RepositorySpy{}
+	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, hasherSpy)
 
@@ -124,8 +125,8 @@ func TestGetTransaction(t *testing.T) {
 }
 
 func TestUpdateTransaction(t *testing.T) {
-	repoSpy := &RepositorySpy{}
-	hasherSpy := &PasswordHasherSpy{}
+	repoSpy := &spies.RepositorySpy{}
+	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, hasherSpy)
 
@@ -181,8 +182,8 @@ func TestUpdateTransaction(t *testing.T) {
 }
 
 func TestDeleteTransaction(t *testing.T) {
-	repoSpy := &RepositorySpy{}
-	hasherSpy := &PasswordHasherSpy{}
+	repoSpy := &spies.RepositorySpy{}
+	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, hasherSpy)
 
@@ -220,8 +221,8 @@ func TestDeleteTransaction(t *testing.T) {
 }
 
 func TestListTransactions(t *testing.T) {
-	repoSpy := &RepositorySpy{}
-	hasherSpy := &PasswordHasherSpy{}
+	repoSpy := &spies.RepositorySpy{}
+	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, hasherSpy)
 
