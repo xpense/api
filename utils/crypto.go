@@ -32,7 +32,7 @@ func (h *hasher) GenerateSalt() (string, error) {
 	return hex.EncodeToString(salt), err
 }
 
-// HashPassword hashed a given password with a salt
+// HashPassword hashes a given password with a salt
 func (h *hasher) HashPassword(password, salt string) (string, error) {
 	saltSlice, err := hex.DecodeString(salt)
 	if err != nil {

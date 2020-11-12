@@ -17,7 +17,7 @@ var (
 
 var specialChars = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
-// IsPasswordStrong checks if provided password is strong enough
+// IsPasswordStrong checks if the length is at least 8 and if it contains at least one digit, lowercase, upppercase and special character
 func IsPasswordStrong(password string) (bool, error) {
 	if len(password) < 8 {
 		return false, ErrorPasswordLength

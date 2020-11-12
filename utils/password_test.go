@@ -13,22 +13,22 @@ func TestIsPasswordStrong(t *testing.T) {
 			err      error
 		}{
 			{
-				desc:     "Doesnt' contain lower char",
+				desc:     "Doesn't contain lower char",
 				password: "123WHATEVER!@{}",
 				err:      utils.ErrorPasswordLowerChar,
 			},
 			{
-				desc:     "Doesnt' contain upper char",
+				desc:     "Doesn't contain upper char",
 				password: "123whatever!@{}",
 				err:      utils.ErrorPasswordUpperChar,
 			},
 			{
-				desc:     "Doesnt' contain numerical char",
+				desc:     "Doesn't contain numerical char",
 				password: "Whatever!{}",
 				err:      utils.ErrorPasswordDigitChar,
 			},
 			{
-				desc:     "Doesnt' contain special char",
+				desc:     "Doesn't contain special char",
 				password: "123Whatever",
 				err:      utils.ErrorPasswordSpecialChar,
 			},
