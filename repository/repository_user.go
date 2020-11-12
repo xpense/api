@@ -72,3 +72,16 @@ func (r *repository) UserGet(id uint) (*model.User, error) {
 
 	return &user, nil
 }
+
+func (r *repository) UserGetWithEmail(email string) (*model.User, error) {
+	var user model.User
+
+	if tx := r.db.Where("email = ?", email).First(&user); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, ErrorRecordNotFound
+		}
+		return nil, ErrorOther
+	}
+
+	return &user, nil
+}

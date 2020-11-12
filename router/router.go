@@ -23,10 +23,16 @@ func Setup(repo repository.Repository, hasher utils.PasswordHasher) *gin.Engine 
 
 	user := router.Group("/user")
 	{
-		user.POST("/", handlers.CreateUser(repo, hasher))
 		user.GET("/:id", handlers.GetUser(repo))
 		user.PATCH("/:id", handlers.UpdateUserInfo(repo))
 		user.DELETE("/:id", handlers.DeleteUser(repo))
+	}
+
+	auth := router.Group("/auth")
+	{
+		auth.POST("/signup", handlers.SignUp(repo, hasher))
+		auth.POST("/login", handlers.Login(repo, hasher))
+		// auth.POST("/change-password", handlers.ChangePassword(repo, hasher))
 	}
 
 	return router

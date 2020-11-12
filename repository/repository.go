@@ -18,6 +18,7 @@ type Repository interface {
 	UserUpdate(id uint, firstName, LastName, Email string) (*model.User, error)
 	UserDelete(id uint) error
 	UserGet(id uint) (*model.User, error)
+	UserGetWithEmail(email string) (*model.User, error)
 }
 
 var (
