@@ -11,27 +11,28 @@ import (
 // Setup creates a new gin router
 func Setup(repo repository.Repository, hasher utils.PasswordHasher) *gin.Engine {
 	router := gin.Default()
+	handler := handlers.New(repo, hasher)
 
 	transaction := router.Group("/transaction")
 	{
-		transaction.GET("/", handlers.ListTransactions(repo))
-		transaction.POST("/", handlers.CreateTransaction(repo))
-		transaction.GET("/:id", handlers.GetTransaction(repo))
-		transaction.PATCH("/:id", handlers.UpdateTransaction(repo))
-		transaction.DELETE("/:id", handlers.DeleteTransaction(repo))
+		transaction.GET("/", handler.ListTransactions)
+		transaction.POST("/", handler.CreateTransaction)
+		transaction.GET("/:id", handler.GetTransaction)
+		transaction.PATCH("/:id", handler.UpdateTransaction)
+		transaction.DELETE("/:id", handler.DeleteTransaction)
 	}
 
 	user := router.Group("/user")
 	{
-		user.GET("/:id", handlers.GetUser(repo))
-		user.PATCH("/:id", handlers.UpdateUserInfo(repo))
-		user.DELETE("/:id", handlers.DeleteUser(repo))
+		user.GET("/:id", handler.GetUser)
+		user.PATCH("/:id", handler.UpdateUserInfo)
+		user.DELETE("/:id", handler.DeleteUser)
 	}
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/signup", handlers.SignUp(repo, hasher))
-		auth.POST("/login", handlers.Login(repo, hasher))
+		auth.POST("/signup", handler.SignUp)
+		auth.POST("/login", handler.Login)
 		// auth.POST("/change-password", handlers.ChangePassword(repo, hasher))
 	}
 
