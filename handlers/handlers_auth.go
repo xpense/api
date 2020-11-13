@@ -25,6 +25,12 @@ type (
 	}
 )
 
+const (
+	ErrMsgMissingPasswordOrEmail = "both email and password are required for login"
+	ErrMsgNonExistentUser        = "user with this email does not exist"
+	ErrMsgWrongPassword          = "wrong password"
+)
+
 func (h *handler) SignUp(ctx *gin.Context) {
 	var userBody model.User
 	if err := ctx.Bind(&userBody); err != nil {
@@ -56,20 +62,18 @@ func (h *handler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	userModel, err := h.repo.UserCreate(
+	if _, err := h.repo.UserCreate(
 		userBody.FirstName,
 		userBody.LastName,
 		userBody.Email,
 		hashedPassword,
 		salt,
-	)
-	if err != nil {
+	); err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
 
-	userResponse := UserModelToResponse(userModel)
-	ctx.JSON(http.StatusCreated, userResponse)
+	ctx.Status(http.StatusCreated)
 }
 
 func (h *handler) Login(ctx *gin.Context) {
@@ -81,7 +85,7 @@ func (h *handler) Login(ctx *gin.Context) {
 
 	if loginInfo.Email == "" || loginInfo.Password == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "both email and password are required for login",
+			"message": ErrMsgMissingPasswordOrEmail,
 		})
 		return
 	}
@@ -90,7 +94,7 @@ func (h *handler) Login(ctx *gin.Context) {
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.JSON(http.StatusNotFound, gin.H{
-				"message": "user with this email does not exist",
+				"message": ErrMsgNonExistentUser,
 			})
 			return
 		}
@@ -106,7 +110,7 @@ func (h *handler) Login(ctx *gin.Context) {
 
 	if user.Password != hashedPassword {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "wrong password",
+			"message": ErrMsgWrongPassword,
 		})
 		return
 	}
