@@ -2,6 +2,7 @@ package test
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"expense-api/handlers"
 	"expense-api/model"
@@ -11,6 +12,7 @@ import (
 	"expense-api/utils"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -253,30 +255,66 @@ func TestLogin(t *testing.T) {
 		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
 	})
 
-	// t.Run("Shouldn't log in if there's an error while generating the access token", func(t *testing.T) {
-	// 	reqBody := &handlers.LoginInfo{
-	// 		Email:    "john@doe.com",
-	// 		Password: "123Password!{}",
-	// 	}
-	// 	user := &model.User{
-	// 		Salt:     "salty",
-	// 		Password: "good-password",
-	// 	}
+	t.Run("Shouldn't log in if there's an error while generating the access token", func(t *testing.T) {
+		reqBody := &handlers.LoginInfo{
+			Email:    "john@doe.com",
+			Password: "123Password!{}",
+		}
+		user := &model.User{
+			Email:    "john@doe.com",
+			Salt:     "salty",
+			Password: "good-password",
+		}
 
-	// 	repoSpy.On("UserGetWithEmail", reqBody.Email).Return(user, nil).Once()
-	// 	hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user.Password, nil).Once()
-	// 	hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user.Password, nil).Once()
+		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(user, nil).Once()
+		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user.Password, nil).Once()
+		jwtServiceSpy.On("CreateJWT", user.Email).Return(nil, errors.New("dummy error")).Once()
 
-	// 	res := httptest.NewRecorder()
-	// 	req := newLoginRequest(reqBody)
+		res := httptest.NewRecorder()
+		req := newLoginRequest(reqBody)
 
-	// 	r.ServeHTTP(res, req)
+		r.ServeHTTP(res, req)
 
-	// 	jsonResponse := parseJSON(t, res)
-	// 	haveErrorMessage := jsonResponse["message"].(string)
-	// 	wantErrorMessage := handlers.ErrMsgWrongPassword
+		assertStatusCode(t, res, http.StatusInternalServerError)
+	})
 
-	// 	assertStatusCode(t, res, http.StatusBadRequest)
-	// 	assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
-	// })
+	t.Run("Should log in user and return access token", func(t *testing.T) {
+		reqBody := &handlers.LoginInfo{
+			Email:    "john@doe.com",
+			Password: "123Password!{}",
+		}
+		user := &model.User{
+			Email:    "john@doe.com",
+			Salt:     "salty",
+			Password: "good-password",
+		}
+		loginToken := &handlers.LoginToken{
+			Token: "token",
+		}
+
+		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(user, nil).Once()
+		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user.Password, nil).Once()
+		jwtServiceSpy.On("CreateJWT", user.Email).Return(loginToken.Token, nil).Once()
+
+		res := httptest.NewRecorder()
+		req := newLoginRequest(reqBody)
+
+		r.ServeHTTP(res, req)
+
+		assertStatusCode(t, res, http.StatusOK)
+		assertLoginTokenResponseBody(t, res, loginToken)
+	})
+}
+
+func assertLoginTokenResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *handlers.LoginToken) {
+	t.Helper()
+
+	var got handlers.LoginToken
+	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+
+	if !reflect.DeepEqual(got, *expected) {
+		t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
+	}
 }
