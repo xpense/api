@@ -17,9 +17,10 @@ import (
 
 func TestGetUser(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newUserRequest := func(id uint) *http.Request {
 		url := fmt.Sprintf("/user/%d", id)
@@ -57,9 +58,10 @@ func TestGetUser(t *testing.T) {
 
 func TestUpdateUser(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newUserRequest := func(id uint, user *model.User) *http.Request {
 		url := fmt.Sprintf("/user/%d", id)
@@ -141,9 +143,10 @@ func TestUpdateUser(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newUserRequest := func(id uint) *http.Request {
 		url := fmt.Sprintf("/user/%d", id)

@@ -19,9 +19,10 @@ import (
 
 func TestCreateTransaction(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newTransactionRequest := func(transaction *model.Transaction) *http.Request {
 		body := createRequestBody(transaction)
@@ -70,9 +71,10 @@ func TestCreateTransaction(t *testing.T) {
 
 func TestGetTransaction(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newTransactionRequest := func(id uint) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -126,9 +128,10 @@ func TestGetTransaction(t *testing.T) {
 
 func TestUpdateTransaction(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newTransactionRequest := func(id uint, transaction *model.Transaction) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -183,9 +186,10 @@ func TestUpdateTransaction(t *testing.T) {
 
 func TestDeleteTransaction(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newTransactionRequest := func(id uint) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -222,9 +226,10 @@ func TestDeleteTransaction(t *testing.T) {
 
 func TestListTransactions(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
+	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
 	newTransactionListResponse := func(slice []*model.Transaction) *transactionListResponse {
 		return &transactionListResponse{

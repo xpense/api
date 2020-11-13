@@ -12,10 +12,15 @@ type Handler interface {
 }
 
 type handler struct {
-	repo   repository.Repository
-	hasher utils.PasswordHasher
+	repo       repository.Repository
+	jwtService utils.JWTService
+	hasher     utils.PasswordHasher
 }
 
-func New(repo repository.Repository, hasher utils.PasswordHasher) Handler {
-	return &handler{repo, hasher}
+func New(
+	repo repository.Repository,
+	jwtService utils.JWTService,
+	hasher utils.PasswordHasher,
+) Handler {
+	return &handler{repo, jwtService, hasher}
 }

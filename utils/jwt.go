@@ -2,60 +2,61 @@ package utils
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-const issuer = "xpense"
-
-var secret = []byte(os.Getenv("JWT_SECRET"))
+type JWTService interface {
+	CreateJWT(email string) (string, error)
+	ValidateJWT(tokenString string) (*CustomClaims, error)
+}
 
 var (
 	ErrorJWTClaimsInvalid = errors.New("couldn't parse claims")
 	ErrorJWTExpired       = errors.New("jwt is expired")
 )
 
-type CustomClaims struct {
-	Email string `json:"email"`
-}
-
-type customClaims struct {
+type jwtClaims struct {
 	CustomClaims
 	jwt.StandardClaims
 }
 
-func CreateJWT(email string) (string, error) {
-	claims := customClaims{
+type jwtService struct {
+	issuer string
+	secret []byte
+}
+
+func NewJWTService(issuer, secret string) JWTService {
+	return &jwtService{
+		issuer: issuer,
+		secret: []byte(secret),
+	}
+}
+
+func (jwts *jwtService) CreateJWT(email string) (string, error) {
+	claims := jwtClaims{
 		CustomClaims: CustomClaims{
 			Email: email,
 		},
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().UTC().Add(time.Minute * 2).Unix(),
-			Issuer:    issuer,
+			Issuer:    jwts.issuer,
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(secret)
+	return token.SignedString(jwts.secret)
 }
 
-func ValidateJWT(tokenString string) (*CustomClaims, error) {
-	token, err := jwt.ParseWithClaims(
-		tokenString,
-		&customClaims{},
-		func(token *jwt.Token) (interface{}, error) {
-			return secret, nil
-		},
-	)
-
+func (jwts *jwtService) ValidateJWT(tokenString string) (*CustomClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwtClaims{}, func(token *jwt.Token) (interface{}, error) { return jwts.secret, nil })
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*customClaims)
+	claims, ok := token.Claims.(*jwtClaims)
 	if !ok {
 		return nil, ErrorJWTClaimsInvalid
 	}

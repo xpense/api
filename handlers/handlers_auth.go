@@ -3,7 +3,6 @@ package handlers
 import (
 	"expense-api/model"
 	"expense-api/repository"
-	"expense-api/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -115,7 +114,7 @@ func (h *handler) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := utils.CreateJWT(user.Email)
+	token, err := h.jwtService.CreateJWT(user.Email)
 	if err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return

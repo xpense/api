@@ -29,6 +29,16 @@ func main() {
 		port = ":8080"
 	}
 
+	issuer := os.Getenv("JWT_ISSUER")
+	if issuer == "" {
+		panic("JWT_ISSUER not set!")
+	}
+
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET not set!")
+	}
+
 	postgresURI := os.Getenv("POSTGRES_CONNECTION")
 
 	db, err := gorm.Open(postgres.Open(postgresURI), &gorm.Config{
@@ -50,8 +60,9 @@ func main() {
 	}
 
 	repository := repository.New(db)
+	jwtService := utils.NewJWTService(issuer, secret)
 	hasher := utils.NewPasswordHasher()
 
-	r := router.Setup(repository, hasher)
+	r := router.Setup(repository, jwtService, hasher)
 	r.Run(port)
 }

@@ -9,9 +9,13 @@ import (
 )
 
 // Setup creates a new gin router
-func Setup(repo repository.Repository, hasher utils.PasswordHasher) *gin.Engine {
+func Setup(
+	repo repository.Repository,
+	jwtService utils.JWTService,
+	hasher utils.PasswordHasher,
+) *gin.Engine {
 	router := gin.Default()
-	handler := handlers.New(repo, hasher)
+	handler := handlers.New(repo, jwtService, hasher)
 
 	auth := router.Group("/auth")
 	{
