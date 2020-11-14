@@ -8,7 +8,7 @@ import (
 )
 
 type JWTService interface {
-	CreateJWT(email string) (string, error)
+	CreateJWT(id uint, email string) (string, error)
 	ValidateJWT(tokenString string) (*CustomClaims, error)
 }
 
@@ -34,9 +34,10 @@ func NewJWTService(issuer, secret string) JWTService {
 	}
 }
 
-func (jwts *jwtService) CreateJWT(email string) (string, error) {
+func (jwts *jwtService) CreateJWT(id uint, email string) (string, error) {
 	claims := jwtClaims{
 		CustomClaims: CustomClaims{
+			ID:    id,
 			Email: email,
 		},
 		StandardClaims: jwt.StandardClaims{

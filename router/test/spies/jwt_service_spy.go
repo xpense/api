@@ -13,20 +13,20 @@ type JWTServiceSpy struct {
 	mock.Mock
 }
 
-// CreateJWT provides a mock function with given fields: email
-func (_m *JWTServiceSpy) CreateJWT(email string) (string, error) {
-	ret := _m.Called(email)
+// CreateJWT provides a mock function with given fields: id, email
+func (_m *JWTServiceSpy) CreateJWT(id uint, email string) (string, error) {
+	ret := _m.Called(id, email)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(email)
+	if rf, ok := ret.Get(0).(func(uint, string) string); ok {
+		r0 = rf(id, email)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(email)
+	if rf, ok := ret.Get(1).(func(uint, string) error); ok {
+		r1 = rf(id, email)
 	} else {
 		r1 = ret.Error(1)
 	}

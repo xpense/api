@@ -3,6 +3,7 @@ package utils
 import "github.com/gin-gonic/gin"
 
 type CustomClaims struct {
+	ID    uint   `json:"id"`
 	Email string `json:"email"`
 }
 

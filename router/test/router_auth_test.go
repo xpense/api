@@ -247,10 +247,11 @@ func TestLogin(t *testing.T) {
 			Salt:     "salty",
 			Password: "good-password",
 		}
+		user.ID = 1
 
 		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(user, nil).Once()
 		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user.Password, nil).Once()
-		jwtServiceSpy.On("CreateJWT", user.Email).Return(nil, errors.New("dummy error")).Once()
+		jwtServiceSpy.On("CreateJWT", user.ID, user.Email).Return(nil, errors.New("dummy error")).Once()
 
 		res := httptest.NewRecorder()
 		req := newLoginRequest(reqBody)
@@ -270,13 +271,14 @@ func TestLogin(t *testing.T) {
 			Salt:     "salty",
 			Password: "good-password",
 		}
+		user.ID = 1
 		loginToken := &handlers.LoginToken{
 			Token: "token",
 		}
 
 		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(user, nil).Once()
 		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user.Password, nil).Once()
-		jwtServiceSpy.On("CreateJWT", user.Email).Return(loginToken.Token, nil).Once()
+		jwtServiceSpy.On("CreateJWT", user.ID, user.Email).Return(loginToken.Token, nil).Once()
 
 		res := httptest.NewRecorder()
 		req := newLoginRequest(reqBody)

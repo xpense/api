@@ -114,7 +114,7 @@ func (h *handler) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := h.jwtService.CreateJWT(user.Email)
+	token, err := h.jwtService.CreateJWT(user.ID, user.Email)
 	if err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
