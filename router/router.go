@@ -26,25 +26,25 @@ func Setup(
 		auth.POST("/login", handler.Login)
 	}
 
-	account := router.Group("/account")
+	account := router.Group("/account").Use(authMiddleware.Handler)
 	{
-		account.GET("", authMiddleware.Handler, handler.GetAccount)
-		account.GET("/", authMiddleware.Handler, handler.GetAccount)
+		account.GET("", handler.GetAccount)
+		account.GET("/", handler.GetAccount)
 
-		account.PATCH("", authMiddleware.Handler, handler.UpdateAccount)
-		account.PATCH("/", authMiddleware.Handler, handler.UpdateAccount)
+		account.PATCH("", handler.UpdateAccount)
+		account.PATCH("/", handler.UpdateAccount)
 
-		account.DELETE("", authMiddleware.Handler, handler.DeleteAccount)
-		account.DELETE("/", authMiddleware.Handler, handler.DeleteAccount)
+		account.DELETE("", handler.DeleteAccount)
+		account.DELETE("/", handler.DeleteAccount)
 	}
 
-	transaction := router.Group("/transaction")
+	transaction := router.Group("/transaction").Use(authMiddleware.Handler)
 	{
-		transaction.GET("/", authMiddleware.Handler, handler.ListTransactions)
-		transaction.POST("/", authMiddleware.Handler, handler.CreateTransaction)
-		transaction.GET("/:id", authMiddleware.Handler, handler.GetTransaction)
-		transaction.PATCH("/:id", authMiddleware.Handler, handler.UpdateTransaction)
-		transaction.DELETE("/:id", authMiddleware.Handler, handler.DeleteTransaction)
+		transaction.GET("/", handler.ListTransactions)
+		transaction.POST("/", handler.CreateTransaction)
+		transaction.GET("/:id", handler.GetTransaction)
+		transaction.PATCH("/:id", handler.UpdateTransaction)
+		transaction.DELETE("/:id", handler.DeleteTransaction)
 	}
 
 	return router

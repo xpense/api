@@ -39,7 +39,11 @@ func UserModelToAccountResponse(u *model.User) *Account {
 }
 
 func (h *handler) UpdateAccount(ctx *gin.Context) {
-	id := utils.GetIDFromContext(ctx)
+	id, err := utils.GetIDFromContext(ctx)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
 	var userBody model.User
 	if err := ctx.Bind(&userBody); err != nil {
@@ -79,7 +83,11 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 }
 
 func (h *handler) DeleteAccount(ctx *gin.Context) {
-	id := utils.GetIDFromContext(ctx)
+	id, err := utils.GetIDFromContext(ctx)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
 	if err := h.repo.UserDelete(id); err != nil {
 		if err == repository.ErrorRecordNotFound {
@@ -95,7 +103,11 @@ func (h *handler) DeleteAccount(ctx *gin.Context) {
 }
 
 func (h *handler) GetAccount(ctx *gin.Context) {
-	id := utils.GetIDFromContext(ctx)
+	id, err := utils.GetIDFromContext(ctx)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
 	userModel, err := h.repo.UserGet(id)
 	if err != nil {
