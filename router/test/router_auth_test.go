@@ -36,13 +36,10 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		jsonResponse := parseJSON(t, res)
-
-		haveErrorMessage := jsonResponse["message"].(string)
 		wantErrorMessage := model.ErrorName.Error()
 
 		assertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't sign up with missing 'last_name'", func(t *testing.T) {
@@ -53,13 +50,10 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		jsonResponse := parseJSON(t, res)
-
-		haveErrorMessage := jsonResponse["message"].(string)
 		wantErrorMessage := model.ErrorName.Error()
 
 		assertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't sign up with missing 'email'", func(t *testing.T) {
@@ -71,13 +65,10 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		jsonResponse := parseJSON(t, res)
-
-		haveErrorMessage := jsonResponse["message"].(string)
 		wantErrorMessage := model.ErrorEmail.Error()
 
 		assertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't sign up with missing 'password'", func(t *testing.T) {
@@ -90,13 +81,10 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		jsonResponse := parseJSON(t, res)
-
-		haveErrorMessage := jsonResponse["message"].(string)
 		wantErrorMessage := utils.ErrorPasswordLength.Error()
 
 		assertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Should sign up user", func(t *testing.T) {
@@ -164,12 +152,10 @@ func TestLogin(t *testing.T) {
 
 				r.ServeHTTP(res, req)
 
-				jsonResponse := parseJSON(t, res)
-				haveErrorMessage := jsonResponse["message"].(string)
 				wantErrorMessage := handlers.ErrMsgMissingPasswordOrEmail
 
 				assertStatusCode(t, res, http.StatusBadRequest)
-				assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+				assertErrorMessage(t, res, wantErrorMessage)
 			})
 		}
 	})
@@ -187,12 +173,10 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		jsonResponse := parseJSON(t, res)
-		haveErrorMessage := jsonResponse["message"].(string)
 		wantErrorMessage := handlers.ErrMsgNonExistentUser
 
 		assertStatusCode(t, res, http.StatusNotFound)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't log in if an error occurs while trying to query for user", func(t *testing.T) {
@@ -247,12 +231,10 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		jsonResponse := parseJSON(t, res)
-		haveErrorMessage := jsonResponse["message"].(string)
 		wantErrorMessage := handlers.ErrMsgWrongPassword
 
 		assertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't log in if there's an error while generating the access token", func(t *testing.T) {

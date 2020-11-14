@@ -2,6 +2,7 @@ package router
 
 import (
 	"expense-api/handlers"
+	"expense-api/middleware"
 	"expense-api/repository"
 	"expense-api/utils"
 
@@ -15,29 +16,30 @@ func Setup(
 	hasher utils.PasswordHasher,
 ) *gin.Engine {
 	router := gin.Default()
+
+	authMiddleware := middleware.NewAuthMiddleware(jwtService)
 	handler := handlers.New(repo, jwtService, hasher)
 
 	auth := router.Group("/auth")
 	{
 		auth.POST("/signup", handler.SignUp)
 		auth.POST("/login", handler.Login)
-		// auth.POST("/change-password", handlers.ChangePassword(repo, hasher))
 	}
 
 	transaction := router.Group("/transaction")
 	{
-		transaction.GET("/", handler.ListTransactions)
-		transaction.POST("/", handler.CreateTransaction)
-		transaction.GET("/:id", handler.GetTransaction)
-		transaction.PATCH("/:id", handler.UpdateTransaction)
-		transaction.DELETE("/:id", handler.DeleteTransaction)
+		transaction.GET("/", authMiddleware.Handler, handler.ListTransactions)
+		transaction.POST("/", authMiddleware.Handler, handler.CreateTransaction)
+		transaction.GET("/:id", authMiddleware.Handler, handler.GetTransaction)
+		transaction.PATCH("/:id", authMiddleware.Handler, handler.UpdateTransaction)
+		transaction.DELETE("/:id", authMiddleware.Handler, handler.DeleteTransaction)
 	}
 
 	user := router.Group("/user")
 	{
-		user.GET("/:id", handler.GetUser)
-		user.PATCH("/:id", handler.UpdateUserInfo)
-		user.DELETE("/:id", handler.DeleteUser)
+		user.GET("/:id", authMiddleware.Handler, handler.GetUser)
+		user.PATCH("/:id", authMiddleware.Handler, handler.UpdateUserInfo)
+		user.DELETE("/:id", authMiddleware.Handler, handler.DeleteUser)
 	}
 
 	return router

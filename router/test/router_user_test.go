@@ -22,37 +22,54 @@ func TestGetUser(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newUserRequest := func(id uint) *http.Request {
+	newUserRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/user/%d", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("Get non-existent user", func(t *testing.T) {
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		repoSpy.On("UserGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
+		token := "invalid-token"
 
-		res := httptest.NewRecorder()
-		req := newUserRequest(id)
+		missingTokenReq := newUserRequest(id, token)
+		invalidTokenReq := newUserRequest(id, token)
 
-		r.ServeHTTP(res, req)
-
-		assertStatusCode(t, res, http.StatusNotFound)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
-	t.Run("Get existing user", func(t *testing.T) {
+	t.Run("Valid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		user := &model.User{}
+		token := "valid-token"
 
-		repoSpy.On("UserGet", id).Return(user, nil).Once()
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		res := httptest.NewRecorder()
-		req := newUserRequest(id)
+		t.Run("Get non-existent user", func(t *testing.T) {
+			repoSpy.On("UserGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
-		r.ServeHTTP(res, req)
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, token)
 
-		assertStatusCode(t, res, http.StatusOK)
-		assertUserResponseBody(t, res, user)
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusNotFound)
+		})
+
+		t.Run("Get existing user", func(t *testing.T) {
+			user := &model.User{}
+
+			repoSpy.On("UserGet", id).Return(user, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusOK)
+			assertUserResponseBody(t, res, user)
+		})
 	})
 }
 
@@ -63,81 +80,91 @@ func TestUpdateUser(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newUserRequest := func(id uint, user *model.User) *http.Request {
+	newUserRequest := func(id uint, user *model.User, token string) *http.Request {
 		url := fmt.Sprintf("/user/%d", id)
 		body := createRequestBody(user)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("Update non-existent user", func(t *testing.T) {
-		id := uint(10)
-		user := &model.User{
-			FirstName: "Updated First Name",
-			LastName:  "Last Name",
-			Email:     "john@doe.com",
-		}
-
-		repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(nil, repository.ErrorRecordNotFound).Once()
-
-		res := httptest.NewRecorder()
-		req := newUserRequest(id, user)
-
-		r.ServeHTTP(res, req)
-
-		assertStatusCode(t, res, http.StatusNotFound)
-	})
-
-	t.Run("Update existing user with empty body", func(t *testing.T) {
-		id := uint(10)
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
+		id := uint(1)
 		user := &model.User{}
+		token := "invalid-token"
 
-		res := httptest.NewRecorder()
-		req := newUserRequest(id, user)
+		missingTokenReq := newUserRequest(id, user, token)
+		invalidTokenReq := newUserRequest(id, user, token)
 
-		r.ServeHTTP(res, req)
-
-		jsonResponse := parseJSON(t, res)
-
-		haveErrorMessage := jsonResponse["message"].(string)
-		wantErrorMessage := model.ErrorEmptyBody.Error()
-
-		assertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
-	t.Run("Update existing user with invalid email", func(t *testing.T) {
+	t.Run("Valid authorization token cases", func(t *testing.T) {
 		id := uint(10)
-		user := &model.User{Email: "@"}
+		token := "valid-token"
 
-		res := httptest.NewRecorder()
-		req := newUserRequest(id, user)
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		r.ServeHTTP(res, req)
+		t.Run("Update non-existent user", func(t *testing.T) {
+			user := &model.User{
+				FirstName: "Updated First Name",
+				LastName:  "Last Name",
+				Email:     "john@doe.com",
+			}
 
-		jsonResponse := parseJSON(t, res)
+			repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(nil, repository.ErrorRecordNotFound).Once()
 
-		haveErrorMessage := jsonResponse["message"].(string)
-		wantErrorMessage := model.ErrorEmail.Error()
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, user, token)
 
-		assertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, haveErrorMessage, wantErrorMessage)
-	})
+			r.ServeHTTP(res, req)
 
-	t.Run("Update existing user with valid email", func(t *testing.T) {
-		id := uint(10)
-		user := &model.User{Email: "john@doe.com"}
+			assertStatusCode(t, res, http.StatusNotFound)
+		})
 
-		repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
+		t.Run("Update existing user with empty body", func(t *testing.T) {
+			user := &model.User{}
 
-		res := httptest.NewRecorder()
-		req := newUserRequest(id, user)
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, user, token)
 
-		r.ServeHTTP(res, req)
+			r.ServeHTTP(res, req)
 
-		assertStatusCode(t, res, http.StatusOK)
-		assertUserResponseBody(t, res, user)
+			wantErrorMessage := model.ErrorEmptyBody.Error()
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Update existing user with invalid email", func(t *testing.T) {
+			user := &model.User{Email: "@"}
+
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, user, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := model.ErrorEmail.Error()
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Update existing user with valid email", func(t *testing.T) {
+			user := &model.User{Email: "john@doe.com"}
+
+			repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, user, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusOK)
+			assertUserResponseBody(t, res, user)
+		})
 	})
 }
 
@@ -148,34 +175,51 @@ func TestDeleteUser(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newUserRequest := func(id uint) *http.Request {
+	newUserRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/user/%d", id)
 		req, _ := http.NewRequest(http.MethodDelete, url, nil)
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("Delete non-existent user", func(t *testing.T) {
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		repoSpy.On("UserDelete", id).Return(repository.ErrorRecordNotFound).Once()
+		token := "invalid-token"
 
-		res := httptest.NewRecorder()
-		req := newUserRequest(id)
+		missingTokenReq := newUserRequest(id, token)
+		invalidTokenReq := newUserRequest(id, token)
 
-		r.ServeHTTP(res, req)
-
-		assertStatusCode(t, res, http.StatusNotFound)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
-	t.Run("Delete existing user", func(t *testing.T) {
+	t.Run("Valid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		repoSpy.On("UserDelete", id).Return(nil).Once()
+		token := "valid-token"
 
-		res := httptest.NewRecorder()
-		req := newUserRequest(id)
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		r.ServeHTTP(res, req)
+		t.Run("Delete non-existent user", func(t *testing.T) {
+			repoSpy.On("UserDelete", id).Return(repository.ErrorRecordNotFound).Once()
 
-		assertStatusCode(t, res, http.StatusNoContent)
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusNotFound)
+		})
+
+		t.Run("Delete existing user", func(t *testing.T) {
+			repoSpy.On("UserDelete", id).Return(nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newUserRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusNoContent)
+		})
 	})
 }
 

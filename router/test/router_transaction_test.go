@@ -24,48 +24,71 @@ func TestCreateTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newTransactionRequest := func(transaction *model.Transaction) *http.Request {
+	newTransactionRequest := func(transaction *model.Transaction, token string) *http.Request {
 		body := createRequestBody(transaction)
 		req, _ := http.NewRequest(http.MethodPost, "/transaction/", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
-
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("Create transaction with amount = 0", func(t *testing.T) {
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(&model.Transaction{Amount: 0})
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
+		transaction := &model.Transaction{}
+		token := "invalid-token"
 
-		r.ServeHTTP(res, req)
+		missingTokenReq := newTransactionRequest(transaction, token)
+		invalidTokenReq := newTransactionRequest(transaction, token)
 
-		assertStatusCode(t, res, http.StatusBadRequest)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
-	t.Run("Create transaction with invalid transaction type", func(t *testing.T) {
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(&model.Transaction{Amount: 1000, Type: "invalid"})
+	t.Run("Valid authorization token cases", func(t *testing.T) {
+		token := "valid-token"
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		r.ServeHTTP(res, req)
+		t.Run("Create transaction with amount = 0", func(t *testing.T) {
+			transaction := &model.Transaction{Amount: 0}
 
-		assertStatusCode(t, res, http.StatusBadRequest)
-	})
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
 
-	t.Run("Create transaction with valid data", func(t *testing.T) {
-		transaction := &model.Transaction{
-			Timestamp: time.Now().Round(0),
-			Amount:    1000,
-			Type:      model.Expense,
-		}
+			r.ServeHTTP(res, req)
 
-		repoSpy.On("TransactionCreate", transaction.Timestamp, transaction.Amount, transaction.Type).Return(transaction, nil).Once()
+			assertStatusCode(t, res, http.StatusBadRequest)
+		})
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(transaction)
+		t.Run("Create transaction with invalid transaction type", func(t *testing.T) {
+			transaction := &model.Transaction{
+				Amount: 1000,
+				Type:   "invalid",
+			}
 
-		r.ServeHTTP(res, req)
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
 
-		assertStatusCode(t, res, http.StatusCreated)
-		assertSingleTransactionResponseBody(t, res, transaction)
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+		})
+
+		t.Run("Create transaction with valid data", func(t *testing.T) {
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    1000,
+				Type:      model.Expense,
+			}
+
+			repoSpy.On("TransactionCreate", transaction.Timestamp, transaction.Amount, transaction.Type).Return(transaction, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusCreated)
+			assertSingleTransactionResponseBody(t, res, transaction)
+		})
 	})
 }
 
@@ -76,53 +99,70 @@ func TestGetTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newTransactionRequest := func(id uint) *http.Request {
+	newTransactionRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("Get transaction with id = 0", func(t *testing.T) {
-		id := uint(0)
-
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id)
-
-		r.ServeHTTP(res, req)
-
-		assertStatusCode(t, res, http.StatusBadRequest)
-	})
-
-	t.Run("Get transaction with non-existent id", func(t *testing.T) {
-		id := uint(10)
-
-		repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
-
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id)
-
-		r.ServeHTTP(res, req)
-
-		assertStatusCode(t, res, http.StatusNotFound)
-	})
-
-	t.Run("Get transaction with valid id", func(t *testing.T) {
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		transaction := &model.Transaction{
-			Timestamp: time.Now().Round(0),
-			Amount:    1000,
-			Type:      model.Expense,
-		}
+		token := "invalid-token"
 
-		repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+		missingTokenReq := newTransactionRequest(id, token)
+		invalidTokenReq := newTransactionRequest(id, token)
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
+	})
 
-		r.ServeHTTP(res, req)
+	t.Run("Valid authorization token cases", func(t *testing.T) {
+		token := "valid-token"
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		assertStatusCode(t, res, http.StatusOK)
-		assertSingleTransactionResponseBody(t, res, transaction)
+		t.Run("Get transaction with id = 0", func(t *testing.T) {
+			id := uint(0)
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+		})
+
+		t.Run("Get transaction with non-existent id", func(t *testing.T) {
+			id := uint(10)
+
+			repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusNotFound)
+		})
+
+		t.Run("Get transaction with valid id", func(t *testing.T) {
+			id := uint(1)
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    1000,
+				Type:      model.Expense,
+			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusOK)
+			assertSingleTransactionResponseBody(t, res, transaction)
+		})
 	})
 }
 
@@ -133,54 +173,77 @@ func TestUpdateTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newTransactionRequest := func(id uint, transaction *model.Transaction) *http.Request {
+	newTransactionRequest := func(id uint, transaction *model.Transaction, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
 		body := createRequestBody(transaction)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
-
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("Update non-existent transaction", func(t *testing.T) {
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		transaction := &model.Transaction{Amount: 1000}
+		transaction := &model.Transaction{}
+		token := "invalid-token"
 
-		repoSpy.On("TransactionUpdate", id, mock.Anything, transaction.Amount, mock.Anything).Return(nil, repository.ErrorRecordNotFound).Once()
+		missingTokenReq := newTransactionRequest(id, transaction, token)
+		invalidTokenReq := newTransactionRequest(id, transaction, token)
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id, transaction)
-
-		r.ServeHTTP(res, req)
-
-		assertStatusCode(t, res, http.StatusNotFound)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
-	t.Run("Update existing transaction with invalid type", func(t *testing.T) {
-		id := uint(2)
-		transaction := &model.Transaction{Amount: 1000, Type: "invalid"}
+	t.Run("Valid authorization token cases", func(t *testing.T) {
+		token := "valid-token"
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id, transaction)
+		t.Run("Update non-existent transaction", func(t *testing.T) {
+			id := uint(1)
+			transaction := &model.Transaction{Amount: 1000}
 
-		r.ServeHTTP(res, req)
+			repoSpy.On("TransactionUpdate", id, mock.Anything, transaction.Amount, mock.Anything).Return(nil, repository.ErrorRecordNotFound).Once()
 
-		assertStatusCode(t, res, http.StatusBadRequest)
-	})
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, transaction, token)
 
-	t.Run("Update existing transaction with valid arguments", func(t *testing.T) {
-		id := uint(3)
-		transaction := &model.Transaction{Amount: 2000, Type: model.Income}
+			r.ServeHTTP(res, req)
 
-		repoSpy.On("TransactionUpdate", id, mock.Anything, transaction.Amount, transaction.Type).Return(transaction, nil).Once()
+			assertStatusCode(t, res, http.StatusNotFound)
+		})
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id, transaction)
+		t.Run("Update existing transaction with invalid type", func(t *testing.T) {
+			id := uint(2)
+			transaction := &model.Transaction{
+				Amount: 1000,
+				Type:   "invalid",
+			}
 
-		r.ServeHTTP(res, req)
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, transaction, token)
 
-		assertStatusCode(t, res, http.StatusOK)
-		assertSingleTransactionResponseBody(t, res, transaction)
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+		})
+
+		t.Run("Update existing transaction with valid arguments", func(t *testing.T) {
+			id := uint(3)
+			transaction := &model.Transaction{
+				Amount: 2000,
+				Type:   model.Income,
+			}
+
+			repoSpy.On("TransactionUpdate", id, mock.Anything, transaction.Amount, transaction.Type).Return(transaction, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusOK)
+			assertSingleTransactionResponseBody(t, res, transaction)
+		})
 	})
 }
 
@@ -191,36 +254,53 @@ func TestDeleteTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newTransactionRequest := func(id uint) *http.Request {
+	newTransactionRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
 		req, _ := http.NewRequest(http.MethodDelete, url, nil)
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("Delete non-existent transaction", func(t *testing.T) {
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
+		token := "invalid-token"
 
-		repoSpy.On("TransactionDelete", id).Return(repository.ErrorRecordNotFound).Once()
+		missingTokenReq := newTransactionRequest(id, token)
+		invalidTokenReq := newTransactionRequest(id, token)
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id)
-
-		r.ServeHTTP(res, req)
-
-		assertStatusCode(t, res, http.StatusNotFound)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
-	t.Run("Delete existing transaction", func(t *testing.T) {
-		id := uint(2)
+	t.Run("Valid authorization token cases", func(t *testing.T) {
+		token := "valid-token"
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		repoSpy.On("TransactionDelete", id).Return(nil).Once()
+		t.Run("Delete non-existent transaction", func(t *testing.T) {
+			id := uint(1)
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest(id)
+			repoSpy.On("TransactionDelete", id).Return(repository.ErrorRecordNotFound).Once()
 
-		r.ServeHTTP(res, req)
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, token)
 
-		assertStatusCode(t, res, http.StatusNoContent)
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusNotFound)
+		})
+
+		t.Run("Delete existing transaction", func(t *testing.T) {
+			id := uint(2)
+
+			repoSpy.On("TransactionDelete", id).Return(nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusNoContent)
+		})
 	})
 }
 
@@ -238,41 +318,57 @@ func TestListTransactions(t *testing.T) {
 		}
 	}
 
-	newTransactionRequest := func() *http.Request {
+	newTransactionRequest := func(token string) *http.Request {
 		req, _ := http.NewRequest(http.MethodGet, "/transaction/", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
-	t.Run("List transactions when there are no transactions", func(t *testing.T) {
-		transactions := []*model.Transaction{}
+	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
+		token := "invalid-token"
 
-		repoSpy.On("TransactionList").Return(transactions, nil).Once()
+		missingTokenReq := newTransactionRequest(token)
+		invalidTokenReq := newTransactionRequest(token)
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest()
-
-		r.ServeHTTP(res, req)
-
-		expected := newTransactionListResponse(transactions)
-
-		assertStatusCode(t, res, http.StatusOK)
-		assertListTransactionResponseBody(t, res, expected)
+		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
+		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
-	t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
-		transactions := []*model.Transaction{{}, {}}
+	t.Run("Valid authorization token cases", func(t *testing.T) {
+		token := "valid-token"
+		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
 
-		repoSpy.On("TransactionList").Return(transactions, nil).Once()
+		t.Run("List transactions when there are no transactions", func(t *testing.T) {
+			transactions := []*model.Transaction{}
 
-		res := httptest.NewRecorder()
-		req := newTransactionRequest()
+			repoSpy.On("TransactionList").Return(transactions, nil).Once()
 
-		r.ServeHTTP(res, req)
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(token)
 
-		expected := newTransactionListResponse(transactions)
+			r.ServeHTTP(res, req)
 
-		assertStatusCode(t, res, http.StatusOK)
-		assertListTransactionResponseBody(t, res, expected)
+			expected := newTransactionListResponse(transactions)
+
+			assertStatusCode(t, res, http.StatusOK)
+			assertListTransactionResponseBody(t, res, expected)
+		})
+
+		t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
+			transactions := []*model.Transaction{{}, {}}
+
+			repoSpy.On("TransactionList").Return(transactions, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(token)
+
+			r.ServeHTTP(res, req)
+
+			expected := newTransactionListResponse(transactions)
+
+			assertStatusCode(t, res, http.StatusOK)
+			assertListTransactionResponseBody(t, res, expected)
+		})
 	})
 }
 

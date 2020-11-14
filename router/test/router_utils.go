@@ -2,8 +2,11 @@ package test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func assertStatusCode(t *testing.T, res *httptest.ResponseRecorder, expectedStatusCode int) {
@@ -14,15 +17,20 @@ func assertStatusCode(t *testing.T, res *httptest.ResponseRecorder, expectedStat
 	}
 }
 
-func assertErrorMessage(t *testing.T, expected, got string) {
+func assertErrorMessage(t *testing.T, res *httptest.ResponseRecorder, expected string) {
 	t.Helper()
 
-	if expected != got {
-		t.Errorf("expected error message: '%v', instead got error message: '%v'", expected, got)
-	}
+	jsonResponse := parseJSON(t, res)
+	got := jsonResponse["message"].(string)
+
+	notEqualMsg := fmt.Sprintf("expected error message: '%v', instead got error message: '%v'", expected, got)
+
+	assert.Equal(t, expected, got, notEqualMsg)
 }
 
 func parseJSON(t *testing.T, res *httptest.ResponseRecorder) map[string]interface{} {
+	t.Helper()
+
 	jsonResponse := map[string]interface{}{}
 	if err := json.NewDecoder(res.Body).Decode(&jsonResponse); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)

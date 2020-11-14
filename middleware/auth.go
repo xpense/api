@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const ErrMsgMalformedToken = "Malformed token"
+
 type AuthMiddleware interface {
 	Handler(*gin.Context)
 }
@@ -24,7 +26,7 @@ func (a *authMiddleware) Handler(ctx *gin.Context) {
 	authHeader := strings.Split(ctx.GetHeader("Authorization"), "Bearer ")
 	if len(authHeader) != 2 {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "Malformed token",
+			"message": ErrMsgMalformedToken,
 		})
 		return
 	}
