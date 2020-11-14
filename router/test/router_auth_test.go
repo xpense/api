@@ -87,6 +87,33 @@ func TestSignUp(t *testing.T) {
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
+	t.Run("Shouldn't sign up user with an already registered email", func(t *testing.T) {
+		user := &model.User{
+			FirstName: "First Name",
+			LastName:  "Last Name",
+			Email:     "john@doe.com",
+			Password:  "123Password!{}",
+		}
+		user.ID = 1
+
+		salt := "saltystring"
+		hashedPassword := "hashedPassword"
+
+		hasherSpy.On("GenerateSalt").Return(salt, nil).Once()
+		hasherSpy.On("HashPassword", user.Password, salt).Return(hashedPassword, nil).Once()
+		repoSpy.On("UserCreate", user.FirstName, user.LastName, user.Email, hashedPassword, salt).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
+
+		res := httptest.NewRecorder()
+		req := newUserRequest(user)
+
+		r.ServeHTTP(res, req)
+
+		wantErrorMessage := handlers.ErrMsgEmailConflict
+
+		assertStatusCode(t, res, http.StatusConflict)
+		assertErrorMessage(t, res, wantErrorMessage)
+	})
+
 	t.Run("Should sign up user", func(t *testing.T) {
 		user := &model.User{
 			FirstName: "First Name",

@@ -27,6 +27,7 @@ type (
 const (
 	ErrMsgMissingPasswordOrEmail = "both email and password are required for login"
 	ErrMsgNonExistentUser        = "user with this email does not exist"
+	ErrMsgEmailConflict          = "user with this email already exists"
 	ErrMsgWrongPassword          = "wrong password"
 )
 
@@ -68,6 +69,13 @@ func (h *handler) SignUp(ctx *gin.Context) {
 		hashedPassword,
 		salt,
 	); err != nil {
+		if err == repository.ErrorUniqueConstaintViolation {
+			ctx.JSON(http.StatusConflict, gin.H{
+				"message": ErrMsgEmailConflict,
+			})
+			return
+		}
+
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}

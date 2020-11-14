@@ -16,6 +16,10 @@ func (r *repository) UserCreate(firstName, lastName, email, password, salt strin
 	}
 
 	if tx := r.db.Create(user); tx.Error != nil {
+		if isUniqueConstaintViolationError(tx.Error) {
+			return nil, ErrorUniqueConstaintViolation
+		}
+
 		return nil, ErrorOther
 	}
 

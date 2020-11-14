@@ -26,6 +26,13 @@ func Setup(
 		auth.POST("/login", handler.Login)
 	}
 
+	user := router.Group("/user")
+	{
+		user.GET("/:id", authMiddleware.Handler, handler.GetUser)
+		user.PATCH("/:id", authMiddleware.Handler, handler.UpdateUserInfo)
+		user.DELETE("/:id", authMiddleware.Handler, handler.DeleteUser)
+	}
+
 	transaction := router.Group("/transaction")
 	{
 		transaction.GET("/", authMiddleware.Handler, handler.ListTransactions)
@@ -33,13 +40,6 @@ func Setup(
 		transaction.GET("/:id", authMiddleware.Handler, handler.GetTransaction)
 		transaction.PATCH("/:id", authMiddleware.Handler, handler.UpdateTransaction)
 		transaction.DELETE("/:id", authMiddleware.Handler, handler.DeleteTransaction)
-	}
-
-	user := router.Group("/user")
-	{
-		user.GET("/:id", authMiddleware.Handler, handler.GetUser)
-		user.PATCH("/:id", authMiddleware.Handler, handler.UpdateUserInfo)
-		user.DELETE("/:id", authMiddleware.Handler, handler.DeleteUser)
 	}
 
 	return router

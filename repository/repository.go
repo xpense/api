@@ -5,6 +5,7 @@ import (
 	"expense-api/model"
 	"time"
 
+	"github.com/jackc/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -22,8 +23,9 @@ type Repository interface {
 }
 
 var (
-	ErrorRecordNotFound = errors.New("resource not found")
-	ErrorOther          = errors.New("an error occurred")
+	ErrorRecordNotFound           = errors.New("resource not found")
+	ErrorOther                    = errors.New("an error occurred")
+	ErrorUniqueConstaintViolation = errors.New("record already exists (duplicate unique key)")
 )
 
 type repository struct {
@@ -32,4 +34,13 @@ type repository struct {
 
 func New(db *gorm.DB) Repository {
 	return &repository{db}
+}
+
+func isUniqueConstaintViolationError(err error) bool {
+	if err, ok := err.(*pgconn.PgError); ok {
+		uniqueConstraintCode := "23505"
+		return err.Code == uniqueConstraintCode
+	}
+
+	return false
 }
