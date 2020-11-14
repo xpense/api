@@ -3,8 +3,8 @@ package handlers
 import (
 	"expense-api/model"
 	"expense-api/repository"
+	"expense-api/utils"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,12 +39,7 @@ func UserModelToAccountResponse(u *model.User) *Account {
 }
 
 func (h *handler) UpdateAccount(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
-		ctx.Status(http.StatusBadRequest)
-		return
-	}
+	id := utils.GetIDFromContext(ctx)
 
 	var userBody model.User
 	if err := ctx.Bind(&userBody); err != nil {
@@ -63,7 +58,12 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 		return
 	}
 
-	userModel, err := h.repo.UserUpdate(uint(id), userBody.FirstName, userBody.LastName, userBody.Email)
+	userModel, err := h.repo.UserUpdate(
+		id,
+		userBody.FirstName,
+		userBody.LastName,
+		userBody.Email,
+	)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
@@ -79,14 +79,9 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 }
 
 func (h *handler) DeleteAccount(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
-		ctx.Status(http.StatusBadRequest)
-		return
-	}
+	id := utils.GetIDFromContext(ctx)
 
-	if err := h.repo.UserDelete(uint(id)); err != nil {
+	if err := h.repo.UserDelete(id); err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
 			return
@@ -100,14 +95,9 @@ func (h *handler) DeleteAccount(ctx *gin.Context) {
 }
 
 func (h *handler) GetAccount(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
-		ctx.Status(http.StatusBadRequest)
-		return
-	}
+	id := utils.GetIDFromContext(ctx)
 
-	userModel, err := h.repo.UserGet(uint(id))
+	userModel, err := h.repo.UserGet(id)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)

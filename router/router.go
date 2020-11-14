@@ -28,9 +28,14 @@ func Setup(
 
 	account := router.Group("/account")
 	{
-		account.GET("/:id", authMiddleware.Handler, handler.GetAccount)
-		account.PATCH("/:id", authMiddleware.Handler, handler.UpdateAccount)
-		account.DELETE("/:id", authMiddleware.Handler, handler.DeleteAccount)
+		account.GET("", authMiddleware.Handler, handler.GetAccount)
+		account.GET("/", authMiddleware.Handler, handler.GetAccount)
+
+		account.PATCH("", authMiddleware.Handler, handler.UpdateAccount)
+		account.PATCH("/", authMiddleware.Handler, handler.UpdateAccount)
+
+		account.DELETE("", authMiddleware.Handler, handler.DeleteAccount)
+		account.DELETE("/", authMiddleware.Handler, handler.DeleteAccount)
 	}
 
 	transaction := router.Group("/transaction")

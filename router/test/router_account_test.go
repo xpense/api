@@ -8,7 +8,7 @@ import (
 	"expense-api/repository"
 	"expense-api/router"
 	"expense-api/router/test/spies"
-	"fmt"
+	"expense-api/utils"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -22,35 +22,36 @@ func TestGetAccount(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newAccountRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/account/%d", id)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
+	newAccountRequest := func(token string) *http.Request {
+		req, _ := http.NewRequest(http.MethodGet, "/account", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newAccountRequest(id, token)
-		invalidTokenReq := newAccountRequest(id, token)
+		missingTokenReq := newAccountRequest(token)
+		invalidTokenReq := newAccountRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
-		id := uint(1)
+		claims := &utils.CustomClaims{
+			ID:    1,
+			Email: "john@doe.com",
+		}
 		token := "valid-token"
 
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		jwtServiceSpy.On("ValidateJWT", token).Return(claims, nil)
 
 		t.Run("Get non-existent user", func(t *testing.T) {
-			repoSpy.On("UserGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
+			repoSpy.On("UserGet", claims.ID).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, token)
+			req := newAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -60,10 +61,10 @@ func TestGetAccount(t *testing.T) {
 		t.Run("Get existing user", func(t *testing.T) {
 			user := &model.User{}
 
-			repoSpy.On("UserGet", id).Return(user, nil).Once()
+			repoSpy.On("UserGet", claims.ID).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, token)
+			req := newAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -80,32 +81,33 @@ func TestUpdateAccount(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newAccountRequest := func(id uint, user *model.User, token string) *http.Request {
-		url := fmt.Sprintf("/account/%d", id)
+	newAccountRequest := func(user *model.User, token string) *http.Request {
 		body := createRequestBody(user)
-		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPatch, "/account", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		id := uint(1)
 		user := &model.User{}
 		token := "invalid-token"
 
-		missingTokenReq := newAccountRequest(id, user, token)
-		invalidTokenReq := newAccountRequest(id, user, token)
+		missingTokenReq := newAccountRequest(user, token)
+		invalidTokenReq := newAccountRequest(user, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
-		id := uint(10)
+		claims := &utils.CustomClaims{
+			ID:    10,
+			Email: "john@doe.com",
+		}
 		token := "valid-token"
 
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		jwtServiceSpy.On("ValidateJWT", token).Return(claims, nil)
 
 		t.Run("Update non-existent user", func(t *testing.T) {
 			user := &model.User{
@@ -114,10 +116,10 @@ func TestUpdateAccount(t *testing.T) {
 				Email:     "john@doe.com",
 			}
 
-			repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(nil, repository.ErrorRecordNotFound).Once()
+			repoSpy.On("UserUpdate", claims.ID, user.FirstName, user.LastName, user.Email).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, user, token)
+			req := newAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -128,7 +130,7 @@ func TestUpdateAccount(t *testing.T) {
 			user := &model.User{}
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, user, token)
+			req := newAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -142,7 +144,7 @@ func TestUpdateAccount(t *testing.T) {
 			user := &model.User{Email: "@"}
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, user, token)
+			req := newAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -155,10 +157,10 @@ func TestUpdateAccount(t *testing.T) {
 		t.Run("Update existing user with valid email", func(t *testing.T) {
 			user := &model.User{Email: "john@doe.com"}
 
-			repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
+			repoSpy.On("UserUpdate", claims.ID, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, user, token)
+			req := newAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -175,35 +177,36 @@ func TestDeleteAccount(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newAccountRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/account/%d", id)
-		req, _ := http.NewRequest(http.MethodDelete, url, nil)
+	newAccountRequest := func(token string) *http.Request {
+		req, _ := http.NewRequest(http.MethodDelete, "/account", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newAccountRequest(id, token)
-		invalidTokenReq := newAccountRequest(id, token)
+		missingTokenReq := newAccountRequest(token)
+		invalidTokenReq := newAccountRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
 	})
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
-		id := uint(1)
+		claims := &utils.CustomClaims{
+			ID:    10,
+			Email: "john@doe.com",
+		}
 		token := "valid-token"
 
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		jwtServiceSpy.On("ValidateJWT", token).Return(claims, nil)
 
 		t.Run("Delete non-existent user", func(t *testing.T) {
-			repoSpy.On("UserDelete", id).Return(repository.ErrorRecordNotFound).Once()
+			repoSpy.On("UserDelete", claims.ID).Return(repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, token)
+			req := newAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -211,10 +214,10 @@ func TestDeleteAccount(t *testing.T) {
 		})
 
 		t.Run("Delete existing user", func(t *testing.T) {
-			repoSpy.On("UserDelete", id).Return(nil).Once()
+			repoSpy.On("UserDelete", claims.ID).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(id, token)
+			req := newAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 
