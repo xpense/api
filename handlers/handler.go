@@ -7,7 +7,7 @@ import (
 
 type Handler interface {
 	TransactionsHandler
-	UserHandler
+	AccountHandler
 	AuthHandler
 }
 

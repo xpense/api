@@ -15,15 +15,15 @@ import (
 	"testing"
 )
 
-func TestGetUser(t *testing.T) {
+func TestGetAccount(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newUserRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/user/%d", id)
+	newAccountRequest := func(id uint, token string) *http.Request {
+		url := fmt.Sprintf("/account/%d", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -33,8 +33,8 @@ func TestGetUser(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newUserRequest(id, token)
-		invalidTokenReq := newUserRequest(id, token)
+		missingTokenReq := newAccountRequest(id, token)
+		invalidTokenReq := newAccountRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -50,7 +50,7 @@ func TestGetUser(t *testing.T) {
 			repoSpy.On("UserGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, token)
+			req := newAccountRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -63,7 +63,7 @@ func TestGetUser(t *testing.T) {
 			repoSpy.On("UserGet", id).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, token)
+			req := newAccountRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -73,15 +73,15 @@ func TestGetUser(t *testing.T) {
 	})
 }
 
-func TestUpdateUser(t *testing.T) {
+func TestUpdateAccount(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newUserRequest := func(id uint, user *model.User, token string) *http.Request {
-		url := fmt.Sprintf("/user/%d", id)
+	newAccountRequest := func(id uint, user *model.User, token string) *http.Request {
+		url := fmt.Sprintf("/account/%d", id)
 		body := createRequestBody(user)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -94,8 +94,8 @@ func TestUpdateUser(t *testing.T) {
 		user := &model.User{}
 		token := "invalid-token"
 
-		missingTokenReq := newUserRequest(id, user, token)
-		invalidTokenReq := newUserRequest(id, user, token)
+		missingTokenReq := newAccountRequest(id, user, token)
+		invalidTokenReq := newAccountRequest(id, user, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -117,7 +117,7 @@ func TestUpdateUser(t *testing.T) {
 			repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, user, token)
+			req := newAccountRequest(id, user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -128,7 +128,7 @@ func TestUpdateUser(t *testing.T) {
 			user := &model.User{}
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, user, token)
+			req := newAccountRequest(id, user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -142,7 +142,7 @@ func TestUpdateUser(t *testing.T) {
 			user := &model.User{Email: "@"}
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, user, token)
+			req := newAccountRequest(id, user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -158,7 +158,7 @@ func TestUpdateUser(t *testing.T) {
 			repoSpy.On("UserUpdate", id, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, user, token)
+			req := newAccountRequest(id, user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -168,15 +168,15 @@ func TestUpdateUser(t *testing.T) {
 	})
 }
 
-func TestDeleteUser(t *testing.T) {
+func TestDeleteAccount(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
 
-	newUserRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/user/%d", id)
+	newAccountRequest := func(id uint, token string) *http.Request {
+		url := fmt.Sprintf("/account/%d", id)
 		req, _ := http.NewRequest(http.MethodDelete, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -186,8 +186,8 @@ func TestDeleteUser(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newUserRequest(id, token)
-		invalidTokenReq := newUserRequest(id, token)
+		missingTokenReq := newAccountRequest(id, token)
+		invalidTokenReq := newAccountRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -203,7 +203,7 @@ func TestDeleteUser(t *testing.T) {
 			repoSpy.On("UserDelete", id).Return(repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, token)
+			req := newAccountRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -214,7 +214,7 @@ func TestDeleteUser(t *testing.T) {
 			repoSpy.On("UserDelete", id).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newUserRequest(id, token)
+			req := newAccountRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -226,12 +226,12 @@ func TestDeleteUser(t *testing.T) {
 func assertUserResponseBody(t *testing.T, res *httptest.ResponseRecorder, user *model.User) {
 	t.Helper()
 
-	var got handlers.User
+	var got handlers.Account
 	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)
 	}
 
-	expected := handlers.UserModelToResponse(user)
+	expected := handlers.UserModelToAccountResponse(user)
 	if !reflect.DeepEqual(got, *expected) {
 		t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
 	}

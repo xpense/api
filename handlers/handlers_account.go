@@ -10,14 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserHandler interface {
-	GetUser(ctx *gin.Context)
-	UpdateUserInfo(ctx *gin.Context)
-	DeleteUser(ctx *gin.Context)
+type AccountHandler interface {
+	GetAccount(ctx *gin.Context)
+	UpdateAccount(ctx *gin.Context)
+	DeleteAccount(ctx *gin.Context)
 }
 
-// User is a user with an omitted 'password' field
-type User struct {
+// Account is a user with an omitted 'password' field
+type Account struct {
 	ID        uint      `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -26,9 +26,9 @@ type User struct {
 	Email     string    `json:"email"`
 }
 
-// UserModelToResponse cretes a user struct that doesn't expose the password of a user
-func UserModelToResponse(u *model.User) *User {
-	return &User{
+// UserModelToAccountResponse cretes a user struct that doesn't expose the password of a user
+func UserModelToAccountResponse(u *model.User) *Account {
+	return &Account{
 		ID:        u.ID,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
@@ -38,7 +38,7 @@ func UserModelToResponse(u *model.User) *User {
 	}
 }
 
-func (h *handler) UpdateUserInfo(ctx *gin.Context) {
+func (h *handler) UpdateAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id <= 0 {
@@ -74,11 +74,11 @@ func (h *handler) UpdateUserInfo(ctx *gin.Context) {
 		return
 	}
 
-	userResponse := UserModelToResponse(userModel)
-	ctx.JSON(http.StatusOK, userResponse)
+	accountResponse := UserModelToAccountResponse(userModel)
+	ctx.JSON(http.StatusOK, accountResponse)
 }
 
-func (h *handler) DeleteUser(ctx *gin.Context) {
+func (h *handler) DeleteAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id <= 0 {
@@ -99,7 +99,7 @@ func (h *handler) DeleteUser(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
-func (h *handler) GetUser(ctx *gin.Context) {
+func (h *handler) GetAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id <= 0 {
@@ -118,6 +118,6 @@ func (h *handler) GetUser(ctx *gin.Context) {
 		return
 	}
 
-	userResponse := UserModelToResponse(userModel)
-	ctx.JSON(http.StatusOK, userResponse)
+	accountResponse := UserModelToAccountResponse(userModel)
+	ctx.JSON(http.StatusOK, accountResponse)
 }
