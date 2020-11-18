@@ -3,18 +3,18 @@ package repository
 import (
 	"errors"
 	"expense-api/model"
-	"time"
 
 	"github.com/jackc/pgconn"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	TransactionCreate(timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error)
-	TransactionUpdate(id uint, timestamp time.Time, amount uint64, transactionType model.TransactionType) (*model.Transaction, error)
+	TransactionCreate(t *model.Transaction) error
+	TransactionUpdate(id uint, t *model.Transaction) (*model.Transaction, error)
 	TransactionGet(id uint) (*model.Transaction, error)
 	TransactionDelete(id uint) error
-	TransactionList() ([]*model.Transaction, error)
+	TransactionList(userID uint) ([]*model.Transaction, error)
+
 	UserCreate(firstName, LastName, Email, Password, Salt string) (*model.User, error)
 	UserUpdate(id uint, firstName, LastName, Email string) (*model.User, error)
 	UserDelete(id uint) error

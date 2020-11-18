@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"expense-api/middleware/auth"
 	"expense-api/repository"
 	"expense-api/utils"
 )
@@ -13,13 +14,13 @@ type Handler interface {
 
 type handler struct {
 	repo       repository.Repository
-	jwtService utils.JWTService
+	jwtService auth.JWTService
 	hasher     utils.PasswordHasher
 }
 
 func New(
 	repo repository.Repository,
-	jwtService utils.JWTService,
+	jwtService auth.JWTService,
 	hasher utils.PasswordHasher,
 ) Handler {
 	return &handler{repo, jwtService, hasher}

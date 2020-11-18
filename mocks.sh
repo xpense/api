@@ -7,4 +7,4 @@ mockery --name Repository --filename repository_spy.go --dir repository --output
 mockery --name PasswordHasher --filename password_hasher_spy.go --dir utils --output router/test/spies --outpkg spies --structname PasswordHasherSpy
 
 # JWT Service
-mockery --name JWTService --filename jwt_service_spy.go --dir utils --output router/test/spies --outpkg spies --structname JWTServiceSpy
+mockery --name JWTService --filename jwt_service_spy.go --dir middleware/auth --output router/test/spies --outpkg spies --structname JWTServiceSpy

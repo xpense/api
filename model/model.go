@@ -19,9 +19,12 @@ const (
 
 type Transaction struct {
 	Model
-	Timestamp time.Time       `json:"timestamp,omitempty"`
-	Amount    uint64          `json:"amount"`
-	Type      TransactionType `json:"type"`
+	Description string
+	Timestamp   time.Time
+	Amount      uint64
+	Type        TransactionType
+	UserID      uint
+	User        User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type User struct {

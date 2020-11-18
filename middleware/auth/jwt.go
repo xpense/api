@@ -1,4 +1,4 @@
-package utils
+package auth
 
 import (
 	"errors"
@@ -41,7 +41,7 @@ func (jwts *jwtService) CreateJWT(id uint, email string) (string, error) {
 			Email: email,
 		},
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().UTC().Add(time.Minute * 2).Unix(),
+			ExpiresAt: time.Now().UTC().Add(time.Minute * 60 * 24 * 365).Unix(),
 			Issuer:    jwts.issuer,
 		},
 	}

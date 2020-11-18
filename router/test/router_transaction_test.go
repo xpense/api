@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"expense-api/middleware/auth"
 	"expense-api/model"
 	"expense-api/repository"
 	"expense-api/router"
@@ -13,8 +14,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/mock"
 )
 
 func TestCreateTransaction(t *testing.T) {
@@ -22,7 +21,7 @@ func TestCreateTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newTransactionRequest := func(transaction *model.Transaction, token string) *http.Request {
 		body := createRequestBody(transaction)
@@ -45,7 +44,11 @@ func TestCreateTransaction(t *testing.T) {
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
 		token := "valid-token"
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		userID := uint(1)
+		claims := auth.CustomClaims{
+			ID: userID,
+		}
+		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
 		t.Run("Create transaction with amount = 0", func(t *testing.T) {
 			transaction := &model.Transaction{Amount: 0}
@@ -77,14 +80,17 @@ func TestCreateTransaction(t *testing.T) {
 				Timestamp: time.Now().Round(0),
 				Amount:    1000,
 				Type:      model.Expense,
+				UserID:    userID,
 			}
 
-			repoSpy.On("TransactionCreate", transaction.Timestamp, transaction.Amount, transaction.Type).Return(transaction, nil).Once()
+			repoSpy.On("TransactionCreate", transaction).Return(nil).Once()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
+
+			transaction.UserID = 0
 
 			assertStatusCode(t, res, http.StatusCreated)
 			assertSingleTransactionResponseBody(t, res, transaction)
@@ -97,7 +103,7 @@ func TestGetTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newTransactionRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -119,7 +125,11 @@ func TestGetTransaction(t *testing.T) {
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
 		token := "valid-token"
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		userID := uint(1)
+		claims := auth.CustomClaims{
+			ID: userID,
+		}
+		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
 		t.Run("Get transaction with id = 0", func(t *testing.T) {
 			id := uint(0)
@@ -151,14 +161,17 @@ func TestGetTransaction(t *testing.T) {
 				Timestamp: time.Now().Round(0),
 				Amount:    1000,
 				Type:      model.Expense,
+				UserID:    userID,
 			}
 
-			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Twice()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
+
+			transaction.UserID = 0
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertSingleTransactionResponseBody(t, res, transaction)
@@ -171,7 +184,7 @@ func TestUpdateTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newTransactionRequest := func(id uint, transaction *model.Transaction, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -196,13 +209,17 @@ func TestUpdateTransaction(t *testing.T) {
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
 		token := "valid-token"
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		userID := uint(1)
+		claims := auth.CustomClaims{
+			ID: userID,
+		}
+		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
 		t.Run("Update non-existent transaction", func(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{Amount: 1000}
 
-			repoSpy.On("TransactionUpdate", id, mock.Anything, transaction.Amount, mock.Anything).Return(nil, repository.ErrorRecordNotFound).Once()
+			repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(id, transaction, token)
@@ -217,7 +234,10 @@ func TestUpdateTransaction(t *testing.T) {
 			transaction := &model.Transaction{
 				Amount: 1000,
 				Type:   "invalid",
+				UserID: userID,
 			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(id, transaction, token)
@@ -232,14 +252,18 @@ func TestUpdateTransaction(t *testing.T) {
 			transaction := &model.Transaction{
 				Amount: 2000,
 				Type:   model.Income,
+				UserID: userID,
 			}
 
-			repoSpy.On("TransactionUpdate", id, mock.Anything, transaction.Amount, transaction.Type).Return(transaction, nil).Once()
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+			repoSpy.On("TransactionUpdate", id, transaction).Return(transaction, nil).Once()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(id, transaction, token)
 
 			r.ServeHTTP(res, req)
+
+			transaction.UserID = 0
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertSingleTransactionResponseBody(t, res, transaction)
@@ -252,7 +276,7 @@ func TestDeleteTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newTransactionRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -274,12 +298,16 @@ func TestDeleteTransaction(t *testing.T) {
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
 		token := "valid-token"
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		userID := uint(1)
+		claims := auth.CustomClaims{
+			ID: userID,
+		}
+		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
 		t.Run("Delete non-existent transaction", func(t *testing.T) {
 			id := uint(1)
 
-			repoSpy.On("TransactionDelete", id).Return(repository.ErrorRecordNotFound).Once()
+			repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(id, token)
@@ -291,7 +319,13 @@ func TestDeleteTransaction(t *testing.T) {
 
 		t.Run("Delete existing transaction", func(t *testing.T) {
 			id := uint(2)
+			transaction := &model.Transaction{
+				Amount: 2000,
+				Type:   model.Income,
+				UserID: userID,
+			}
 
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
 			repoSpy.On("TransactionDelete", id).Return(nil).Once()
 
 			res := httptest.NewRecorder()
@@ -309,7 +343,7 @@ func TestListTransactions(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newTransactionListResponse := func(slice []*model.Transaction) *transactionListResponse {
 		return &transactionListResponse{
@@ -336,12 +370,16 @@ func TestListTransactions(t *testing.T) {
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
 		token := "valid-token"
-		jwtServiceSpy.On("ValidateJWT", token).Return(nil, nil)
+		userID := uint(1)
+		claims := auth.CustomClaims{
+			ID: userID,
+		}
+		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
 		t.Run("List transactions when there are no transactions", func(t *testing.T) {
 			transactions := []*model.Transaction{}
 
-			repoSpy.On("TransactionList").Return(transactions, nil).Once()
+			repoSpy.On("TransactionList", userID).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(token)
@@ -357,7 +395,7 @@ func TestListTransactions(t *testing.T) {
 		t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
 			transactions := []*model.Transaction{{}, {}}
 
-			repoSpy.On("TransactionList").Return(transactions, nil).Once()
+			repoSpy.On("TransactionList", userID).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(token)

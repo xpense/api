@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"expense-api/middleware/auth"
 	"expense-api/model"
 	"expense-api/repository"
-	"expense-api/utils"
 	"net/http"
 	"time"
 
@@ -39,7 +39,7 @@ func UserModelToAccountResponse(u *model.User) *Account {
 }
 
 func (h *handler) UpdateAccount(ctx *gin.Context) {
-	id, err := utils.GetIDFromContext(ctx)
+	id, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -83,7 +83,7 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 }
 
 func (h *handler) DeleteAccount(ctx *gin.Context) {
-	id, err := utils.GetIDFromContext(ctx)
+	id, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -103,7 +103,7 @@ func (h *handler) DeleteAccount(ctx *gin.Context) {
 }
 
 func (h *handler) GetAccount(ctx *gin.Context) {
-	id, err := utils.GetIDFromContext(ctx)
+	id, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return

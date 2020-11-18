@@ -1,4 +1,4 @@
-package utils
+package auth
 
 import (
 	"errors"
@@ -15,8 +15,8 @@ var errNilCustomClaims = errors.New("custom claims not set")
 
 const claimsContextKey = "claims"
 
-// GetIDFromContext retrieves the authenticated user's id from the context
-func GetIDFromContext(ctx *gin.Context) (uint, error) {
+// GetUserIDFromContext retrieves the authenticated user's id from the context
+func GetUserIDFromContext(ctx *gin.Context) (uint, error) {
 	claims, err := GetClaimsFromContext(ctx)
 	if err != nil {
 		return 0, err
@@ -38,9 +38,4 @@ func GetClaimsFromContext(ctx *gin.Context) (*CustomClaims, error) {
 	}
 
 	return claims, nil
-}
-
-// SetClaimsToContext sets the claims to a gin Context
-func SetClaimsToContext(ctx *gin.Context, claims *CustomClaims) {
-	ctx.Set(claimsContextKey, claims)
 }

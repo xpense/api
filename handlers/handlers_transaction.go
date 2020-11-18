@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"expense-api/middleware"
+	auth_middleware "expense-api/middleware/auth"
 	"expense-api/model"
 	"expense-api/repository"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,14 +20,43 @@ type TransactionsHandler interface {
 	DeleteTransaction(ctx *gin.Context)
 }
 
+// Transaction is a transaction with an omitted user
+type Transaction struct {
+	ID          uint                  `json:"id"`
+	CreatedAt   time.Time             `json:"created_at"`
+	UpdatedAt   time.Time             `json:"updated_at"`
+	Timestamp   time.Time             `json:"timestamp"`
+	Amount      uint64                `json:"amount"`
+	Type        model.TransactionType `json:"type"`
+	Description string                `json:"description"`
+}
+
+func TransactionModelToResponse(t *model.Transaction) *Transaction {
+	return &Transaction{
+		ID:          t.ID,
+		CreatedAt:   t.CreatedAt,
+		UpdatedAt:   t.UpdatedAt,
+		Timestamp:   t.Timestamp,
+		Amount:      t.Amount,
+		Type:        t.Type,
+		Description: t.Description,
+	}
+}
+
 func (h *handler) CreateTransaction(ctx *gin.Context) {
+	userID, err := auth_middleware.GetUserIDFromContext(ctx)
+	if err != nil {
+		ctx.Status(http.StatusUnauthorized)
+		return
+	}
+
 	var tRequest model.Transaction
 	if err := ctx.Bind(&tRequest); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	err := model.TransactionValidateCreateBody(tRequest.Timestamp, tRequest.Amount, tRequest.Type)
+	tModel, err := TransactionCreateRequestToModel(&tRequest)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -32,22 +64,20 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 		return
 	}
 
-	tResponse, err := h.repo.TransactionCreate(tRequest.Timestamp, tRequest.Amount, tRequest.Type)
-	if err != nil {
+	tModel.UserID = userID
+
+	if err := h.repo.TransactionCreate(tModel); err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
+
+	tResponse := TransactionModelToResponse(tModel)
 
 	ctx.JSON(http.StatusCreated, tResponse)
 }
 
 func (h *handler) UpdateTransaction(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
-		ctx.Status(http.StatusBadRequest)
-		return
-	}
+	id := middleware.GetIDParamFromContext(ctx)
 
 	var tRequest model.Transaction
 	if err := ctx.Bind(&tRequest); err != nil {
@@ -55,34 +85,35 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		return
 	}
 
-	if err := model.TransactionValidateUpdateBody(&tRequest); err != nil {
+	if err := TransactionValidateUpdateBody(&tRequest); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	tResponse, err := h.repo.TransactionUpdate(uint(id), tRequest.Timestamp, tRequest.Amount, tRequest.Type)
+	updatedTModel, err := h.repo.TransactionUpdate(id, &tRequest)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
 			return
 		}
-
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
+
+	tResponse := TransactionModelToResponse(updatedTModel)
 
 	ctx.JSON(http.StatusOK, tResponse)
 }
 
 func (h *handler) DeleteTransaction(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
+	tID, err := strconv.Atoi(idStr)
+	if err != nil || tID <= 0 {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	if err := h.repo.TransactionDelete(uint(id)); err != nil {
+	if err := h.repo.TransactionDelete(uint(tID)); err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
 			return
@@ -95,15 +126,20 @@ func (h *handler) DeleteTransaction(ctx *gin.Context) {
 }
 
 func (h *handler) GetTransaction(ctx *gin.Context) {
-	idStr := ctx.Param("id")
+	userID, err := auth_middleware.GetUserIDFromContext(ctx)
+	if err != nil {
+		ctx.Status(http.StatusUnauthorized)
+		return
+	}
 
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
+	tIDString := ctx.Param("id")
+	tID, err := strconv.Atoi(tIDString)
+	if err != nil || tID <= 0 {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	transaction, err := h.repo.TransactionGet(uint(id))
+	tModel, err := h.repo.TransactionGet(uint(tID))
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
@@ -113,11 +149,24 @@ func (h *handler) GetTransaction(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, transaction)
+	if tModel.UserID != userID {
+		ctx.Status(http.StatusUnauthorized)
+		return
+	}
+
+	tResponse := TransactionModelToResponse(tModel)
+
+	ctx.JSON(http.StatusOK, tResponse)
 }
 
 func (h *handler) ListTransactions(ctx *gin.Context) {
-	transactions, err := h.repo.TransactionList()
+	userID, err := auth_middleware.GetUserIDFromContext(ctx)
+	if err != nil {
+		ctx.Status(http.StatusUnauthorized)
+		return
+	}
+
+	tModels, err := h.repo.TransactionList(userID)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
@@ -127,6 +176,12 @@ func (h *handler) ListTransactions(ctx *gin.Context) {
 		return
 	}
 
-	res := NewListResponse(transactions)
+	tResponses := make([]*Transaction, 0, len(tModels))
+
+	for _, t := range tModels {
+		tResponses = append(tResponses, TransactionModelToResponse(t))
+	}
+
+	res := NewListResponse(tResponses)
 	ctx.JSON(http.StatusOK, res)
 }

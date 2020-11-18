@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expense-api/middleware/auth"
 	"expense-api/repository"
 	"expense-api/router"
 	"expense-api/utils"
@@ -60,9 +61,9 @@ func main() {
 	}
 
 	repository := repository.New(db)
-	jwtService := utils.NewJWTService(issuer, secret)
+	jwtService := auth.NewJWTService(issuer, secret)
 	hasher := utils.NewPasswordHasher()
 
-	r := router.Setup(repository, jwtService, hasher)
+	r := router.Setup(repository, jwtService, hasher, false)
 	r.Run(port)
 }

@@ -2,7 +2,7 @@ package test
 
 import (
 	"errors"
-	"expense-api/middleware"
+	auth_middleware "expense-api/middleware/auth"
 	"expense-api/router/test/spies"
 	"net/http"
 	"net/http/httptest"
@@ -25,7 +25,7 @@ func UnauthorizedTestCases(
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, missingTokenReq)
 
-			wantErrorMessage := middleware.ErrMsgMalformedToken
+			wantErrorMessage := auth_middleware.ErrMsgMalformedToken
 
 			assertStatusCode(t, res, http.StatusUnauthorized)
 			assertErrorMessage(t, res, wantErrorMessage)

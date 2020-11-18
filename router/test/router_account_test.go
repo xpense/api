@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"expense-api/handlers"
+	auth_middleware "expense-api/middleware/auth"
 	"expense-api/model"
 	"expense-api/repository"
 	"expense-api/router"
 	"expense-api/router/test/spies"
-	"expense-api/utils"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -20,10 +20,10 @@ func TestGetAccount(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newAccountRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, "/account", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/account/", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
@@ -39,7 +39,7 @@ func TestGetAccount(t *testing.T) {
 	})
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
-		claims := &utils.CustomClaims{
+		claims := &auth_middleware.CustomClaims{
 			ID:    1,
 			Email: "john@doe.com",
 		}
@@ -79,11 +79,11 @@ func TestUpdateAccount(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newAccountRequest := func(user *model.User, token string) *http.Request {
 		body := createRequestBody(user)
-		req, _ := http.NewRequest(http.MethodPatch, "/account", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPatch, "/account/", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -101,7 +101,7 @@ func TestUpdateAccount(t *testing.T) {
 	})
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
-		claims := &utils.CustomClaims{
+		claims := &auth_middleware.CustomClaims{
 			ID:    10,
 			Email: "john@doe.com",
 		}
@@ -175,10 +175,10 @@ func TestDeleteAccount(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newAccountRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodDelete, "/account", nil)
+		req, _ := http.NewRequest(http.MethodDelete, "/account/", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
@@ -194,7 +194,7 @@ func TestDeleteAccount(t *testing.T) {
 	})
 
 	t.Run("Valid authorization token cases", func(t *testing.T) {
-		claims := &utils.CustomClaims{
+		claims := &auth_middleware.CustomClaims{
 			ID:    10,
 			Email: "john@doe.com",
 		}

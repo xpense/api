@@ -21,7 +21,7 @@ func TestSignUp(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newUserRequest := func(user *model.User) *http.Request {
 		body := createRequestBody(user)
@@ -144,7 +144,7 @@ func TestLogin(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
 
 	newLoginRequest := func(login *handlers.LoginInfo) *http.Request {
 		body := createRequestBody(login)
@@ -230,7 +230,7 @@ func TestLogin(t *testing.T) {
 		user := &model.User{Salt: "salty"}
 
 		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(user, nil).Once()
-		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user, errors.New("dummy error")).Once()
+		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return("", errors.New("dummy error")).Once()
 
 		res := httptest.NewRecorder()
 		req := newLoginRequest(reqBody)
@@ -278,7 +278,7 @@ func TestLogin(t *testing.T) {
 
 		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(user, nil).Once()
 		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return(user.Password, nil).Once()
-		jwtServiceSpy.On("CreateJWT", user.ID, user.Email).Return(nil, errors.New("dummy error")).Once()
+		jwtServiceSpy.On("CreateJWT", user.ID, user.Email).Return("", errors.New("dummy error")).Once()
 
 		res := httptest.NewRecorder()
 		req := newLoginRequest(reqBody)
