@@ -33,10 +33,6 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 		transaction.Amount = updated.Amount
 	}
 
-	if updated.Type == model.Income || updated.Type == model.Expense {
-		transaction.Type = updated.Type
-	}
-
 	if updated.Description != "" {
 		transaction.Description = updated.Description
 	}

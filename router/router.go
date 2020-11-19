@@ -7,8 +7,11 @@ import (
 	transaction_middleware "expense-api/middleware/transaction"
 	"expense-api/repository"
 	"expense-api/utils"
+	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 )
 
 type Config struct {
@@ -34,6 +37,19 @@ func Setup(
 	}
 
 	handler := handlers.New(repo, jwtService, hasher)
+
+	router.POST("/", func(ctx *gin.Context) {
+		var transaction struct {
+			Amount decimal.Decimal `json:"amount"`
+		}
+
+		if err := ctx.Bind(&transaction); err != nil {
+			ctx.Status(http.StatusBadRequest)
+			return
+		}
+
+		fmt.Println("Amount - ", transaction.Amount)
+	})
 
 	auth := router.Group("/auth")
 	{

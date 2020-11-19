@@ -61,25 +61,10 @@ func TestCreateTransaction(t *testing.T) {
 			assertStatusCode(t, res, http.StatusBadRequest)
 		})
 
-		t.Run("Create transaction with invalid transaction type", func(t *testing.T) {
-			transaction := &model.Transaction{
-				Amount: 1000,
-				Type:   "invalid",
-			}
-
-			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
-
-			r.ServeHTTP(res, req)
-
-			assertStatusCode(t, res, http.StatusBadRequest)
-		})
-
 		t.Run("Create transaction with valid data", func(t *testing.T) {
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
 				Amount:    1000,
-				Type:      model.Expense,
 				UserID:    userID,
 			}
 
@@ -160,7 +145,6 @@ func TestGetTransaction(t *testing.T) {
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
 				Amount:    1000,
-				Type:      model.Expense,
 				UserID:    userID + 1,
 			}
 
@@ -179,7 +163,6 @@ func TestGetTransaction(t *testing.T) {
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
 				Amount:    1000,
-				Type:      model.Expense,
 				UserID:    userID,
 			}
 
@@ -248,30 +231,11 @@ func TestUpdateTransaction(t *testing.T) {
 			assertStatusCode(t, res, http.StatusNotFound)
 		})
 
-		t.Run("Update existing transaction with invalid type", func(t *testing.T) {
-			id := uint(2)
-			transaction := &model.Transaction{
-				Amount: 1000,
-				Type:   "invalid",
-				UserID: userID,
-			}
-
-			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
-
-			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, transaction, token)
-
-			r.ServeHTTP(res, req)
-
-			assertStatusCode(t, res, http.StatusBadRequest)
-		})
-
 		t.Run("Try to update transaction with valid id that belongs to another user", func(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
 				Amount:    1000,
-				Type:      model.Expense,
 				UserID:    userID + 1,
 			}
 
@@ -289,7 +253,6 @@ func TestUpdateTransaction(t *testing.T) {
 			id := uint(3)
 			transaction := &model.Transaction{
 				Amount: 2000,
-				Type:   model.Income,
 				UserID: userID,
 			}
 
@@ -360,7 +323,6 @@ func TestDeleteTransaction(t *testing.T) {
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
 				Amount:    1000,
-				Type:      model.Expense,
 				UserID:    userID + 1,
 			}
 
@@ -378,7 +340,6 @@ func TestDeleteTransaction(t *testing.T) {
 			id := uint(2)
 			transaction := &model.Transaction{
 				Amount: 2000,
-				Type:   model.Income,
 				UserID: userID,
 			}
 

@@ -10,19 +10,11 @@ type Model struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type TransactionType string
-
-const (
-	Income  TransactionType = "income"
-	Expense TransactionType = "expense"
-)
-
 type Transaction struct {
 	Model
 	Description string
 	Timestamp   time.Time
 	Amount      uint64
-	Type        TransactionType
 	UserID      uint
 	User        User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
