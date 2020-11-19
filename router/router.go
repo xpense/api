@@ -11,19 +11,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Config struct {
+	withDefaultMiddleware bool
+}
+
+var DefaultConfig = &Config{withDefaultMiddleware: true}
+var TestConfig = &Config{}
+
 // Setup creates a new gin router
 func Setup(
 	repo repository.Repository,
 	jwtService auth_middleware.JWTService,
 	hasher utils.PasswordHasher,
-	withoutDefaultMiddleware bool,
+	config *Config,
 ) *gin.Engine {
 
 	var router *gin.Engine
-	if withoutDefaultMiddleware {
-		router = gin.New()
-	} else {
+	if config.withDefaultMiddleware {
 		router = gin.Default()
+	} else {
+		router = gin.New()
 	}
 
 	handler := handlers.New(repo, jwtService, hasher)

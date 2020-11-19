@@ -21,7 +21,7 @@ func TestSignUp(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newUserRequest := func(user *model.User) *http.Request {
 		body := createRequestBody(user)
@@ -144,7 +144,7 @@ func TestLogin(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newLoginRequest := func(login *handlers.LoginInfo) *http.Request {
 		body := createRequestBody(login)

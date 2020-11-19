@@ -20,7 +20,7 @@ func TestGetAccount(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newAccountRequest := func(token string) *http.Request {
 		req, _ := http.NewRequest(http.MethodGet, "/account/", nil)
@@ -79,7 +79,7 @@ func TestUpdateAccount(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newAccountRequest := func(user *model.User, token string) *http.Request {
 		body := createRequestBody(user)
@@ -175,7 +175,7 @@ func TestDeleteAccount(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newAccountRequest := func(token string) *http.Request {
 		req, _ := http.NewRequest(http.MethodDelete, "/account/", nil)

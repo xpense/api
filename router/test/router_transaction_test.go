@@ -21,7 +21,7 @@ func TestCreateTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionRequest := func(transaction *model.Transaction, token string) *http.Request {
 		body := createRequestBody(transaction)
@@ -103,7 +103,7 @@ func TestGetTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -203,7 +203,7 @@ func TestUpdateTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionRequest := func(id uint, transaction *model.Transaction, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -314,7 +314,7 @@ func TestDeleteTransaction(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionRequest := func(id uint, token string) *http.Request {
 		url := fmt.Sprintf("/transaction/%d", id)
@@ -400,7 +400,7 @@ func TestListTransactions(t *testing.T) {
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
-	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, true)
+	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionListResponse := func(slice []*model.Transaction) *transactionListResponse {
 		return &transactionListResponse{

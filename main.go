@@ -64,6 +64,6 @@ func main() {
 	jwtService := auth.NewJWTService(issuer, secret)
 	hasher := utils.NewPasswordHasher()
 
-	r := router.Setup(repository, jwtService, hasher, false)
+	r := router.Setup(repository, jwtService, hasher, router.DefaultConfig)
 	r.Run(port)
 }
