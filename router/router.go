@@ -5,6 +5,7 @@ import (
 	"expense-api/middleware"
 	auth_middleware "expense-api/middleware/auth"
 	transaction_middleware "expense-api/middleware/transaction"
+	wallet_middleware "expense-api/middleware/wallet"
 	"expense-api/repository"
 	"expense-api/utils"
 
@@ -30,6 +31,7 @@ func Setup(
 	if config.withDefaultMiddleware {
 		router = gin.Default()
 	} else {
+		gin.SetMode(gin.ReleaseMode)
 		router = gin.New()
 	}
 
@@ -49,6 +51,18 @@ func Setup(
 		account.GET("/", handler.GetAccount)
 		account.PATCH("/", handler.UpdateAccount)
 		account.DELETE("/", handler.DeleteAccount)
+	}
+
+	wallet := router.Group("/wallet").Use(authM.IsAuthenticated)
+	{
+		walletM := wallet_middleware.New(repo)
+
+		wallet.GET("/", handler.ListWallets)
+		wallet.POST("/", handler.CreateWallet)
+		wallet.GET("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.GetWallet)
+		wallet.PATCH("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.UpdateWallet)
+		wallet.DELETE("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.DeleteWallet)
+		wallet.GET("/:id/transaction", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.ListTransactionsByWallet)
 	}
 
 	transaction := router.Group("/transaction").Use(authM.IsAuthenticated)

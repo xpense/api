@@ -1,19 +1,19 @@
 package handlers
 
 import (
+	"errors"
 	"expense-api/middleware"
 	auth_middleware "expense-api/middleware/auth"
 	"expense-api/model"
 	"expense-api/repository"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 )
 
-type TransactionsHandler interface {
+type TransactionHandler interface {
 	ListTransactions(ctx *gin.Context)
 	CreateTransaction(ctx *gin.Context)
 	GetTransaction(ctx *gin.Context)
@@ -24,6 +24,7 @@ type TransactionsHandler interface {
 // Transaction is a transaction with an omitted user
 type Transaction struct {
 	ID          uint            `json:"id"`
+	WalletID    uint            `json:"wallet_id"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 	Timestamp   time.Time       `json:"timestamp"`
@@ -34,6 +35,7 @@ type Transaction struct {
 func TransactionModelToResponse(t *model.Transaction) *Transaction {
 	return &Transaction{
 		ID:          t.ID,
+		WalletID:    t.WalletID,
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
 		Timestamp:   t.Timestamp,
@@ -41,6 +43,28 @@ func TransactionModelToResponse(t *model.Transaction) *Transaction {
 		Description: t.Description,
 	}
 }
+
+var ErrorAmount = errors.New("cannot create new transaction with an amount of 0")
+
+func TransactionCreateRequestToModel(t *model.Transaction, userID uint) (*model.Transaction, error) {
+	if t.Amount.Cmp(decimal.Zero) == 0 {
+		return nil, ErrorAmount
+	}
+
+	return &model.Transaction{
+		Amount:      t.Amount,
+		Timestamp:   t.Timestamp,
+		Description: t.Description,
+		WalletID:    t.WalletID,
+		UserID:      userID,
+	}, nil
+}
+
+const (
+	ErrMsgRequiredWalletID = "a valid wallet id must be specified to register a new transaction"
+	ErrMsgWalletNotFound   = "wallet with specified id not found"
+	ErrMsgBadWalletID      = "wallet with specified id belongs to another user"
+)
 
 func (h *handler) CreateTransaction(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
@@ -55,12 +79,40 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 		return
 	}
 
-	tModel, err := TransactionCreateRequestToModel(&tRequest)
+	tModel, err := TransactionCreateRequestToModel(&tRequest, userID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
+	}
+
+	{ // Validate wallet ownership
+		if tModel.WalletID == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": ErrMsgRequiredWalletID,
+			})
+			return
+		}
+
+		wallet, err := h.repo.WalletGet(tModel.WalletID)
+		if err != nil {
+			if err == repository.ErrorRecordNotFound {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"message": ErrMsgWalletNotFound,
+				})
+				return
+			}
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+
+		if wallet.UserID != userID {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"message": ErrMsgBadWalletID,
+			})
+			return
+		}
 	}
 
 	tModel.UserID = userID
@@ -100,14 +152,9 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 }
 
 func (h *handler) DeleteTransaction(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	tID, err := strconv.Atoi(idStr)
-	if err != nil || tID <= 0 {
-		ctx.Status(http.StatusBadRequest)
-		return
-	}
+	id := middleware.GetIDParamFromContext(ctx)
 
-	if err := h.repo.TransactionDelete(uint(tID)); err != nil {
+	if err := h.repo.TransactionDelete(id); err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
 			return
@@ -120,31 +167,15 @@ func (h *handler) DeleteTransaction(ctx *gin.Context) {
 }
 
 func (h *handler) GetTransaction(ctx *gin.Context) {
-	userID, err := auth_middleware.GetUserIDFromContext(ctx)
-	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
-		return
-	}
+	id := middleware.GetIDParamFromContext(ctx)
 
-	tIDString := ctx.Param("id")
-	tID, err := strconv.Atoi(tIDString)
-	if err != nil || tID <= 0 {
-		ctx.Status(http.StatusBadRequest)
-		return
-	}
-
-	tModel, err := h.repo.TransactionGet(uint(tID))
+	tModel, err := h.repo.TransactionGet(id)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
 			return
 		}
 		ctx.Status(http.StatusInternalServerError)
-		return
-	}
-
-	if tModel.UserID != userID {
-		ctx.Status(http.StatusUnauthorized)
 		return
 	}
 
@@ -170,12 +201,12 @@ func (h *handler) ListTransactions(ctx *gin.Context) {
 		return
 	}
 
-	tResponses := make([]*Transaction, 0, len(tModels))
+	tResponse := make([]*Transaction, 0, len(tModels))
 
 	for _, t := range tModels {
-		tResponses = append(tResponses, TransactionModelToResponse(t))
+		tResponse = append(tResponse, TransactionModelToResponse(t))
 	}
 
-	res := NewListResponse(tResponses)
+	res := NewListResponse(tResponse)
 	ctx.JSON(http.StatusOK, res)
 }

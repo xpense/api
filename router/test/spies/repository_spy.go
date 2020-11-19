@@ -87,6 +87,29 @@ func (_m *RepositorySpy) TransactionList(userID uint) ([]*model.Transaction, err
 	return r0, r1
 }
 
+// TransactionListByWallet provides a mock function with given fields: userID, walletID
+func (_m *RepositorySpy) TransactionListByWallet(userID uint, walletID uint) ([]*model.Transaction, error) {
+	ret := _m.Called(userID, walletID)
+
+	var r0 []*model.Transaction
+	if rf, ok := ret.Get(0).(func(uint, uint) []*model.Transaction); ok {
+		r0 = rf(userID, walletID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Transaction)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint, uint) error); ok {
+		r1 = rf(userID, walletID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // TransactionUpdate provides a mock function with given fields: id, t
 func (_m *RepositorySpy) TransactionUpdate(id uint, t *model.Transaction) (*model.Transaction, error) {
 	ret := _m.Called(id, t)
@@ -209,6 +232,103 @@ func (_m *RepositorySpy) UserUpdate(id uint, firstName string, LastName string, 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(uint, string, string, string) error); ok {
 		r1 = rf(id, firstName, LastName, Email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// WalletCreate provides a mock function with given fields: w
+func (_m *RepositorySpy) WalletCreate(w *model.Wallet) error {
+	ret := _m.Called(w)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Wallet) error); ok {
+		r0 = rf(w)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// WalletDelete provides a mock function with given fields: id
+func (_m *RepositorySpy) WalletDelete(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// WalletGet provides a mock function with given fields: id
+func (_m *RepositorySpy) WalletGet(id uint) (*model.Wallet, error) {
+	ret := _m.Called(id)
+
+	var r0 *model.Wallet
+	if rf, ok := ret.Get(0).(func(uint) *model.Wallet); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Wallet)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// WalletList provides a mock function with given fields: userID
+func (_m *RepositorySpy) WalletList(userID uint) ([]*model.Wallet, error) {
+	ret := _m.Called(userID)
+
+	var r0 []*model.Wallet
+	if rf, ok := ret.Get(0).(func(uint) []*model.Wallet); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Wallet)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// WalletUpdate provides a mock function with given fields: id, w
+func (_m *RepositorySpy) WalletUpdate(id uint, w *model.Wallet) (*model.Wallet, error) {
+	ret := _m.Called(id, w)
+
+	var r0 *model.Wallet
+	if rf, ok := ret.Get(0).(func(uint, *model.Wallet) *model.Wallet); ok {
+		r0 = rf(id, w)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Wallet)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint, *model.Wallet) error); ok {
+		r1 = rf(id, w)
 	} else {
 		r1 = ret.Error(1)
 	}

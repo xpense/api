@@ -7,9 +7,10 @@ import (
 )
 
 type Handler interface {
-	TransactionsHandler
-	AccountHandler
 	AuthHandler
+	AccountHandler
+	TransactionHandler
+	WalletHandler
 }
 
 type handler struct {

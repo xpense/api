@@ -83,3 +83,16 @@ func (r *repository) TransactionList(userID uint) ([]*model.Transaction, error) 
 
 	return transactions, nil
 }
+
+func (r *repository) TransactionListByWallet(userID, walletID uint) ([]*model.Transaction, error) {
+	var transactions []*model.Transaction
+
+	if tx := r.db.Where("user_id = ? AND wallet_id = ?", userID, walletID).Find(&transactions); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, ErrorRecordNotFound
+		}
+		return nil, ErrorOther
+	}
+
+	return transactions, nil
+}

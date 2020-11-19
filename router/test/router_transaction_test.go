@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"expense-api/handlers"
 	"expense-api/middleware/auth"
 	"expense-api/model"
 	"expense-api/repository"
@@ -65,13 +66,84 @@ func TestCreateTransaction(t *testing.T) {
 			assertStatusCode(t, res, http.StatusBadRequest)
 		})
 
-		t.Run("Create transaction with valid data", func(t *testing.T) {
+		t.Run("Create transaction with valid data but missing wallet id", func(t *testing.T) {
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 			}
 
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgRequiredWalletID
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Create transaction with valid data with non-existing wallet id", func(t *testing.T) {
+			walletID := uint(1)
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    decimal.NewFromInt32(100),
+				UserID:    userID,
+				WalletID:  walletID,
+			}
+
+			repoSpy.On("WalletGet", walletID).Return(nil, repository.ErrorRecordNotFound).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgWalletNotFound
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Create transaction with valid data with existing wallet id that belongs to other user", func(t *testing.T) {
+			walletID := uint(1)
+			wallet := &model.Wallet{
+				UserID: userID + 1,
+			}
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    decimal.NewFromInt32(100),
+				UserID:    userID,
+				WalletID:  walletID,
+			}
+
+			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgBadWalletID
+
+			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Create transaction with valid data", func(t *testing.T) {
+			walletID := uint(1)
+			wallet := &model.Wallet{
+				UserID: userID,
+			}
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    decimal.NewFromInt32(100),
+				UserID:    userID,
+				WalletID:  walletID,
+			}
+
+			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
 			repoSpy.On("TransactionCreate", transaction).Return(nil).Once()
 
 			res := httptest.NewRecorder()
@@ -402,7 +474,6 @@ func TestListTransactions(t *testing.T) {
 
 		t.Run("List transactions when there are no transactions", func(t *testing.T) {
 			transactions := []*model.Transaction{}
-
 			repoSpy.On("TransactionList", userID).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()

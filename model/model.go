@@ -12,15 +12,6 @@ type Model struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type Transaction struct {
-	Model
-	Description string
-	Timestamp   time.Time
-	Amount      decimal.Decimal `gorm:"type:numeric"`
-	UserID      uint
-	User        User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-}
-
 type User struct {
 	Model
 	FirstName string `json:"firstName" gorm:"not null;"`
@@ -28,4 +19,23 @@ type User struct {
 	Email     string `json:"email" gorm:"type:varchar(255);unique;not null;"`
 	Password  string `json:"password" gorm:"not null;"`
 	Salt      string `json:"salt" gorm:"not null;"`
+}
+
+type Transaction struct {
+	Model
+	Description string          `json:"description"`
+	Timestamp   time.Time       `json:"timestamp"`
+	Amount      decimal.Decimal `json:"amount" gorm:"type:numeric"`
+	UserID      uint            `json:"user_id" gorm:"not null;"`
+	User        User            `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	WalletID    uint            `json:"wallet_id" gorm:"not null;"`
+	Wallet      Wallet          `json:"wallet" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+
+type Wallet struct {
+	Model
+	Name        string `json:"name" gorm:"index:idx_userid_name;not null;"`
+	Description string `json:"description"`
+	UserID      uint   `json:"user_id" gorm:"index:idx_userid_name;not null;"`
+	User        User   `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
