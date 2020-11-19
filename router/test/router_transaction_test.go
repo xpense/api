@@ -155,6 +155,25 @@ func TestGetTransaction(t *testing.T) {
 			assertStatusCode(t, res, http.StatusNotFound)
 		})
 
+		t.Run("Get transaction with valid id that belongs to another user", func(t *testing.T) {
+			id := uint(1)
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    1000,
+				Type:      model.Expense,
+				UserID:    userID + 1,
+			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusUnauthorized)
+		})
+
 		t.Run("Get transaction with valid id", func(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
@@ -247,6 +266,25 @@ func TestUpdateTransaction(t *testing.T) {
 			assertStatusCode(t, res, http.StatusBadRequest)
 		})
 
+		t.Run("Try to update transaction with valid id that belongs to another user", func(t *testing.T) {
+			id := uint(1)
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    1000,
+				Type:      model.Expense,
+				UserID:    userID + 1,
+			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusUnauthorized)
+		})
+
 		t.Run("Update existing transaction with valid arguments", func(t *testing.T) {
 			id := uint(3)
 			transaction := &model.Transaction{
@@ -315,6 +353,25 @@ func TestDeleteTransaction(t *testing.T) {
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusNotFound)
+		})
+
+		t.Run("Try to delete transaction with valid id that belongs to another user", func(t *testing.T) {
+			id := uint(1)
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    1000,
+				Type:      model.Expense,
+				UserID:    userID + 1,
+			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, token)
+
+			r.ServeHTTP(res, req)
+
+			assertStatusCode(t, res, http.StatusUnauthorized)
 		})
 
 		t.Run("Delete existing transaction", func(t *testing.T) {
