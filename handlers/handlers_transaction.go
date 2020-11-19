@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 )
 
 type TransactionsHandler interface {
@@ -22,12 +23,12 @@ type TransactionsHandler interface {
 
 // Transaction is a transaction with an omitted user
 type Transaction struct {
-	ID          uint      `json:"id"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Timestamp   time.Time `json:"timestamp"`
-	Amount      uint64    `json:"amount"`
-	Description string    `json:"description"`
+	ID          uint            `json:"id"`
+	CreatedAt   time.Time       `json:"created_at"`
+	UpdatedAt   time.Time       `json:"updated_at"`
+	Timestamp   time.Time       `json:"timestamp"`
+	Amount      decimal.Decimal `json:"amount"`
+	Description string          `json:"description"`
 }
 
 func TransactionModelToResponse(t *model.Transaction) *Transaction {

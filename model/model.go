@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Model struct {
@@ -14,7 +16,7 @@ type Transaction struct {
 	Model
 	Description string
 	Timestamp   time.Time
-	Amount      uint64
+	Amount      decimal.Decimal `gorm:"type:numeric"`
 	UserID      uint
 	User        User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

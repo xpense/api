@@ -3,6 +3,8 @@ package handlers
 import (
 	"errors"
 	"expense-api/model"
+
+	"github.com/shopspring/decimal"
 )
 
 var (
@@ -10,7 +12,7 @@ var (
 )
 
 func TransactionCreateRequestToModel(t *model.Transaction) (*model.Transaction, error) {
-	if t.Amount == 0 {
+	if t.Amount.Cmp(decimal.Zero) == 0 {
 		return nil, ErrorAmount
 	}
 

@@ -4,6 +4,7 @@ import (
 	"expense-api/model"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -29,7 +30,7 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 		transaction.Timestamp = updated.Timestamp
 	}
 
-	if updated.Amount > 0 {
+	if updated.Amount.Cmp(decimal.Zero) != 0 {
 		transaction.Amount = updated.Amount
 	}
 

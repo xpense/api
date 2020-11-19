@@ -11,9 +11,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/shopspring/decimal"
 )
 
 func TestCreateTransaction(t *testing.T) {
@@ -51,7 +53,9 @@ func TestCreateTransaction(t *testing.T) {
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
 		t.Run("Create transaction with amount = 0", func(t *testing.T) {
-			transaction := &model.Transaction{Amount: 0}
+			transaction := &model.Transaction{
+				Amount: decimal.Zero,
+			}
 
 			res := httptest.NewRecorder()
 			req := newTransactionRequest(transaction, token)
@@ -64,7 +68,7 @@ func TestCreateTransaction(t *testing.T) {
 		t.Run("Create transaction with valid data", func(t *testing.T) {
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
-				Amount:    1000,
+				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 			}
 
@@ -144,7 +148,7 @@ func TestGetTransaction(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
-				Amount:    1000,
+				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID + 1,
 			}
 
@@ -162,7 +166,7 @@ func TestGetTransaction(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
-				Amount:    1000,
+				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 			}
 
@@ -219,7 +223,9 @@ func TestUpdateTransaction(t *testing.T) {
 
 		t.Run("Update non-existent transaction", func(t *testing.T) {
 			id := uint(1)
-			transaction := &model.Transaction{Amount: 1000}
+			transaction := &model.Transaction{
+				Amount: decimal.NewFromInt32(100),
+			}
 
 			repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
@@ -235,7 +241,7 @@ func TestUpdateTransaction(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
-				Amount:    1000,
+				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID + 1,
 			}
 
@@ -252,7 +258,7 @@ func TestUpdateTransaction(t *testing.T) {
 		t.Run("Update existing transaction with valid arguments", func(t *testing.T) {
 			id := uint(3)
 			transaction := &model.Transaction{
-				Amount: 2000,
+				Amount: decimal.NewFromInt32(100),
 				UserID: userID,
 			}
 
@@ -322,7 +328,7 @@ func TestDeleteTransaction(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
-				Amount:    1000,
+				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID + 1,
 			}
 
@@ -339,7 +345,7 @@ func TestDeleteTransaction(t *testing.T) {
 		t.Run("Delete existing transaction", func(t *testing.T) {
 			id := uint(2)
 			transaction := &model.Transaction{
-				Amount: 2000,
+				Amount: decimal.NewFromInt32(100),
 				UserID: userID,
 			}
 
@@ -411,7 +417,7 @@ func TestListTransactions(t *testing.T) {
 		})
 
 		t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
-			transactions := []*model.Transaction{{}, {}}
+			transactions := []*model.Transaction{{}}
 
 			repoSpy.On("TransactionList", userID).Return(transactions, nil).Once()
 
@@ -441,7 +447,7 @@ func assertSingleTransactionResponseBody(t *testing.T, res *httptest.ResponseRec
 		t.Errorf("couldn't parse json response: %v", err)
 	}
 
-	if !reflect.DeepEqual(got, *transaction) {
+	if !cmp.Equal(got, *transaction) {
 		t.Errorf("expected %+v, got %+v", *transaction, got)
 	}
 }
@@ -454,7 +460,7 @@ func assertListTransactionResponseBody(t *testing.T, res *httptest.ResponseRecor
 		t.Errorf("couldn't parse json response: %v", err)
 	}
 
-	if !reflect.DeepEqual(got, *expected) {
+	if !cmp.Equal(got, *expected) {
 		t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
 	}
 }
