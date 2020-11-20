@@ -7,5 +7,10 @@ import (
 )
 
 func Migrate(db *gorm.DB) error {
-	return db.AutoMigrate(model.Transaction{}, model.User{})
+	return db.AutoMigrate(
+		model.User{},
+		model.Wallet{},
+		model.Party{},
+		model.Transaction{},
+	)
 }
