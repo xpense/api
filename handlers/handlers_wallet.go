@@ -47,6 +47,8 @@ func WalletRequestToModel(w *Wallet, userID uint) *model.Wallet {
 	}
 }
 
+const ErrMsgWalletNameTaken = "wallet with the same name, belonging to the same user already exists"
+
 func (h *handler) CreateWallet(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
@@ -65,7 +67,7 @@ func (h *handler) CreateWallet(ctx *gin.Context) {
 	if err := h.repo.WalletCreate(wModel); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
+				"message": ErrMsgWalletNameTaken,
 			})
 			return
 		}
@@ -101,7 +103,7 @@ func (h *handler) UpdateWallet(ctx *gin.Context) {
 		}
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
+				"message": ErrMsgWalletNameTaken,
 			})
 			return
 		}

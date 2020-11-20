@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"expense-api/handlers"
 	"expense-api/middleware/auth"
 	"expense-api/model"
 	"expense-api/repository"
@@ -49,6 +50,25 @@ func TestCreateWallet(t *testing.T) {
 			ID: userID,
 		}
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
+
+		t.Run("Try to create a wallet with already existing name, belonging to the same user", func(t *testing.T) {
+			wallet := &model.Wallet{
+				Name:   "cash",
+				UserID: userID,
+			}
+
+			repoSpy.On("WalletCreate", wallet).Return(repository.ErrorUniqueConstaintViolation).Once()
+
+			res := httptest.NewRecorder()
+			req := newWalletRequest(wallet, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgWalletNameTaken
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
 
 		t.Run("Create wallet with valid data", func(t *testing.T) {
 			wallet := &model.Wallet{
@@ -234,6 +254,27 @@ func TestUpdateWallet(t *testing.T) {
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusUnauthorized)
+		})
+
+		t.Run("Try to update a wallet with already existing name, belonging to the same user", func(t *testing.T) {
+			id := uint(1)
+			wallet := &model.Wallet{
+				Name:   "cash",
+				UserID: userID,
+			}
+
+			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
+			repoSpy.On("WalletUpdate", id, wallet).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
+
+			res := httptest.NewRecorder()
+			req := newWalletRequest(id, wallet, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgWalletNameTaken
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Update existing wallet with valid arguments", func(t *testing.T) {
