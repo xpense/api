@@ -193,10 +193,6 @@ func (h *handler) ListTransactions(ctx *gin.Context) {
 
 	tModels, err := h.repo.TransactionList(userID)
 	if err != nil {
-		if err == repository.ErrorRecordNotFound {
-			ctx.Status(http.StatusNotFound)
-			return
-		}
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
