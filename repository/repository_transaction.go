@@ -38,6 +38,10 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 		transaction.Description = updated.Description
 	}
 
+	if updated.WalletID != 0 {
+		transaction.WalletID = updated.WalletID
+	}
+
 	if tx := r.db.Save(transaction); tx.Error != nil {
 		return nil, ErrorOther
 	}

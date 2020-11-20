@@ -327,6 +327,65 @@ func TestUpdateTransaction(t *testing.T) {
 			assertStatusCode(t, res, http.StatusUnauthorized)
 		})
 
+		t.Run("Change a transaction's wallet ID to one that doesn't exist", func(t *testing.T) {
+			id := uint(1)
+			walletID := uint(3)
+
+			transaction := &model.Transaction{
+				UserID: userID,
+			}
+
+			updateTransaction := &model.Transaction{
+				WalletID: walletID,
+			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+			repoSpy.On("WalletGet", walletID).Return(nil, repository.ErrorRecordNotFound).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, updateTransaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgWalletNotFound
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Change a transaction's wallet ID to one that belongs to another user", func(t *testing.T) {
+			id := uint(1)
+			anotherUsersID := uint(199999)
+			anotherUsersWalletID := uint(3)
+
+			transaction := &model.Transaction{
+				UserID: userID,
+			}
+
+			updateTransaction := &model.Transaction{
+				WalletID: anotherUsersWalletID,
+			}
+
+			anotherUsersWallet := &model.Wallet{
+				UserID: anotherUsersID,
+			}
+			anotherUsersWallet.ID = anotherUsersWalletID
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+			repoSpy.On("WalletGet", anotherUsersWalletID).Return(anotherUsersWallet, nil).Once()
+			repoSpy.On("TransactionUpdate", id, updateTransaction).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, updateTransaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgBadWalletID
+
+			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
 		t.Run("Update existing transaction with valid arguments", func(t *testing.T) {
 			id := uint(3)
 			transaction := &model.Transaction{

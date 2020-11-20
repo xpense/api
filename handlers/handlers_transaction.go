@@ -136,12 +136,32 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 	}
 
 	tModel := TransactionRequestToModel(&tRequest, userID)
-	updatedTModel, err := h.repo.TransactionUpdate(id, tModel)
-	if err != nil {
-		if err == repository.ErrorRecordNotFound {
-			ctx.Status(http.StatusNotFound)
+
+	// Validate wallet ownership
+	if tModel.WalletID != 0 {
+
+		wallet, err := h.repo.WalletGet(tModel.WalletID)
+		if err != nil {
+			if err == repository.ErrorRecordNotFound {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"message": ErrMsgWalletNotFound,
+				})
+				return
+			}
+			ctx.Status(http.StatusInternalServerError)
 			return
 		}
+
+		if wallet.UserID != userID {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"message": ErrMsgBadWalletID,
+			})
+			return
+		}
+	}
+
+	updatedTModel, err := h.repo.TransactionUpdate(id, tModel)
+	if err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
