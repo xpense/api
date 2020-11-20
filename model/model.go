@@ -34,8 +34,8 @@ type Transaction struct {
 
 type Wallet struct {
 	Model
-	Name        string `json:"name" gorm:"index:idx_userid_name;not null;"`
+	Name        string `json:"name" gorm:"uniqueIndex:idx_userid_name;not null;"`
 	Description string `json:"description"`
-	UserID      uint   `json:"user_id" gorm:"index:idx_userid_name;not null;"`
+	UserID      uint   `json:"user_id" gorm:"uniqueIndex:idx_userid_name;not null;"`
 	User        User   `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

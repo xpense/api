@@ -63,6 +63,12 @@ func (h *handler) CreateWallet(ctx *gin.Context) {
 	wModel := WalletRequestToModel(&wRequest, userID)
 
 	if err := h.repo.WalletCreate(wModel); err != nil {
+		if err == repository.ErrorUniqueConstaintViolation {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
@@ -91,6 +97,12 @@ func (h *handler) UpdateWallet(ctx *gin.Context) {
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.Status(http.StatusNotFound)
+			return
+		}
+		if err == repository.ErrorUniqueConstaintViolation {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
 			return
 		}
 		ctx.Status(http.StatusInternalServerError)

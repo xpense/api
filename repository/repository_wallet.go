@@ -8,6 +8,9 @@ import (
 
 func (r *repository) WalletCreate(w *model.Wallet) error {
 	if tx := r.db.Create(w); tx.Error != nil {
+		if isUniqueConstaintViolationError(tx.Error) {
+			return ErrorUniqueConstaintViolation
+		}
 		return ErrorOther
 	}
 
@@ -29,6 +32,9 @@ func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet
 	}
 
 	if tx := r.db.Save(wallet); tx.Error != nil {
+		if isUniqueConstaintViolationError(tx.Error) {
+			return nil, ErrorUniqueConstaintViolation
+		}
 		return nil, ErrorOther
 	}
 
