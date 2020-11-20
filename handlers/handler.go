@@ -11,6 +11,7 @@ type Handler interface {
 	AccountHandler
 	TransactionHandler
 	WalletHandler
+	PartyHandler
 }
 
 type handler struct {

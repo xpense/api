@@ -24,6 +24,7 @@ type TransactionHandler interface {
 type Transaction struct {
 	ID          uint            `json:"id"`
 	WalletID    uint            `json:"wallet_id"`
+	PartyID     uint            `json:"party_id"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 	Timestamp   time.Time       `json:"timestamp"`
@@ -35,6 +36,7 @@ func TransactionModelToResponse(t *model.Transaction) *Transaction {
 	return &Transaction{
 		ID:          t.ID,
 		WalletID:    t.WalletID,
+		PartyID:     t.PartyID,
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
 		Timestamp:   t.Timestamp,
@@ -49,6 +51,7 @@ func TransactionRequestToModel(t *Transaction, userID uint) *model.Transaction {
 		Timestamp:   t.Timestamp,
 		Description: t.Description,
 		WalletID:    t.WalletID,
+		PartyID:     t.PartyID,
 		UserID:      userID,
 	}
 }
@@ -58,6 +61,8 @@ const (
 	ErrMsgRequiredWalletID = "a valid wallet id must be specified to register a new transaction"
 	ErrMsgWalletNotFound   = "wallet with specified id not found"
 	ErrMsgBadWalletID      = "wallet with specified id belongs to another user"
+	ErrMsgPartyNotFound    = "party with specified id not found"
+	ErrMsgBadPartyID       = "party with specified id belongs to another user"
 )
 
 func (h *handler) CreateTransaction(ctx *gin.Context) {
@@ -110,6 +115,34 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 		}
 	}
 
+	{ // Validate party ownership
+		if tModel.PartyID == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": ErrMsgRequiredWalletID,
+			})
+			return
+		}
+
+		party, err := h.repo.PartyGet(tModel.PartyID)
+		if err != nil {
+			if err == repository.ErrorRecordNotFound {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"message": ErrMsgPartyNotFound,
+				})
+				return
+			}
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+
+		if party.UserID != userID {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"message": ErrMsgBadPartyID,
+			})
+			return
+		}
+	}
+
 	if err := h.repo.TransactionCreate(tModel); err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
@@ -153,6 +186,28 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		if wallet.UserID != userID {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"message": ErrMsgBadWalletID,
+			})
+			return
+		}
+	}
+
+	// Validate party ownership
+	if tModel.PartyID != 0 {
+		party, err := h.repo.PartyGet(tModel.PartyID)
+		if err != nil {
+			if err == repository.ErrorRecordNotFound {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"message": ErrMsgPartyNotFound,
+				})
+				return
+			}
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+
+		if party.UserID != userID {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"message": ErrMsgBadPartyID,
 			})
 			return
 		}

@@ -1,0 +1,622 @@
+{
+	"info": {
+		"_postman_id": "16187426-b7a1-4539-b075-b58c7bcadae3",
+		"name": "Xpense API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Transaction",
+			"item": [
+				{
+					"name": "List ",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/transaction",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"transaction"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/transaction/1",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"transaction",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1000,\n    \"description\": \"drug money\",\n    \"wallet_id\": 2,\n    \"party_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/transaction/",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"transaction",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wallet_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/transaction/1",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"transaction",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/transaction/3",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"transaction",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Account",
+			"item": [
+				{
+					"name": "Get Account",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/account",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Account",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"firstName\": \"Jon3\",\n\t\"lastName\": \"Doe3\",\n\t\"email\": \"jon2@doe3.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/account/11",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"account",
+								"11"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/account",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"account"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6897e54-aaf0-4b6f-aade-22ec86e06e92",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "6a8438e3-aa76-47b9-8256-add9f46942de",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Sign Up",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"firstName\": \"Jane\",\n\t\"lastName\": \"Doe\",\n\t\"email\": \"jane@doe.com\",\n    \"password\": \"Janespassword1!\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/auth/signup",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9cd92ab3-d3a7-4459-b917-edc71741721a",
+								"exec": [
+									"const oldAuthToken = pm.collectionVariables.get(\"token\");",
+									"const authToken = JSON.parse(responseBody).token;",
+									"",
+									"pm.collectionVariables.set(\"token\", authToken);",
+									"",
+									"const newAuthToken = pm.collectionVariables.get(\"token\");",
+									"",
+									"if (oldAuthToken === newAuthToken) {",
+									"    console.error(\"Couldn't set new token\");",
+									"} else {",
+									"    console.log(\"New auth token set\");",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jane@doe.com\",\n    \"password\": \"Janespassword1!\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/auth/login",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Wallet",
+			"item": [
+				{
+					"name": "List Wallets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/wallet",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"wallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Transactions by Wallet",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/wallet/2/transaction",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"wallet",
+								"2",
+								"transaction"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Wallet",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/wallet/1",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"wallet",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Wallet",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cash2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/wallet",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"wallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Wallet",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"cash\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/wallet/5",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"wallet",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Wallet",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/wallet/2",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"wallet",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Party",
+			"item": [
+				{
+					"name": "Get Party",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/party/2",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"party",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Party",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Rewe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/party/2",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"party",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Party",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Amazon\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{prefix}}/party",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"party"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Party",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/party/1",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"party",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Parties",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/party",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"party"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Transactions by Party",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{prefix}}/party/2/transaction",
+							"host": [
+								"{{prefix}}"
+							],
+							"path": [
+								"party",
+								"2",
+								"transaction"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "7bc3ce67-11bc-4da8-b010-6e7357381b71",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "91d6b34a-83af-4dbf-916d-fef88dfc304d",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "ce24e91a-880f-4378-ba93-1cdfa3a586f0",
+			"key": "prefix",
+			"value": "http://localhost:8080"
+		},
+		{
+			"id": "6787a015-9b91-44e5-bee3-1f4d3ab9e03d",
+			"key": "token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJqb25AZG9lLmNvbSIsImV4cCI6MTYzNzMzODAxMywiaXNzIjoiaXNzdWVyIn0.ZhGc2RbzRiM3-i_t8IugZawmaFOvP7w8mdRg7RR4Bi4"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

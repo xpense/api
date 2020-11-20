@@ -4,6 +4,7 @@ import (
 	"expense-api/handlers"
 	"expense-api/middleware"
 	auth_middleware "expense-api/middleware/auth"
+	party_middleware "expense-api/middleware/party"
 	transaction_middleware "expense-api/middleware/transaction"
 	wallet_middleware "expense-api/middleware/wallet"
 	"expense-api/repository"
@@ -63,6 +64,18 @@ func Setup(
 		wallet.PATCH("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.UpdateWallet)
 		wallet.DELETE("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.DeleteWallet)
 		wallet.GET("/:id/transaction", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.ListTransactionsByWallet)
+	}
+
+	party := router.Group("/party").Use(authM.IsAuthenticated)
+	{
+		partyM := party_middleware.New(repo)
+
+		party.GET("/", handler.ListParties)
+		party.POST("/", handler.CreateParty)
+		party.GET("/:id", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.GetParty)
+		party.PATCH("/:id", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.UpdateParty)
+		party.DELETE("/:id", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.DeleteParty)
+		party.GET("/:id/transaction", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.ListTransactionsByParty)
 	}
 
 	transaction := router.Group("/transaction").Use(authM.IsAuthenticated)

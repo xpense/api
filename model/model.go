@@ -45,4 +45,6 @@ type Transaction struct {
 	User        User            `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	WalletID    uint            `json:"wallet_id" gorm:"not null;"`
 	Wallet      Wallet          `json:"wallet" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	PartyID     uint            `json:"party_id" gorm:"not null;"`
+	Party       Party           `json:"party" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

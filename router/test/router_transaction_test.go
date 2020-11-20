@@ -136,14 +136,20 @@ func TestCreateTransaction(t *testing.T) {
 			wallet := &model.Wallet{
 				UserID: userID,
 			}
+			partyID := uint(1)
+			party := &model.Party{
+				UserID: userID,
+			}
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 				WalletID:  walletID,
+				PartyID:   partyID,
 			}
 
 			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", partyID).Return(party, nil).Once()
 			repoSpy.On("TransactionCreate", transaction).Return(nil).Once()
 
 			res := httptest.NewRecorder()

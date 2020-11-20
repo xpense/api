@@ -23,10 +23,9 @@ func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, e
 		return nil, err
 	}
 
-	// TODO: check if it's really unnecessary
-	// if updated.Name != "" {
-	// 	party.Name = updated.Name
-	// }
+	if updated.Name != "" {
+		party.Name = updated.Name
+	}
 
 	if tx := r.db.Save(party); tx.Error != nil {
 		if isUniqueConstaintViolationError(tx.Error) {
