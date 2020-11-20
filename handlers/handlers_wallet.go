@@ -142,10 +142,6 @@ func (h *handler) ListWallets(ctx *gin.Context) {
 
 	wModels, err := h.repo.WalletList(userID)
 	if err != nil {
-		if err == repository.ErrorRecordNotFound {
-			ctx.Status(http.StatusNotFound)
-			return
-		}
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
@@ -169,33 +165,8 @@ func (h *handler) ListTransactionsByWallet(ctx *gin.Context) {
 
 	id := middleware.GetIDParamFromContext(ctx)
 
-	{ // Validate wallet ownership
-		wallet, err := h.repo.WalletGet(id)
-		if err != nil {
-			if err == repository.ErrorRecordNotFound {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"message": ErrMsgWalletNotFound,
-				})
-				return
-			}
-			ctx.Status(http.StatusInternalServerError)
-			return
-		}
-
-		if wallet.UserID != userID {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"message": ErrMsgBadWalletID,
-			})
-			return
-		}
-	}
-
 	tModels, err := h.repo.TransactionListByWallet(userID, id)
 	if err != nil {
-		if err == repository.ErrorRecordNotFound {
-			ctx.Status(http.StatusNotFound)
-			return
-		}
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
