@@ -1,0 +1,78 @@
+package repository
+
+import (
+	"expense-api/model"
+
+	"gorm.io/gorm"
+)
+
+func (r *repository) PartyCreate(p *model.Party) error {
+	if tx := r.db.Create(p); tx.Error != nil {
+		if isUniqueConstaintViolationError(tx.Error) {
+			return ErrorUniqueConstaintViolation
+		}
+		return ErrorOther
+	}
+
+	return nil
+}
+
+func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, error) {
+	party, err := r.PartyGet(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: check if it's really unnecessary
+	// if updated.Name != "" {
+	// 	party.Name = updated.Name
+	// }
+
+	if tx := r.db.Save(party); tx.Error != nil {
+		if isUniqueConstaintViolationError(tx.Error) {
+			return nil, ErrorUniqueConstaintViolation
+		}
+		return nil, ErrorOther
+	}
+
+	return party, nil
+}
+
+func (r *repository) PartyGet(id uint) (*model.Party, error) {
+	var party model.Party
+
+	if tx := r.db.First(&party, id); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, ErrorRecordNotFound
+		}
+		return nil, ErrorOther
+	}
+
+	return &party, nil
+}
+
+func (r *repository) PartyDelete(id uint) error {
+	party, err := r.PartyGet(id)
+	if err != nil {
+		return err
+	}
+
+	if tx := r.db.Delete(party); tx.Error != nil {
+		return ErrorOther
+	}
+
+	return nil
+}
+
+func (r *repository) PartyList(userID uint) ([]*model.Party, error) {
+	var partys []*model.Party
+
+	if tx := r.db.Where("user_id = ?", userID).Find(&partys); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, ErrorRecordNotFound
+		}
+		return nil, ErrorOther
+	}
+
+	return partys, nil
+}

@@ -13,6 +13,103 @@ type RepositorySpy struct {
 	mock.Mock
 }
 
+// PartyCreate provides a mock function with given fields: w
+func (_m *RepositorySpy) PartyCreate(w *model.Party) error {
+	ret := _m.Called(w)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Party) error); ok {
+		r0 = rf(w)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// PartyDelete provides a mock function with given fields: id
+func (_m *RepositorySpy) PartyDelete(id uint) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// PartyGet provides a mock function with given fields: id
+func (_m *RepositorySpy) PartyGet(id uint) (*model.Party, error) {
+	ret := _m.Called(id)
+
+	var r0 *model.Party
+	if rf, ok := ret.Get(0).(func(uint) *model.Party); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Party)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PartyList provides a mock function with given fields: userID
+func (_m *RepositorySpy) PartyList(userID uint) ([]*model.Party, error) {
+	ret := _m.Called(userID)
+
+	var r0 []*model.Party
+	if rf, ok := ret.Get(0).(func(uint) []*model.Party); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Party)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PartyUpdate provides a mock function with given fields: id, w
+func (_m *RepositorySpy) PartyUpdate(id uint, w *model.Party) (*model.Party, error) {
+	ret := _m.Called(id, w)
+
+	var r0 *model.Party
+	if rf, ok := ret.Get(0).(func(uint, *model.Party) *model.Party); ok {
+		r0 = rf(id, w)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Party)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint, *model.Party) error); ok {
+		r1 = rf(id, w)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // TransactionCreate provides a mock function with given fields: t
 func (_m *RepositorySpy) TransactionCreate(t *model.Transaction) error {
 	ret := _m.Called(t)
@@ -80,6 +177,29 @@ func (_m *RepositorySpy) TransactionList(userID uint) ([]*model.Transaction, err
 	var r1 error
 	if rf, ok := ret.Get(1).(func(uint) error); ok {
 		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// TransactionListByParty provides a mock function with given fields: userID, partyID
+func (_m *RepositorySpy) TransactionListByParty(userID uint, partyID uint) ([]*model.Transaction, error) {
+	ret := _m.Called(userID, partyID)
+
+	var r0 []*model.Transaction
+	if rf, ok := ret.Get(0).(func(uint, uint) []*model.Transaction); ok {
+		r0 = rf(userID, partyID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Transaction)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint, uint) error); ok {
+		r1 = rf(userID, partyID)
 	} else {
 		r1 = ret.Error(1)
 	}

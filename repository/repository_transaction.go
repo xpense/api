@@ -76,22 +76,35 @@ func (r *repository) TransactionDelete(id uint) error {
 }
 
 func (r *repository) TransactionList(userID uint) ([]*model.Transaction, error) {
-	var transactions []*model.Transaction
-
-	if tx := r.db.Where("user_id = ?", userID).Find(&transactions); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
+	query := map[string]interface{}{
+		"user_id": userID,
 	}
 
-	return transactions, nil
+	return r.transactionList(query)
 }
 
 func (r *repository) TransactionListByWallet(userID, walletID uint) ([]*model.Transaction, error) {
+	query := map[string]interface{}{
+		"user_id":   userID,
+		"wallet_id": walletID,
+	}
+
+	return r.transactionList(query)
+}
+
+func (r *repository) TransactionListByParty(userID, partyID uint) ([]*model.Transaction, error) {
+	query := map[string]interface{}{
+		"user_id":  userID,
+		"party_id": partyID,
+	}
+
+	return r.transactionList(query)
+}
+
+func (r *repository) transactionList(query map[string]interface{}) ([]*model.Transaction, error) {
 	var transactions []*model.Transaction
 
-	if tx := r.db.Where("user_id = ? AND wallet_id = ?", userID, walletID).Find(&transactions); tx.Error != nil {
+	if tx := r.db.Where(query).Find(&transactions); tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
 			return nil, ErrorRecordNotFound
 		}

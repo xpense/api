@@ -21,6 +21,21 @@ type User struct {
 	Salt      string `json:"salt" gorm:"not null;"`
 }
 
+type Wallet struct {
+	Model
+	Name        string `json:"name" gorm:"uniqueIndex:idx_userid_wallet_name;not null;"`
+	Description string `json:"description"`
+	UserID      uint   `json:"user_id" gorm:"uniqueIndex:idx_userid_wallet_name;not null;"`
+	User        User   `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+
+type Party struct {
+	Model
+	Name   string `json:"name" gorm:"uniqueIndex:idx_userid_party_name;not null;"`
+	UserID uint   `json:"user_id" gorm:"uniqueIndex:idx_userid_party_name;not null;"`
+	User   User   `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+
 type Transaction struct {
 	Model
 	Description string          `json:"description"`
@@ -30,12 +45,4 @@ type Transaction struct {
 	User        User            `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	WalletID    uint            `json:"wallet_id" gorm:"not null;"`
 	Wallet      Wallet          `json:"wallet" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-}
-
-type Wallet struct {
-	Model
-	Name        string `json:"name" gorm:"uniqueIndex:idx_userid_name;not null;"`
-	Description string `json:"description"`
-	UserID      uint   `json:"user_id" gorm:"uniqueIndex:idx_userid_name;not null;"`
-	User        User   `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
