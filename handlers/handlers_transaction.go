@@ -116,7 +116,6 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 	}
 
 	tResponse := TransactionModelToResponse(tModel)
-
 	ctx.JSON(http.StatusCreated, tResponse)
 }
 
@@ -139,7 +138,6 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 
 	// Validate wallet ownership
 	if tModel.WalletID != 0 {
-
 		wallet, err := h.repo.WalletGet(tModel.WalletID)
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
@@ -167,7 +165,6 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 	}
 
 	tResponse := TransactionModelToResponse(updatedTModel)
-
 	ctx.JSON(http.StatusOK, tResponse)
 }
 
@@ -200,7 +197,6 @@ func (h *handler) GetTransaction(ctx *gin.Context) {
 	}
 
 	tResponse := TransactionModelToResponse(tModel)
-
 	ctx.JSON(http.StatusOK, tResponse)
 }
 
@@ -218,7 +214,6 @@ func (h *handler) ListTransactions(ctx *gin.Context) {
 	}
 
 	tResponse := make([]*Transaction, 0, len(tModels))
-
 	for _, t := range tModels {
 		tResponse = append(tResponse, TransactionModelToResponse(t))
 	}
