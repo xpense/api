@@ -84,7 +84,7 @@ func TestCreateTransaction(t *testing.T) {
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
-		t.Run("Create transaction with valid data with non-existing wallet id", func(t *testing.T) {
+		t.Run("Create transaction with valid data with non-existent wallet id", func(t *testing.T) {
 			walletID := uint(1)
 			transaction := &model.Transaction{
 				Timestamp: time.Now().Round(0),
@@ -126,6 +126,90 @@ func TestCreateTransaction(t *testing.T) {
 			r.ServeHTTP(res, req)
 
 			wantErrorMessage := handlers.ErrMsgBadWalletID
+
+			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Create transaction with valid data but missing party id", func(t *testing.T) {
+			walletID := uint(1)
+			wallet := &model.Wallet{
+				UserID: userID,
+			}
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    decimal.NewFromInt32(100),
+				UserID:    userID,
+				WalletID:  walletID,
+			}
+
+			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgRequiredWalletID
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Create transaction with valid data with non-existent party id", func(t *testing.T) {
+			walletID := uint(1)
+			wallet := &model.Wallet{
+				UserID: userID,
+			}
+			partyID := uint(2)
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    decimal.NewFromInt32(100),
+				UserID:    userID,
+				WalletID:  walletID,
+				PartyID:   partyID,
+			}
+
+			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", partyID).Return(nil, repository.ErrorRecordNotFound).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgPartyNotFound
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Create transaction with valid data with existing party id that belongs to another user", func(t *testing.T) {
+			walletID := uint(1)
+			wallet := &model.Wallet{
+				UserID: userID,
+			}
+			partyID := uint(1)
+			party := &model.Party{
+				UserID: userID + 1,
+			}
+			transaction := &model.Transaction{
+				Timestamp: time.Now().Round(0),
+				Amount:    decimal.NewFromInt32(100),
+				UserID:    userID,
+				WalletID:  walletID,
+				PartyID:   partyID,
+			}
+
+			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", partyID).Return(party, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(transaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgBadPartyID
 
 			assertStatusCode(t, res, http.StatusUnauthorized)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -387,6 +471,76 @@ func TestUpdateTransaction(t *testing.T) {
 			r.ServeHTTP(res, req)
 
 			wantErrorMessage := handlers.ErrMsgBadWalletID
+
+			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Change a transaction's party ID to one that doesn't exist", func(t *testing.T) {
+			id := uint(1)
+			nonExistentPartyID := uint(3)
+
+			walletID := uint(1)
+			wallet := &model.Wallet{
+				UserID: userID,
+			}
+
+			transaction := &model.Transaction{
+				UserID: userID,
+			}
+
+			updateTransaction := &model.Transaction{
+				PartyID: nonExistentPartyID,
+				UserID:  userID,
+			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", nonExistentPartyID).Return(nil, repository.ErrorRecordNotFound).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, updateTransaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgPartyNotFound
+
+			assertStatusCode(t, res, http.StatusBadRequest)
+			assertErrorMessage(t, res, wantErrorMessage)
+		})
+
+		t.Run("Change a transaction's party ID to one that belongs to another user", func(t *testing.T) {
+			id := uint(1)
+
+			walletID := uint(1)
+			wallet := &model.Wallet{
+				UserID: userID,
+			}
+
+			anotherUsersID := uint(6)
+			anotherUsersPartyID := uint(5)
+			anotherUsersParty := &model.Party{
+				UserID: anotherUsersID,
+			}
+
+			transaction := &model.Transaction{
+				UserID: userID,
+			}
+
+			updateTransaction := &model.Transaction{
+				PartyID: anotherUsersPartyID,
+			}
+
+			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
+			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", anotherUsersPartyID).Return(anotherUsersParty, nil).Once()
+
+			res := httptest.NewRecorder()
+			req := newTransactionRequest(id, updateTransaction, token)
+
+			r.ServeHTTP(res, req)
+
+			wantErrorMessage := handlers.ErrMsgBadPartyID
 
 			assertStatusCode(t, res, http.StatusUnauthorized)
 			assertErrorMessage(t, res, wantErrorMessage)

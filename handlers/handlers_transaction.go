@@ -59,6 +59,7 @@ func TransactionRequestToModel(t *Transaction, userID uint) *model.Transaction {
 const (
 	ErrMsgRequiredAmount   = "cannot create new transaction with an amount of 0"
 	ErrMsgRequiredWalletID = "a valid wallet id must be specified to register a new transaction"
+	ErrMsgRequiredPartyID  = "a valid wallet id must be specified to register a new transaction"
 	ErrMsgWalletNotFound   = "wallet with specified id not found"
 	ErrMsgBadWalletID      = "wallet with specified id belongs to another user"
 	ErrMsgPartyNotFound    = "party with specified id not found"
@@ -118,7 +119,7 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 	{ // Validate party ownership
 		if tModel.PartyID == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"message": ErrMsgRequiredWalletID,
+				"message": ErrMsgRequiredPartyID,
 			})
 			return
 		}
