@@ -49,7 +49,7 @@ const ErrMsgPartyNameTaken = "party with the same name, belonging to the same us
 func (h *handler) CreateParty(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -79,7 +79,7 @@ func (h *handler) CreateParty(ctx *gin.Context) {
 func (h *handler) UpdateParty(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -147,7 +147,7 @@ func (h *handler) GetParty(ctx *gin.Context) {
 func (h *handler) ListParties(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -170,7 +170,7 @@ func (h *handler) ListParties(ctx *gin.Context) {
 func (h *handler) ListTransactionsByParty(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 

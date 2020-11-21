@@ -41,7 +41,7 @@ func UserModelToAccountResponse(u *model.User) *Account {
 func (h *handler) UpdateAccount(ctx *gin.Context) {
 	id, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
@@ -85,7 +85,7 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 func (h *handler) DeleteAccount(ctx *gin.Context) {
 	id, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h *handler) DeleteAccount(ctx *gin.Context) {
 func (h *handler) GetAccount(ctx *gin.Context) {
 	id, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 

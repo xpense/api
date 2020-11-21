@@ -127,7 +127,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgBadWalletID
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -211,7 +211,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgBadPartyID
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -321,7 +321,7 @@ func TestGetTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Get transaction with valid id", func(t *testing.T) {
@@ -414,7 +414,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Change a transaction's wallet ID to one that doesn't exist", func(t *testing.T) {
@@ -472,7 +472,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgBadWalletID
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -542,7 +542,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgBadPartyID
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -630,7 +630,7 @@ func TestDeleteTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Delete existing transaction", func(t *testing.T) {

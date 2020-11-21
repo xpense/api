@@ -24,7 +24,7 @@ func New(repo repository.Repository) TransactionMiddleware {
 func (t *transactionMiddleware) ValidateOwnership(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
@@ -41,7 +41,7 @@ func (t *transactionMiddleware) ValidateOwnership(ctx *gin.Context) {
 	}
 
 	if tModel.UserID != userID {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 

@@ -52,7 +52,7 @@ const ErrMsgWalletNameTaken = "wallet with the same name, belonging to the same 
 func (h *handler) CreateWallet(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -82,7 +82,7 @@ func (h *handler) CreateWallet(ctx *gin.Context) {
 func (h *handler) UpdateWallet(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -150,7 +150,7 @@ func (h *handler) GetWallet(ctx *gin.Context) {
 func (h *handler) ListWallets(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -173,7 +173,7 @@ func (h *handler) ListWallets(ctx *gin.Context) {
 func (h *handler) ListTransactionsByWallet(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 

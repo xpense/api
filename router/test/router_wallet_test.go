@@ -161,7 +161,7 @@ func TestGetWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Get wallet with valid id", func(t *testing.T) {
@@ -253,7 +253,7 @@ func TestUpdateWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Try to update a wallet with already existing name, belonging to the same user", func(t *testing.T) {
@@ -360,7 +360,7 @@ func TestDeleteWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Delete existing wallet", func(t *testing.T) {
@@ -517,7 +517,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("List transactions when there are no transactions", func(t *testing.T) {

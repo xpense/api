@@ -69,7 +69,7 @@ const (
 func (h *handler) CreateTransaction(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 		}
 
 		if wallet.UserID != userID {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
+			ctx.JSON(http.StatusForbidden, gin.H{
 				"message": ErrMsgBadWalletID,
 			})
 			return
@@ -137,7 +137,7 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 		}
 
 		if party.UserID != userID {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
+			ctx.JSON(http.StatusForbidden, gin.H{
 				"message": ErrMsgBadPartyID,
 			})
 			return
@@ -156,7 +156,7 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 func (h *handler) UpdateTransaction(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 
@@ -185,7 +185,7 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		}
 
 		if wallet.UserID != userID {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
+			ctx.JSON(http.StatusForbidden, gin.H{
 				"message": ErrMsgBadWalletID,
 			})
 			return
@@ -207,7 +207,7 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		}
 
 		if party.UserID != userID {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
+			ctx.JSON(http.StatusForbidden, gin.H{
 				"message": ErrMsgBadPartyID,
 			})
 			return
@@ -259,7 +259,7 @@ func (h *handler) GetTransaction(ctx *gin.Context) {
 func (h *handler) ListTransactions(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.Status(http.StatusForbidden)
 		return
 	}
 

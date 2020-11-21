@@ -163,7 +163,7 @@ func TestGetParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Get party with valid id", func(t *testing.T) {
@@ -256,7 +256,7 @@ func TestUpdateParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Try to update a party with already existing name, belonging to the same user", func(t *testing.T) {
@@ -364,7 +364,7 @@ func TestDeleteParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Delete existing party", func(t *testing.T) {
@@ -521,7 +521,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("List transactions when there are no transactions", func(t *testing.T) {
