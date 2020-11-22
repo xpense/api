@@ -66,7 +66,7 @@ func TestCreateParty(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgPartyNameTaken
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -276,7 +276,7 @@ func TestUpdateParty(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgPartyNameTaken
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 

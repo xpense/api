@@ -66,7 +66,7 @@ func (h *handler) CreateWallet(ctx *gin.Context) {
 
 	if err := h.repo.WalletCreate(wModel); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
-			ctx.JSON(http.StatusBadRequest, gin.H{
+			ctx.JSON(http.StatusConflict, gin.H{
 				"message": ErrMsgWalletNameTaken,
 			})
 			return
@@ -102,7 +102,7 @@ func (h *handler) UpdateWallet(ctx *gin.Context) {
 			return
 		}
 		if err == repository.ErrorUniqueConstaintViolation {
-			ctx.JSON(http.StatusBadRequest, gin.H{
+			ctx.JSON(http.StatusConflict, gin.H{
 				"message": ErrMsgWalletNameTaken,
 			})
 			return

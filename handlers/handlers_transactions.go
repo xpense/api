@@ -153,6 +153,23 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, tResponse)
 }
 
+func (h *handler) GetTransaction(ctx *gin.Context) {
+	id := middleware.GetIDParamFromContext(ctx)
+
+	tModel, err := h.repo.TransactionGet(id)
+	if err != nil {
+		if err == repository.ErrorRecordNotFound {
+			ctx.Status(http.StatusNotFound)
+			return
+		}
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	tResponse := TransactionModelToResponse(tModel)
+	ctx.JSON(http.StatusOK, tResponse)
+}
+
 func (h *handler) UpdateTransaction(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
@@ -237,23 +254,6 @@ func (h *handler) DeleteTransaction(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusNoContent)
-}
-
-func (h *handler) GetTransaction(ctx *gin.Context) {
-	id := middleware.GetIDParamFromContext(ctx)
-
-	tModel, err := h.repo.TransactionGet(id)
-	if err != nil {
-		if err == repository.ErrorRecordNotFound {
-			ctx.Status(http.StatusNotFound)
-			return
-		}
-		ctx.Status(http.StatusInternalServerError)
-		return
-	}
-
-	tResponse := TransactionModelToResponse(tModel)
-	ctx.JSON(http.StatusOK, tResponse)
 }
 
 func (h *handler) ListTransactions(ctx *gin.Context) {

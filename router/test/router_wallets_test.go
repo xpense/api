@@ -66,7 +66,7 @@ func TestCreateWallet(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgWalletNameTaken
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -273,7 +273,7 @@ func TestUpdateWallet(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrMsgWalletNameTaken
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 

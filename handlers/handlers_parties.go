@@ -63,7 +63,7 @@ func (h *handler) CreateParty(ctx *gin.Context) {
 
 	if err := h.repo.PartyCreate(wModel); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
-			ctx.JSON(http.StatusBadRequest, gin.H{
+			ctx.JSON(http.StatusConflict, gin.H{
 				"message": ErrMsgPartyNameTaken,
 			})
 			return
@@ -74,6 +74,23 @@ func (h *handler) CreateParty(ctx *gin.Context) {
 
 	wResponse := PartyModelToResponse(wModel)
 	ctx.JSON(http.StatusCreated, wResponse)
+}
+
+func (h *handler) GetParty(ctx *gin.Context) {
+	id := middleware.GetIDParamFromContext(ctx)
+
+	wModel, err := h.repo.PartyGet(id)
+	if err != nil {
+		if err == repository.ErrorRecordNotFound {
+			ctx.Status(http.StatusNotFound)
+			return
+		}
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	wResponse := PartyModelToResponse(wModel)
+	ctx.JSON(http.StatusOK, wResponse)
 }
 
 func (h *handler) UpdateParty(ctx *gin.Context) {
@@ -99,7 +116,7 @@ func (h *handler) UpdateParty(ctx *gin.Context) {
 			return
 		}
 		if err == repository.ErrorUniqueConstaintViolation {
-			ctx.JSON(http.StatusBadRequest, gin.H{
+			ctx.JSON(http.StatusConflict, gin.H{
 				"message": ErrMsgPartyNameTaken,
 			})
 			return
@@ -125,23 +142,6 @@ func (h *handler) DeleteParty(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusNoContent)
-}
-
-func (h *handler) GetParty(ctx *gin.Context) {
-	id := middleware.GetIDParamFromContext(ctx)
-
-	wModel, err := h.repo.PartyGet(id)
-	if err != nil {
-		if err == repository.ErrorRecordNotFound {
-			ctx.Status(http.StatusNotFound)
-			return
-		}
-		ctx.Status(http.StatusInternalServerError)
-		return
-	}
-
-	wResponse := PartyModelToResponse(wModel)
-	ctx.JSON(http.StatusOK, wResponse)
 }
 
 func (h *handler) ListParties(ctx *gin.Context) {
