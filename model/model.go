@@ -14,8 +14,8 @@ type Model struct {
 
 type User struct {
 	Model
-	FirstName string `json:"firstName" gorm:"not null;"`
-	LastName  string `json:"lastName" gorm:"not null;"`
+	FirstName string `json:"first_name" gorm:"not null;"`
+	LastName  string `json:"last_name" gorm:"not null;"`
 	Email     string `json:"email" gorm:"type:varchar(255);unique;not null;"`
 	Password  string `json:"password" gorm:"not null;"`
 	Salt      string `json:"salt" gorm:"not null;"`
