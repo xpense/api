@@ -536,7 +536,7 @@ Authorization: Bearer <token>
 
   - `404 Not Found`
 
-  The wallet with the specified ID does not exist.
+    The wallet with the specified ID does not exist.
 
 - **List Transactions by Wallet**
 
