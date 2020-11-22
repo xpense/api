@@ -469,7 +469,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 	}
 
 	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/wallets/%d/transaction", id)
+		url := fmt.Sprintf("/wallets/%d/transactions", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req

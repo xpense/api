@@ -63,7 +63,7 @@ func Setup(
 		wallets.GET("/:id", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.GetWallet)
 		wallets.PATCH("/:id", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.UpdateWallet)
 		wallets.DELETE("/:id", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.DeleteWallet)
-		wallets.GET("/:id/transaction", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.ListTransactionsByWallet)
+		wallets.GET("/:id/transactions", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.ListTransactionsByWallet)
 	}
 
 	parties := router.Group("/parties").Use(authM.IsAuthenticated)
@@ -75,7 +75,7 @@ func Setup(
 		parties.GET("/:id", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.GetParty)
 		parties.PATCH("/:id", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.UpdateParty)
 		parties.DELETE("/:id", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.DeleteParty)
-		parties.GET("/:id/transaction", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.ListTransactionsByParty)
+		parties.GET("/:id/transactions", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.ListTransactionsByParty)
 	}
 
 	transactions := router.Group("/transactions").Use(authM.IsAuthenticated)
