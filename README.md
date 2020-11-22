@@ -142,13 +142,13 @@ The API uses the [JWT standard](https://jwt.io/) to authenticate users and prote
   - `201 Created`
 
     Account was succesfully created
-  
+
   - `400 Bad Request`
 
     Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing first or last name, or invalid email/password.
 
   - `409 Conflict`
-  
+
     If you're trying to create a new account with an already registered email.
 
 - **Login**
@@ -181,13 +181,13 @@ The API uses the [JWT standard](https://jwt.io/) to authenticate users and prote
       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
     }
     ```
-  
+
   - `400 Bad Request`
 
     Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing email or password field, or the provided password is wrong.
 
   - `404 Not Found`
-  
+
     Account with the specified email does not exist.
 
 ### Account
@@ -197,9 +197,9 @@ All routes are protected and require the following header with a valid authentic
 ```text
 Authorization: Bearer <token>
 ```
-  
+
 - **Get Account information**
-  
+
   Endpoint:
 
   ```text
@@ -230,11 +230,11 @@ Authorization: Bearer <token>
     Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing email or password field, or the provided password is wrong.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `404 Not Found`
-  
+
     Account with the ID belonging to the token does not exist (possibly deleted).
 
 - **Update Account information**
@@ -258,7 +258,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Acccount was updated successfully.
 
     Example:
@@ -279,13 +279,13 @@ Authorization: Bearer <token>
     Somethinig went wrong when processing the request. Either empty request body, malformed request body, or invalid email.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `404 Not Found`
-  
+
     Account with the ID belonging to the token does not exist (possibly deleted).
-  
+
 - **Delete Account**
 
   Endpoint:
@@ -297,15 +297,15 @@ Authorization: Bearer <token>
   Responses:
 
   - `204 No Content`
-  
+
     Acccount was deleted successfully.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `404 Not Found`
-  
+
     Account with the ID belonging to the token does not exist (possibly previously deleted).
 
 ### Wallets
@@ -338,7 +338,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `201 Created`
-  
+
     Wallet was created successfully.
 
     Example:
@@ -354,15 +354,15 @@ Authorization: Bearer <token>
     ```
 
   - `400 Bad Request`
-  
+
     Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `409 Conflict`
-  
+
     A wallet with the same name belonging to the same user already exists.
 
 - **Get Wallet**
@@ -378,7 +378,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Wallet was retrieved successfully.
 
     Example:
@@ -394,7 +394,7 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -402,7 +402,7 @@ Authorization: Bearer <token>
     The wallet with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The wallet with the specified ID does not exist.
 
 - **Update Wallet**
@@ -427,7 +427,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Wallet was updated successfully.
 
     Example:
@@ -443,11 +443,11 @@ Authorization: Bearer <token>
     ```
 
   - `400 Bad Request`
-  
+
     Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -455,11 +455,11 @@ Authorization: Bearer <token>
     The wallet with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The wallet with the specified ID does not exist.
 
   - `409 Conflict`
-  
+
     A wallet with the same name belonging to the same user already exists.
 
 - **Delete Wallet**
@@ -475,11 +475,11 @@ Authorization: Bearer <token>
   Responses:
 
   - `204 No Content`
-  
+
     Wallet was deleted successfully.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -487,7 +487,7 @@ Authorization: Bearer <token>
     The wallet with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The wallet with the specified ID does not exist.
 
 - **List Wallets**
@@ -503,7 +503,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Wallets were retrieved successfully.
 
     Example:
@@ -531,8 +531,12 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
+
+  - `404 Not Found`
+
+  The wallet with the specified ID does not exist.
 
 - **List Transactions by Wallet**
 
@@ -547,7 +551,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Transactions were retrieved successfully.
 
     Example:
@@ -581,7 +585,7 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -617,7 +621,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `201 Created`
-  
+
     Party was created successfully.
 
     Example:
@@ -632,15 +636,15 @@ Authorization: Bearer <token>
     ```
 
   - `400 Bad Request`
-  
+
     Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `409 Conflict`
-  
+
     A party with the same name belonging to the same user already exists.
 
 - **Get Party**
@@ -656,7 +660,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Party was retrieved successfully.
 
     Example:
@@ -671,7 +675,7 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -679,7 +683,7 @@ Authorization: Bearer <token>
     The party with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The party with the specified ID does not exist.
 
 - **Update Party**
@@ -703,7 +707,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Party was updated successfully.
 
     Example:
@@ -718,11 +722,11 @@ Authorization: Bearer <token>
     ```
 
   - `400 Bad Request`
-  
+
     Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -730,11 +734,11 @@ Authorization: Bearer <token>
     The party with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The party with the specified ID does not exist.
 
   - `409 Conflict`
-  
+
     A party with the same name belonging to the same user already exists.
 
 - **Delete Party**
@@ -750,11 +754,11 @@ Authorization: Bearer <token>
   Responses:
 
   - `204 No Content`
-  
+
     Party was deleted successfully.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -762,7 +766,7 @@ Authorization: Bearer <token>
     The party with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The party with the specified ID does not exist.
 
 - **List Parties**
@@ -778,7 +782,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Parties were retrieved successfully.
 
     Example:
@@ -804,8 +808,12 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
+
+  - `404 Not Found`
+
+    The wallet with the specified ID does not exist.
 
 - **List Transactions by Party**
 
@@ -820,7 +828,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Transactions were retrieved successfully.
 
     Example:
@@ -854,7 +862,7 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -885,7 +893,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `201 Created`
-  
+
     Transaction was created successfully.
 
     Example:
@@ -904,11 +912,11 @@ Authorization: Bearer <token>
     ```
 
   - `400 Bad Request`
-  
+
     Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing amount or an amount of 0, missing/invalid/non-existent wallet ID, missing/invalid/non-existent party ID.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -928,7 +936,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Transaction was retrieved successfully.
 
     Example:
@@ -947,7 +955,7 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -955,7 +963,7 @@ Authorization: Bearer <token>
     The transaction with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The transaction with the specified ID does not exist.
 
 - **Update Transaction**
@@ -983,7 +991,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Transaction was updated successfully.
 
     Example:
@@ -995,18 +1003,18 @@ Authorization: Bearer <token>
       "party_id": 6,
       "created_at": "2020-11-20T15:06:27.277849+01:00",
       "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "timestamp": "2020-11-20T15:06:27.277849+01:00",  
+      "timestamp": "2020-11-20T15:06:27.277849+01:00",
       "amount": 25.50,
       "description": "Birthday decorations",
     }
     ```
 
   - `400 Bad Request`
-  
+
     Somethinig went wrong when processing the request. Either empty request body, malformed request body, invalid/non-existent wallet ID, invalid/non-existent party ID.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -1014,7 +1022,7 @@ Authorization: Bearer <token>
     The provided wallet ID or party ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The transaction with the specified ID does not exist.
 
 - **Delete Transaction**
@@ -1030,11 +1038,11 @@ Authorization: Bearer <token>
   Responses:
 
   - `204 No Content`
-  
+
     Transaction was deleted successfully.
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
 
   - `403 Forbidden`
@@ -1042,7 +1050,7 @@ Authorization: Bearer <token>
     The transaction with the specified ID does not belong to the current user.
 
   - `404 Not Found`
-  
+
     The transaction with the specified ID does not exist.
 
 - **List all Transactions**
@@ -1058,7 +1066,7 @@ Authorization: Bearer <token>
   Responses:
 
   - `200 OK`
-  
+
     Transactions were retrieved successfully.
 
     Example:
@@ -1092,5 +1100,5 @@ Authorization: Bearer <token>
     ```
 
   - `401 Unauthorized`
-  
+
     The provided token is not valid.
