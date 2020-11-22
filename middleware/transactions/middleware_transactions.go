@@ -1,4 +1,4 @@
-package party
+package transaction
 
 import (
 	"expense-api/middleware"
@@ -9,28 +9,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type PartyMiddleware interface {
+type TransactionsMiddleware interface {
 	ValidateOwnership(*gin.Context)
 }
 
-type partyMiddleware struct {
+type transactionsMiddleware struct {
 	repo repository.Repository
 }
 
-func New(repo repository.Repository) PartyMiddleware {
-	return &partyMiddleware{repo}
+func New(repo repository.Repository) TransactionsMiddleware {
+	return &transactionsMiddleware{repo}
 }
 
-func (p *partyMiddleware) ValidateOwnership(ctx *gin.Context) {
+func (t *transactionsMiddleware) ValidateOwnership(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	id := middleware.GetIDParamFromContext(ctx)
+	tID := middleware.GetIDParamFromContext(ctx)
 
-	wModel, err := p.repo.PartyGet(id)
+	tModel, err := t.repo.TransactionGet(tID)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.AbortWithStatus(http.StatusNotFound)
@@ -40,7 +40,7 @@ func (p *partyMiddleware) ValidateOwnership(ctx *gin.Context) {
 		return
 	}
 
-	if wModel.UserID != userID {
+	if tModel.UserID != userID {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type WalletHandler interface {
+type WalletsHandler interface {
 	ListWallets(ctx *gin.Context)
 	CreateWallet(ctx *gin.Context)
 	GetWallet(ctx *gin.Context)

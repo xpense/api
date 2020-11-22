@@ -9,19 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type WalletMiddleware interface {
+type WalletsMiddleware interface {
 	ValidateOwnership(*gin.Context)
 }
 
-type walletMiddleware struct {
+type walletsMiddleware struct {
 	repo repository.Repository
 }
 
-func New(repo repository.Repository) WalletMiddleware {
-	return &walletMiddleware{repo}
+func New(repo repository.Repository) WalletsMiddleware {
+	return &walletsMiddleware{repo}
 }
 
-func (w *walletMiddleware) ValidateOwnership(ctx *gin.Context) {
+func (w *walletsMiddleware) ValidateOwnership(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusForbidden)

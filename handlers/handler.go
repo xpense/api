@@ -9,9 +9,9 @@ import (
 type Handler interface {
 	AuthHandler
 	AccountHandler
-	TransactionHandler
-	WalletHandler
-	PartyHandler
+	TransactionsHandler
+	WalletsHandler
+	PartiesHandler
 }
 
 type handler struct {

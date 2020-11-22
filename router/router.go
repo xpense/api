@@ -4,9 +4,9 @@ import (
 	"expense-api/handlers"
 	"expense-api/middleware"
 	auth_middleware "expense-api/middleware/auth"
-	party_middleware "expense-api/middleware/party"
-	transaction_middleware "expense-api/middleware/transaction"
-	wallet_middleware "expense-api/middleware/wallet"
+	parties_middleware "expense-api/middleware/parties"
+	transactions_middleware "expense-api/middleware/transactions"
+	wallets_middleware "expense-api/middleware/wallets"
 	"expense-api/repository"
 	"expense-api/utils"
 
@@ -54,39 +54,39 @@ func Setup(
 		account.DELETE("/", handler.DeleteAccount)
 	}
 
-	wallet := router.Group("/wallet").Use(authM.IsAuthenticated)
+	wallets := router.Group("/wallets").Use(authM.IsAuthenticated)
 	{
-		walletM := wallet_middleware.New(repo)
+		walletsM := wallets_middleware.New(repo)
 
-		wallet.GET("/", handler.ListWallets)
-		wallet.POST("/", handler.CreateWallet)
-		wallet.GET("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.GetWallet)
-		wallet.PATCH("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.UpdateWallet)
-		wallet.DELETE("/:id", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.DeleteWallet)
-		wallet.GET("/:id/transaction", commonM.SetIDParamToContext, walletM.ValidateOwnership, handler.ListTransactionsByWallet)
+		wallets.GET("/", handler.ListWallets)
+		wallets.POST("/", handler.CreateWallet)
+		wallets.GET("/:id", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.GetWallet)
+		wallets.PATCH("/:id", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.UpdateWallet)
+		wallets.DELETE("/:id", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.DeleteWallet)
+		wallets.GET("/:id/transaction", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.ListTransactionsByWallet)
 	}
 
-	party := router.Group("/party").Use(authM.IsAuthenticated)
+	parties := router.Group("/parties").Use(authM.IsAuthenticated)
 	{
-		partyM := party_middleware.New(repo)
+		partiesM := parties_middleware.New(repo)
 
-		party.GET("/", handler.ListParties)
-		party.POST("/", handler.CreateParty)
-		party.GET("/:id", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.GetParty)
-		party.PATCH("/:id", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.UpdateParty)
-		party.DELETE("/:id", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.DeleteParty)
-		party.GET("/:id/transaction", commonM.SetIDParamToContext, partyM.ValidateOwnership, handler.ListTransactionsByParty)
+		parties.GET("/", handler.ListParties)
+		parties.POST("/", handler.CreateParty)
+		parties.GET("/:id", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.GetParty)
+		parties.PATCH("/:id", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.UpdateParty)
+		parties.DELETE("/:id", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.DeleteParty)
+		parties.GET("/:id/transaction", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.ListTransactionsByParty)
 	}
 
-	transaction := router.Group("/transaction").Use(authM.IsAuthenticated)
+	transactions := router.Group("/transactions").Use(authM.IsAuthenticated)
 	{
-		txM := transaction_middleware.New(repo)
+		txM := transactions_middleware.New(repo)
 
-		transaction.GET("/", handler.ListTransactions)
-		transaction.POST("/", handler.CreateTransaction)
-		transaction.GET("/:id", commonM.SetIDParamToContext, txM.ValidateOwnership, handler.GetTransaction)
-		transaction.PATCH("/:id", commonM.SetIDParamToContext, txM.ValidateOwnership, handler.UpdateTransaction)
-		transaction.DELETE("/:id", commonM.SetIDParamToContext, txM.ValidateOwnership, handler.DeleteTransaction)
+		transactions.GET("/", handler.ListTransactions)
+		transactions.POST("/", handler.CreateTransaction)
+		transactions.GET("/:id", commonM.SetIDParamToContext, txM.ValidateOwnership, handler.GetTransaction)
+		transactions.PATCH("/:id", commonM.SetIDParamToContext, txM.ValidateOwnership, handler.UpdateTransaction)
+		transactions.DELETE("/:id", commonM.SetIDParamToContext, txM.ValidateOwnership, handler.DeleteTransaction)
 	}
 
 	return router

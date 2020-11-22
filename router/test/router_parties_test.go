@@ -26,7 +26,7 @@ func TestCreateParty(t *testing.T) {
 
 	newPartyRequest := func(party *model.Party, token string) *http.Request {
 		body := createRequestBody(party)
-		req, _ := http.NewRequest(http.MethodPost, "/party/", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPost, "/parties/", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -99,7 +99,7 @@ func TestGetParty(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newPartyRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/party/%d", id)
+		url := fmt.Sprintf("/parties/%d", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -196,7 +196,7 @@ func TestUpdateParty(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newPartyRequest := func(id uint, party *model.Party, token string) *http.Request {
-		url := fmt.Sprintf("/party/%d", id)
+		url := fmt.Sprintf("/parties/%d", id)
 		body := createRequestBody(party)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -311,7 +311,7 @@ func TestDeleteParty(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newPartyRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/party/%d", id)
+		url := fmt.Sprintf("/parties/%d", id)
 		req, _ := http.NewRequest(http.MethodDelete, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -402,7 +402,7 @@ func TestListParties(t *testing.T) {
 	}
 
 	newPartyRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, "/party/", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/parties/", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
@@ -473,7 +473,7 @@ func TestListTransactionsByParty(t *testing.T) {
 	}
 
 	newPartyRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/party/%d/transaction", id)
+		url := fmt.Sprintf("/parties/%d/transaction", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req

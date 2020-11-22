@@ -26,7 +26,7 @@ func TestCreateWallet(t *testing.T) {
 
 	newWalletRequest := func(wallet *model.Wallet, token string) *http.Request {
 		body := createRequestBody(wallet)
-		req, _ := http.NewRequest(http.MethodPost, "/wallet/", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPost, "/wallets/", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -98,7 +98,7 @@ func TestGetWallet(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/wallet/%d", id)
+		url := fmt.Sprintf("/wallets/%d", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -194,7 +194,7 @@ func TestUpdateWallet(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newWalletRequest := func(id uint, wallet *model.Wallet, token string) *http.Request {
-		url := fmt.Sprintf("/wallet/%d", id)
+		url := fmt.Sprintf("/wallets/%d", id)
 		body := createRequestBody(wallet)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -308,7 +308,7 @@ func TestDeleteWallet(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/wallet/%d", id)
+		url := fmt.Sprintf("/wallets/%d", id)
 		req, _ := http.NewRequest(http.MethodDelete, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -398,7 +398,7 @@ func TestListWallets(t *testing.T) {
 	}
 
 	newWalletRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, "/wallet/", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/wallets/", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
@@ -469,7 +469,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 	}
 
 	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/wallet/%d/transaction", id)
+		url := fmt.Sprintf("/wallets/%d/transaction", id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req

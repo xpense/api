@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type PartyHandler interface {
+type PartiesHandler interface {
 	ListParties(ctx *gin.Context)
 	CreateParty(ctx *gin.Context)
 	GetParty(ctx *gin.Context)

@@ -12,7 +12,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type TransactionHandler interface {
+type TransactionsHandler interface {
 	ListTransactions(ctx *gin.Context)
 	CreateTransaction(ctx *gin.Context)
 	GetTransaction(ctx *gin.Context)
