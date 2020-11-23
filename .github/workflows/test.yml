@@ -17,5 +17,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Generate mocks
+        run: ./mocks.sh
+
       - name: Test
         run: go test ./...
