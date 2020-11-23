@@ -8,6 +8,7 @@
     - [Running the dev server](#running-the-dev-server)
     - [Running the test suite](#running-the-test-suite)
     - [Building the dockerized application](#building-the-dockerized-application)
+  - [Architecture](#architecture)
   - [Documentation](#documentation)
     - [Authentication](#authentication)
       - [Sign Up](#sign-up)
@@ -135,6 +136,10 @@ To build the application together with a running database you can use the provid
 ```sh
 docker-compose up --build
 ```
+
+## Architecture
+
+![Architecture Diagram](docs/XpenseBackend.png)
 
 ## Documentation
 
