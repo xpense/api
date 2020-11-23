@@ -2,6 +2,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 name: Test
 
@@ -17,11 +20,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Mockery
-        run: go get github.com/vektra/mockery/v2/.../
-
-      - name: Generate mocks
-        run: ./mocks.sh
+      - name: Install Dependencies
+        run: go mod download
 
       - name: Test
-        run: go test ./...
+        run: TZ="" go test ./...
