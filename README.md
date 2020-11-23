@@ -9,10 +9,32 @@
     - [Running the test suite](#running-the-test-suite)
   - [Documentation](#documentation)
     - [Authentication](#authentication)
+      - [Sign Up](#sign-up)
+      - [Login](#login)
     - [Account](#account)
+      - [Get Account information](#get-account-information)
+      - [Update Account information](#update-account-information)
+      - [Delete Account](#delete-account)
     - [Wallets](#wallets)
+      - [Create Wallet](#create-wallet)
+      - [Get Wallet](#get-wallet)
+      - [Update Wallet](#update-wallet)
+      - [Delete Wallet](#delete-wallet)
+      - [List Wallets](#list-wallets)
+      - [List Transactions by Wallet](#list-transactions-by-wallet)
     - [Parties](#parties)
+      - [Create Party](#create-party)
+      - [Get Party](#get-party)
+      - [Update Party](#update-party)
+      - [Delete Party](#delete-party)
+      - [List Parties](#list-parties)
+      - [List Transactions by Party](#list-transactions-by-party)
     - [Transactions](#transactions)
+      - [Create Transaction](#create-transaction)
+      - [Get Transaction](#get-transaction)
+      - [Update Transaction](#update-transaction)
+      - [Delete Transaction](#delete-transaction)
+      - [List all Transactions](#list-all-transactions)
 
 ## Introduction
 
@@ -116,79 +138,79 @@ All endpoints may return `500 Internal Server Error`, when something unexpected 
 
 The API uses the [JWT standard](https://jwt.io/) to authenticate users and protect resources and routes
 
-- **Sign Up**
+#### Sign Up
 
-  Endpoint:
+Endpoint:
 
-  ```text
-  POST /auth/signup
-  ```
+```text
+POST /auth/signup
+```
 
-  Request payload:
+Request payload:
+
+```json
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "email@example.com",
+  "password": "123Password!{}"
+}
+```
+
+`password` has to contain at least 1 upper, lower, numerical and special char and have a minimum length of 8 chars
+
+Responses:
+
+- `201 Created`
+
+  Account was succesfully created
+
+- `400 Bad Request`
+
+  Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing first or last name, or invalid email/password.
+
+- `409 Conflict`
+
+  If you're trying to create a new account with an already registered email.
+
+#### Login
+
+Endpoint:
+
+```text
+POST /auth/login
+```
+
+Request payload:
+
+```json
+{
+  "email": "email@example.com",
+  "password": "123Password!{}"
+}
+```
+
+Responses:
+
+- `200 OK`
+
+  Account was logged in succesfully
+
+  Example:
 
   ```json
   {
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "email@example.com",
-    "password": "123Password!{}"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
   }
   ```
 
-  `password` has to contain at least 1 upper, lower, numerical and special char and have a minimum length of 8 chars
+- `400 Bad Request`
 
-  Responses:
+  Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing email or password field, or the provided password is wrong.
 
-  - `201 Created`
+- `404 Not Found`
 
-    Account was succesfully created
-
-  - `400 Bad Request`
-
-    Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing first or last name, or invalid email/password.
-
-  - `409 Conflict`
-
-    If you're trying to create a new account with an already registered email.
-
-- **Login**
-
-  Endpoint:
-
-  ```text
-  POST /auth/login
-  ```
-
-  Request payload:
-
-  ```json
-  {
-    "email": "email@example.com",
-    "password": "123Password!{}"
-  }
-  ```
-
-  Responses:
-
-  - `200 OK`
-
-    Account was logged in succesfully
-
-    Example:
-
-    ```json
-    {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-    }
-    ```
-
-  - `400 Bad Request`
-
-    Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing email or password field, or the provided password is wrong.
-
-  - `404 Not Found`
-
-    Account with the specified email does not exist.
+  Account with the specified email does not exist.
 
 ### Account
 
@@ -198,115 +220,115 @@ All routes are protected and require the following header with a valid authentic
 Authorization: Bearer <token>
 ```
 
-- **Get Account information**
+#### Get Account information
 
-  Endpoint:
+Endpoint:
 
-  ```text
-  GET /account
-  ```
+```text
+GET /account
+```
 
-  Responses:
+Responses:
 
-  - `200 OK`
+- `200 OK`
 
-    Account was retrieved succesfully
+  Account was retrieved succesfully
 
-    Example:
+  Example:
 
-    ```json
-    {
-      "id": "1",
-      "created_at": "2020-11-20T15:05:36.248855+01:00",
-      "updated_at": "2020-11-20T15:05:36.248855+01:00",
-      "first_name": "Jane",
-      "last_name": "Doe",
-      "email": "jane@doe.com"
-    }
-    ```
-
-  - `400 Bad Request`
-
-    Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing email or password field, or the provided password is wrong.
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
-
-  - `404 Not Found`
-
-    Account with the ID belonging to the token does not exist (possibly deleted).
-
-- **Update Account information**
-
-  Endpoint:
-
-  ```text
-  PATCH /account
-  ```
-
-  Request payload:
-
-  ```json5
+  ```json
   {
-    "first_name": "Jenny",       // optional
-    "last_name": "Doh",          // optional
-    "email": "jenny@doh.com"     // optional
+    "id": "1",
+    "created_at": "2020-11-20T15:05:36.248855+01:00",
+    "updated_at": "2020-11-20T15:05:36.248855+01:00",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane@doe.com"
   }
   ```
 
-  Responses:
+- `400 Bad Request`
 
-  - `200 OK`
+  Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing email or password field, or the provided password is wrong.
 
-    Acccount was updated successfully.
+- `401 Unauthorized`
 
-    Example:
+  The provided token is not valid.
 
-    ```json
-    {
-      "id": "1",
-      "created_at": "2020-11-20T15:05:36.248855+01:00",
-      "updated_at": "2020-11-20T15:05:36.248855+01:00",
-      "first_name": "Jenny",
-      "last_name": "Doh",
-      "email": "jenny@doh.com"
-    }
-    ```
+- `404 Not Found`
 
-  - `400 Bad Request`
+  Account with the ID belonging to the token does not exist (possibly deleted).
 
-    Somethinig went wrong when processing the request. Either empty request body, malformed request body, or invalid email.
+#### Update Account information
 
-  - `401 Unauthorized`
+Endpoint:
 
-    The provided token is not valid.
+```text
+PATCH /account
+```
 
-  - `404 Not Found`
+Request payload:
 
-    Account with the ID belonging to the token does not exist (possibly deleted).
+```json5
+{
+  "first_name": "Jenny",       // optional
+  "last_name": "Doh",          // optional
+  "email": "jenny@doh.com"     // optional
+}
+```
 
-- **Delete Account**
+Responses:
 
-  Endpoint:
+- `200 OK`
 
-  ```text
-  DELETE /account
+  Acccount was updated successfully.
+
+  Example:
+
+  ```json
+  {
+    "id": "1",
+    "created_at": "2020-11-20T15:05:36.248855+01:00",
+    "updated_at": "2020-11-20T15:05:36.248855+01:00",
+    "first_name": "Jenny",
+    "last_name": "Doh",
+    "email": "jenny@doh.com"
+  }
   ```
 
-  Responses:
+- `400 Bad Request`
 
-  - `204 No Content`
+  Somethinig went wrong when processing the request. Either empty request body, malformed request body, or invalid email.
 
-    Acccount was deleted successfully.
+- `401 Unauthorized`
 
-  - `401 Unauthorized`
+  The provided token is not valid.
 
-    The provided token is not valid.
+- `404 Not Found`
 
-  - `404 Not Found`
+  Account with the ID belonging to the token does not exist (possibly deleted).
 
-    Account with the ID belonging to the token does not exist (possibly previously deleted).
+#### Delete Account
+
+Endpoint:
+
+```text
+DELETE /account
+```
+
+Responses:
+
+- `204 No Content`
+
+  Acccount was deleted successfully.
+
+- `401 Unauthorized`
+
+  The provided token is not valid.
+
+- `404 Not Found`
+
+  Account with the ID belonging to the token does not exist (possibly previously deleted).
 
 ### Wallets
 
@@ -318,279 +340,279 @@ All routes are protected and require the following header with a valid authentic
 Authorization: Bearer <token>
 ```
 
-- **Create Wallet**
+#### Create Wallet
 
-  Endpoint:
+Endpoint:
 
-  ```text
-  POST /wallets
-  ```
+```text
+POST /wallets
+```
 
-  Request payload:
+Request payload:
 
-  ```json5
+```json5
+{
+  "name": "cash",
+  "description": "a wallet only for cash transactions" // optional
+}
+```
+
+Responses:
+
+- `201 Created`
+
+  Wallet was created successfully.
+
+  Example:
+
+  ```json
   {
+    "id": 2,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T15:06:27.277849+01:00",
     "name": "cash",
-    "description": "a wallet only for cash transactions" // optional
+    "description": "a wallet only for cash transactions"
   }
   ```
 
-  Responses:
+- `400 Bad Request`
 
-  - `201 Created`
+  Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
-    Wallet was created successfully.
+- `401 Unauthorized`
 
-    Example:
+  The provided token is not valid.
 
-    ```json
-    {
-      "id": 2,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "name": "cash",
-      "description": "a wallet only for cash transactions"
-    }
-    ```
+- `409 Conflict`
 
-  - `400 Bad Request`
+  A wallet with the same name belonging to the same user already exists.
 
-    Somethinig went wrong when processing the request. Either empty request body or malformed request body.
+#### Get Wallet
 
-  - `401 Unauthorized`
+Endpoint:
 
-    The provided token is not valid.
+```text
+GET /wallets/:id
+```
 
-  - `409 Conflict`
+where `:id` is the ID of the wallet you want to retrieve
 
-    A wallet with the same name belonging to the same user already exists.
+Responses:
 
-- **Get Wallet**
+- `200 OK`
 
-  Endpoint:
+  Wallet was retrieved successfully.
 
-  ```text
-  GET /wallets/:id
-  ```
+  Example:
 
-  where `:id` is the ID of the wallet you want to retrieve
-
-  Responses:
-
-  - `200 OK`
-
-    Wallet was retrieved successfully.
-
-    Example:
-
-    ```json
-    {
-      "id": 2,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "name": "cash",
-      "description": "a wallet only for cash transactions"
-    }
-    ```
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
-
-  - `403 Forbidden`
-
-    The wallet with the specified ID does not belong to the current user.
-
-  - `404 Not Found`
-
-    The wallet with the specified ID does not exist.
-
-- **Update Wallet**
-
-  Endpoint:
-
-  ```text
-  PATCH /wallets/:id
-  ```
-
-  where `:id` is the ID of the wallet you want to update
-
-  Request payload:
-
-  ```json5
+  ```json
   {
-    "name": "Cash",                   // optional
-    "description": "my cash wallet"   // optional
+    "id": 2,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T15:06:27.277849+01:00",
+    "name": "cash",
+    "description": "a wallet only for cash transactions"
   }
   ```
 
-  Responses:
+- `401 Unauthorized`
 
-  - `200 OK`
+  The provided token is not valid.
 
-    Wallet was updated successfully.
+- `403 Forbidden`
 
-    Example:
+  The wallet with the specified ID does not belong to the current user.
 
-    ```json
-    {
-      "id": 2,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T19:20:14.277849+01:00",
-      "name": "Cash",
-      "description": "my cash wallet"
-    }
-    ```
+- `404 Not Found`
 
-  - `400 Bad Request`
+  The wallet with the specified ID does not exist.
 
-    Somethinig went wrong when processing the request. Either empty request body or malformed request body.
+#### Update Wallet
 
-  - `401 Unauthorized`
+Endpoint:
 
-    The provided token is not valid.
+```text
+PATCH /wallets/:id
+```
 
-  - `403 Forbidden`
+where `:id` is the ID of the wallet you want to update
 
-    The wallet with the specified ID does not belong to the current user.
+Request payload:
 
-  - `404 Not Found`
+```json5
+{
+  "name": "Cash",                   // optional
+  "description": "my cash wallet"   // optional
+}
+```
 
-    The wallet with the specified ID does not exist.
+Responses:
 
-  - `409 Conflict`
+- `200 OK`
 
-    A wallet with the same name belonging to the same user already exists.
+  Wallet was updated successfully.
 
-- **Delete Wallet**
+  Example:
 
-  Endpoint:
-
-  ```text
-  DELETE /wallets/:id
+  ```json
+  {
+    "id": 2,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T19:20:14.277849+01:00",
+    "name": "Cash",
+    "description": "my cash wallet"
+  }
   ```
 
-  where `:id` is the ID of the wallet you want to delete
+- `400 Bad Request`
 
-  Responses:
+  Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
-  - `204 No Content`
+- `401 Unauthorized`
 
-    Wallet was deleted successfully.
+  The provided token is not valid.
 
-  - `401 Unauthorized`
+- `403 Forbidden`
 
-    The provided token is not valid.
+  The wallet with the specified ID does not belong to the current user.
 
-  - `403 Forbidden`
+- `404 Not Found`
 
-    The wallet with the specified ID does not belong to the current user.
+  The wallet with the specified ID does not exist.
 
-  - `404 Not Found`
+- `409 Conflict`
 
-    The wallet with the specified ID does not exist.
+  A wallet with the same name belonging to the same user already exists.
 
-- **List Wallets**
+#### Delete Wallet
 
-  Lists all wallets which belong to the currently logged-in user.
+Endpoint:
 
-  Endpoint:
+```text
+DELETE /wallets/:id
+```
 
-  ```text
-  GET /wallets
+where `:id` is the ID of the wallet you want to delete
+
+Responses:
+
+- `204 No Content`
+
+  Wallet was deleted successfully.
+
+- `401 Unauthorized`
+
+  The provided token is not valid.
+
+- `403 Forbidden`
+
+  The wallet with the specified ID does not belong to the current user.
+
+- `404 Not Found`
+
+  The wallet with the specified ID does not exist.
+
+#### List Wallets
+
+Lists all wallets which belong to the currently logged-in user.
+
+Endpoint:
+
+```text
+GET /wallets
+```
+
+Responses:
+
+- `200 OK`
+
+  Wallets were retrieved successfully.
+
+  Example:
+
+  ```json
+  {
+    "count": 2,
+    "entries": [
+      {
+        "id": 2,
+        "created_at": "2020-11-20T15:06:27.277849+01:00",
+        "updated_at": "2020-11-20T15:06:27.277849+01:00",
+        "name": "cash",
+        "description": "a wallet for only cash transactions"
+      },
+      {
+        "id": 5,
+        "created_at": "2020-11-20T15:11:44.906804+01:00",
+        "updated_at": "2020-11-20T15:12:19.46906+01:00",
+        "name": "Sparkasse",
+        "description": "a wallet for banking transactions"
+      }
+    ]
+  }
   ```
 
-  Responses:
+- `401 Unauthorized`
 
-  - `200 OK`
+  The provided token is not valid.
 
-    Wallets were retrieved successfully.
+- `404 Not Found`
 
-    Example:
+  The wallet with the specified ID does not exist.
 
-    ```json
-    {
-      "count": 2,
-      "entries": [
-        {
-          "id": 2,
-          "created_at": "2020-11-20T15:06:27.277849+01:00",
-          "updated_at": "2020-11-20T15:06:27.277849+01:00",
-          "name": "cash",
-          "description": "a wallet for only cash transactions"
-        },
-        {
-          "id": 5,
-          "created_at": "2020-11-20T15:11:44.906804+01:00",
-          "updated_at": "2020-11-20T15:12:19.46906+01:00",
-          "name": "Sparkasse",
-          "description": "a wallet for banking transactions"
-        }
-      ]
-    }
-    ```
+#### List Transactions by Wallet
 
-  - `401 Unauthorized`
+Lists all transactions which are associated with the wallet with the specified ID.
 
-    The provided token is not valid.
+Endpoint:
 
-  - `404 Not Found`
+```text
+GET /wallets/:id/transactions
+```
 
-    The wallet with the specified ID does not exist.
+Responses:
 
-- **List Transactions by Wallet**
+- `200 OK`
 
-  Lists all transactions which are associated with the wallet with the specified ID.
+  Transactions were retrieved successfully.
 
-  Endpoint:
+  Example:
 
-  ```text
-  GET /wallets/:id/transactions
+  ```json
+  {
+    "count": 1,
+    "entries": [
+      {
+        "id": 4,
+        "wallet_id": 2,
+        "party_id": 2,
+        "created_at": "2020-11-20T17:06:47.329695+01:00",
+        "updated_at": "2020-11-20T17:06:47.329695+01:00",
+        "timestamp": "2020-11-20T17:06:47.327376+01:00",
+        "amount": "29.99",
+        "description": "groceries"
+      },
+      {
+        "id": 10,
+        "wallet_id": 2,
+        "party_id": 3,
+        "created_at": "2020-11-20T17:06:47.329695+01:00",
+        "updated_at": "2020-11-20T17:06:47.329695+01:00",
+        "timestamp": "2020-11-20T17:06:47.327376+01:00",
+        "amount": "6.99",
+        "description": "cigarettes"
+      }
+    ]
+  }
   ```
 
-  Responses:
+- `401 Unauthorized`
 
-  - `200 OK`
+  The provided token is not valid.
 
-    Transactions were retrieved successfully.
+- `403 Forbidden`
 
-    Example:
-
-    ```json
-    {
-      "count": 1,
-      "entries": [
-        {
-          "id": 4,
-          "wallet_id": 2,
-          "party_id": 2,
-          "created_at": "2020-11-20T17:06:47.329695+01:00",
-          "updated_at": "2020-11-20T17:06:47.329695+01:00",
-          "timestamp": "2020-11-20T17:06:47.327376+01:00",
-          "amount": "29.99",
-          "description": "groceries"
-        },
-        {
-          "id": 10,
-          "wallet_id": 2,
-          "party_id": 3,
-          "created_at": "2020-11-20T17:06:47.329695+01:00",
-          "updated_at": "2020-11-20T17:06:47.329695+01:00",
-          "timestamp": "2020-11-20T17:06:47.327376+01:00",
-          "amount": "6.99",
-          "description": "cigarettes"
-        }
-      ]
-    }
-    ```
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
-
-  - `403 Forbidden`
-
-    The wallet with the specified ID does not belong to the current user.
+  The wallet with the specified ID does not belong to the current user.
 
 ### Parties
 
@@ -602,503 +624,503 @@ All routes are protected and require the following header with a valid authentic
 Authorization: Bearer <token>
 ```
 
-- **Create Party**
+#### Create Party
 
-  Endpoint:
+Endpoint:
 
-  ```text
-  POST /parties
-  ```
+```text
+POST /parties
+```
 
-  Request payload:
+Request payload:
 
-  ```json5
+```json5
+{
+  "name": "Amazon",
+}
+```
+
+Responses:
+
+- `201 Created`
+
+  Party was created successfully.
+
+  Example:
+
+  ```json
   {
+    "id": 3,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T15:06:27.277849+01:00",
     "name": "Amazon",
   }
   ```
 
-  Responses:
+- `400 Bad Request`
 
-  - `201 Created`
+  Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
-    Party was created successfully.
+- `401 Unauthorized`
 
-    Example:
+  The provided token is not valid.
 
-    ```json
-    {
-      "id": 3,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "name": "Amazon",
-    }
-    ```
+- `409 Conflict`
 
-  - `400 Bad Request`
+  A party with the same name belonging to the same user already exists.
 
-    Somethinig went wrong when processing the request. Either empty request body or malformed request body.
+#### Get Party
 
-  - `401 Unauthorized`
+Endpoint:
 
-    The provided token is not valid.
+```text
+GET /parties/:id
+```
 
-  - `409 Conflict`
+where `:id` is the ID of the party you want to retrieve
 
-    A party with the same name belonging to the same user already exists.
+Responses:
 
-- **Get Party**
+- `200 OK`
 
-  Endpoint:
+  Party was retrieved successfully.
 
-  ```text
-  GET /parties/:id
-  ```
+  Example:
 
-  where `:id` is the ID of the party you want to retrieve
-
-  Responses:
-
-  - `200 OK`
-
-    Party was retrieved successfully.
-
-    Example:
-
-    ```json
-    {
-      "id": 3,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "name": "Amazon",
-    }
-    ```
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
-
-  - `403 Forbidden`
-
-    The party with the specified ID does not belong to the current user.
-
-  - `404 Not Found`
-
-    The party with the specified ID does not exist.
-
-- **Update Party**
-
-  Endpoint:
-
-  ```text
-  PATCH /parties/:id
-  ```
-
-  where `:id` is the ID of the party you want to update
-
-  Request payload:
-
-  ```json5
+  ```json
   {
+    "id": 3,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T15:06:27.277849+01:00",
+    "name": "Amazon",
+  }
+  ```
+
+- `401 Unauthorized`
+
+  The provided token is not valid.
+
+- `403 Forbidden`
+
+  The party with the specified ID does not belong to the current user.
+
+- `404 Not Found`
+
+  The party with the specified ID does not exist.
+
+#### Update Party
+
+Endpoint:
+
+```text
+PATCH /parties/:id
+```
+
+where `:id` is the ID of the party you want to update
+
+Request payload:
+
+```json5
+{
+  "name": "Rewe"
+}
+```
+
+Responses:
+
+- `200 OK`
+
+  Party was updated successfully.
+
+  Example:
+
+  ```json
+  {
+    "id": 2,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T21:57:34.277849+01:00",
     "name": "Rewe"
   }
   ```
 
-  Responses:
+- `400 Bad Request`
 
-  - `200 OK`
+  Somethinig went wrong when processing the request. Either empty request body or malformed request body.
 
-    Party was updated successfully.
+- `401 Unauthorized`
 
-    Example:
+  The provided token is not valid.
 
-    ```json
-    {
-      "id": 2,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T21:57:34.277849+01:00",
-      "name": "Rewe"
-    }
-    ```
+- `403 Forbidden`
 
-  - `400 Bad Request`
+  The party with the specified ID does not belong to the current user.
 
-    Somethinig went wrong when processing the request. Either empty request body or malformed request body.
+- `404 Not Found`
 
-  - `401 Unauthorized`
+  The party with the specified ID does not exist.
 
-    The provided token is not valid.
+- `409 Conflict`
 
-  - `403 Forbidden`
+  A party with the same name belonging to the same user already exists.
 
-    The party with the specified ID does not belong to the current user.
+#### Delete Party
 
-  - `404 Not Found`
+Endpoint:
 
-    The party with the specified ID does not exist.
+```text
+DELETE /parties/:id
+```
 
-  - `409 Conflict`
+where `:id` is the ID of the party you want to delete
 
-    A party with the same name belonging to the same user already exists.
+Responses:
 
-- **Delete Party**
+- `204 No Content`
 
-  Endpoint:
+  Party was deleted successfully.
 
-  ```text
-  DELETE /parties/:id
+- `401 Unauthorized`
+
+  The provided token is not valid.
+
+- `403 Forbidden`
+
+  The party with the specified ID does not belong to the current user.
+
+- `404 Not Found`
+
+  The party with the specified ID does not exist.
+
+#### List Parties
+
+Lists all parties which belong to the currently logged-in user.
+
+Endpoint:
+
+```text
+GET /parties
+```
+
+Responses:
+
+- `200 OK`
+
+  Parties were retrieved successfully.
+
+  Example:
+
+  ```json
+  {
+    "count": 2,
+    "entries": [
+      {
+        "id": 2,
+        "created_at": "2020-11-20T15:06:27.277849+01:00",
+        "updated_at": "2020-11-20T15:06:27.277849+01:00",
+        "name": "Amazon",
+      },
+      {
+        "id": 5,
+        "created_at": "2020-11-20T15:11:44.906804+01:00",
+        "updated_at": "2020-11-20T15:12:19.46906+01:00",
+        "name": "Rewe",
+      }
+    ]
+  }
   ```
 
-  where `:id` is the ID of the party you want to delete
+- `401 Unauthorized`
 
-  Responses:
+  The provided token is not valid.
 
-  - `204 No Content`
+- `404 Not Found`
 
-    Party was deleted successfully.
+  The party with the specified ID does not exist.
 
-  - `401 Unauthorized`
+#### List Transactions by Party
 
-    The provided token is not valid.
+Lists all transactions which are associated with the party with the specified ID.
 
-  - `403 Forbidden`
+Endpoint:
 
-    The party with the specified ID does not belong to the current user.
+```text
+GET /parties/:id/transactions
+```
 
-  - `404 Not Found`
+Responses:
 
-    The party with the specified ID does not exist.
+- `200 OK`
 
-- **List Parties**
+  Transactions were retrieved successfully.
 
-  Lists all parties which belong to the currently logged-in user.
+  Example:
 
-  Endpoint:
-
-  ```text
-  GET /parties
+  ```json
+  {
+    "count": 1,
+    "entries": [
+      {
+        "id": 4,
+        "wallet_id": 2,
+        "party_id": 2,
+        "created_at": "2020-11-20T17:06:47.329695+01:00",
+        "updated_at": "2020-11-20T17:06:47.329695+01:00",
+        "timestamp": "2020-11-20T17:06:47.327376+01:00",
+        "amount": "29.99",
+        "description": "groceries"
+      },
+      {
+        "id": 10,
+        "wallet_id": 4,
+        "party_id": 2,
+        "created_at": "2020-11-20T17:06:47.329695+01:00",
+        "updated_at": "2020-11-20T17:06:47.329695+01:00",
+        "timestamp": "2020-11-20T17:06:47.327376+01:00",
+        "amount": "6.99",
+        "description": "cigarettes"
+      }
+    ]
+  }
   ```
 
-  Responses:
+- `401 Unauthorized`
 
-  - `200 OK`
+  The provided token is not valid.
 
-    Parties were retrieved successfully.
+- `403 Forbidden`
 
-    Example:
-
-    ```json
-    {
-      "count": 2,
-      "entries": [
-        {
-          "id": 2,
-          "created_at": "2020-11-20T15:06:27.277849+01:00",
-          "updated_at": "2020-11-20T15:06:27.277849+01:00",
-          "name": "Amazon",
-        },
-        {
-          "id": 5,
-          "created_at": "2020-11-20T15:11:44.906804+01:00",
-          "updated_at": "2020-11-20T15:12:19.46906+01:00",
-          "name": "Rewe",
-        }
-      ]
-    }
-    ```
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
-
-  - `404 Not Found`
-
-    The party with the specified ID does not exist.
-
-- **List Transactions by Party**
-
-  Lists all transactions which are associated with the party with the specified ID.
-
-  Endpoint:
-
-  ```text
-  GET /parties/:id/transactions
-  ```
-
-  Responses:
-
-  - `200 OK`
-
-    Transactions were retrieved successfully.
-
-    Example:
-
-    ```json
-    {
-      "count": 1,
-      "entries": [
-        {
-          "id": 4,
-          "wallet_id": 2,
-          "party_id": 2,
-          "created_at": "2020-11-20T17:06:47.329695+01:00",
-          "updated_at": "2020-11-20T17:06:47.329695+01:00",
-          "timestamp": "2020-11-20T17:06:47.327376+01:00",
-          "amount": "29.99",
-          "description": "groceries"
-        },
-        {
-          "id": 10,
-          "wallet_id": 4,
-          "party_id": 2,
-          "created_at": "2020-11-20T17:06:47.329695+01:00",
-          "updated_at": "2020-11-20T17:06:47.329695+01:00",
-          "timestamp": "2020-11-20T17:06:47.327376+01:00",
-          "amount": "6.99",
-          "description": "cigarettes"
-        }
-      ]
-    }
-    ```
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
-
-  - `403 Forbidden`
-
-    The party with the specified ID does not belong to the current user.
+  The party with the specified ID does not belong to the current user.
 
 ### Transactions
 
-- **Create Transaction**
+#### Create Transaction
 
-  Endpoint:
+Endpoint:
 
-  ```text
-  POST /transactions
-  ```
+```text
+POST /transactions
+```
 
-  Request payload:
+Request payload:
 
-  ```json5
+```json5
+{
+  "amount": 15.50,
+  "description": "Christmas decorations",
+  "wallet_id": 2,
+  "party_id": 2
+}
+```
+
+Responses:
+
+- `201 Created`
+
+  Transaction was created successfully.
+
+  Example:
+
+  ```json
   {
+    "id": 3,
+    "wallet_id": 2,
+    "party_id": 2,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T15:06:27.277849+01:00",
+    "timestamp": "2020-11-20T15:06:27.277849+01:00",
     "amount": 15.50,
     "description": "Christmas decorations",
-    "wallet_id": 2,
-    "party_id": 2
   }
   ```
 
-  Responses:
+- `400 Bad Request`
 
-  - `201 Created`
+  Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing amount or an amount of 0, missing/invalid/non-existent wallet ID, missing/invalid/non-existent party ID.
 
-    Transaction was created successfully.
+- `401 Unauthorized`
 
-    Example:
+  The provided token is not valid.
 
-    ```json
-    {
-      "id": 3,
-      "wallet_id": 2,
-      "party_id": 2,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "timestamp": "2020-11-20T15:06:27.277849+01:00",
-      "amount": 15.50,
-      "description": "Christmas decorations",
-    }
-    ```
+- `403 Forbidden`
 
-  - `400 Bad Request`
+  The provided wallet ID or party ID does not belong to the current user.
 
-    Somethinig went wrong when processing the request. Either empty request body, malformed request body, missing amount or an amount of 0, missing/invalid/non-existent wallet ID, missing/invalid/non-existent party ID.
+#### Get Transaction
 
-  - `401 Unauthorized`
+Endpoint:
 
-    The provided token is not valid.
+```text
+GET /transactions/:id
+```
 
-  - `403 Forbidden`
+where `:id` is the ID of the transaction you want to retrieve
 
-    The provided wallet ID or party ID does not belong to the current user.
+Responses:
 
-- **Get Transaction**
+- `200 OK`
 
-  Endpoint:
+  Transaction was retrieved successfully.
 
-  ```text
-  GET /transactions/:id
-  ```
+  Example:
 
-  where `:id` is the ID of the transaction you want to retrieve
-
-  Responses:
-
-  - `200 OK`
-
-    Transaction was retrieved successfully.
-
-    Example:
-
-    ```json
-    {
-      "id": 3,
-      "wallet_id": 2,
-      "party_id": 2,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "timestamp": "2020-11-20T15:06:27.277849+01:00",
-      "amount": 15.50,
-      "description": "Christmas decorations",
-    }
-    ```
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
-
-  - `403 Forbidden`
-
-    The transaction with the specified ID does not belong to the current user.
-
-  - `404 Not Found`
-
-    The transaction with the specified ID does not exist.
-
-- **Update Transaction**
-
-  Endpoint:
-
-  ```text
-  PATCH /transactions/:id
-  ```
-
-  where `:id` is the ID of the transaction you want to update
-
-  Request payload:
-
-  ```json5
+  ```json
   {
-    "wallet_id": 3,                                   // optional
-    "party_id": 6,                                    // optional
-    "timestamp": "2020-11-20T15:06:27.277849+01:00",  // optional
-    "amount": 25.50,                                  // optional
-    "description": "Birthday decorations",            // optional
+    "id": 3,
+    "wallet_id": 2,
+    "party_id": 2,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T15:06:27.277849+01:00",
+    "timestamp": "2020-11-20T15:06:27.277849+01:00",
+    "amount": 15.50,
+    "description": "Christmas decorations",
   }
   ```
 
-  Responses:
+- `401 Unauthorized`
 
-  - `200 OK`
+  The provided token is not valid.
 
-    Transaction was updated successfully.
+- `403 Forbidden`
 
-    Example:
+  The transaction with the specified ID does not belong to the current user.
 
-    ```json
-    {
-      "id": 3,
-      "wallet_id": 3,
-      "party_id": 6,
-      "created_at": "2020-11-20T15:06:27.277849+01:00",
-      "updated_at": "2020-11-20T15:06:27.277849+01:00",
-      "timestamp": "2020-11-20T15:06:27.277849+01:00",
-      "amount": 25.50,
-      "description": "Birthday decorations",
-    }
-    ```
+- `404 Not Found`
 
-  - `400 Bad Request`
+  The transaction with the specified ID does not exist.
 
-    Somethinig went wrong when processing the request. Either empty request body, malformed request body, invalid/non-existent wallet ID, invalid/non-existent party ID.
+#### Update Transaction
 
-  - `401 Unauthorized`
+Endpoint:
 
-    The provided token is not valid.
+```text
+PATCH /transactions/:id
+```
 
-  - `403 Forbidden`
+where `:id` is the ID of the transaction you want to update
 
-    The provided wallet ID or party ID does not belong to the current user.
+Request payload:
 
-  - `404 Not Found`
+```json5
+{
+  "wallet_id": 3,                                   // optional
+  "party_id": 6,                                    // optional
+  "timestamp": "2020-11-20T15:06:27.277849+01:00",  // optional
+  "amount": 25.50,                                  // optional
+  "description": "Birthday decorations",            // optional
+}
+```
 
-    The transaction with the specified ID does not exist.
+Responses:
 
-- **Delete Transaction**
+- `200 OK`
 
-  Endpoint:
+  Transaction was updated successfully.
 
-  ```text
-  DELETE /transactions/:id
+  Example:
+
+  ```json
+  {
+    "id": 3,
+    "wallet_id": 3,
+    "party_id": 6,
+    "created_at": "2020-11-20T15:06:27.277849+01:00",
+    "updated_at": "2020-11-20T15:06:27.277849+01:00",
+    "timestamp": "2020-11-20T15:06:27.277849+01:00",
+    "amount": 25.50,
+    "description": "Birthday decorations",
+  }
   ```
 
-  where `:id` is the ID of the transaction you want to delete
+- `400 Bad Request`
 
-  Responses:
+  Somethinig went wrong when processing the request. Either empty request body, malformed request body, invalid/non-existent wallet ID, invalid/non-existent party ID.
 
-  - `204 No Content`
+- `401 Unauthorized`
 
-    Transaction was deleted successfully.
+  The provided token is not valid.
 
-  - `401 Unauthorized`
+- `403 Forbidden`
 
-    The provided token is not valid.
+  The provided wallet ID or party ID does not belong to the current user.
 
-  - `403 Forbidden`
+- `404 Not Found`
 
-    The transaction with the specified ID does not belong to the current user.
+  The transaction with the specified ID does not exist.
 
-  - `404 Not Found`
+#### Delete Transaction
 
-    The transaction with the specified ID does not exist.
+Endpoint:
 
-- **List all Transactions**
+```text
+DELETE /transactions/:id
+```
 
-  Lists all transactions.
+where `:id` is the ID of the transaction you want to delete
 
-  Endpoint:
+Responses:
 
-  ```text
-  GET /transactions
+- `204 No Content`
+
+  Transaction was deleted successfully.
+
+- `401 Unauthorized`
+
+  The provided token is not valid.
+
+- `403 Forbidden`
+
+  The transaction with the specified ID does not belong to the current user.
+
+- `404 Not Found`
+
+  The transaction with the specified ID does not exist.
+
+#### List all Transactions
+
+Lists all transactions.
+
+Endpoint:
+
+```text
+GET /transactions
+```
+
+Responses:
+
+- `200 OK`
+
+  Transactions were retrieved successfully.
+
+  Example:
+
+  ```json
+  {
+    "count": 1,
+    "entries": [
+      {
+        "id": 4,
+        "wallet_id": 2,
+        "party_id": 5,
+        "created_at": "2020-11-20T17:06:47.329695+01:00",
+        "updated_at": "2020-11-20T17:06:47.329695+01:00",
+        "timestamp": "2020-11-20T17:06:47.327376+01:00",
+        "amount": "29.99",
+        "description": "groceries"
+      },
+      {
+        "id": 10,
+        "wallet_id": 4,
+        "party_id": 2,
+        "created_at": "2020-11-20T17:06:47.329695+01:00",
+        "updated_at": "2020-11-20T17:06:47.329695+01:00",
+        "timestamp": "2020-11-20T17:06:47.327376+01:00",
+        "amount": "6.99",
+        "description": "cigarettes"
+      }
+    ]
+  }
   ```
 
-  Responses:
+- `401 Unauthorized`
 
-  - `200 OK`
-
-    Transactions were retrieved successfully.
-
-    Example:
-
-    ```json
-    {
-      "count": 1,
-      "entries": [
-        {
-          "id": 4,
-          "wallet_id": 2,
-          "party_id": 5,
-          "created_at": "2020-11-20T17:06:47.329695+01:00",
-          "updated_at": "2020-11-20T17:06:47.329695+01:00",
-          "timestamp": "2020-11-20T17:06:47.327376+01:00",
-          "amount": "29.99",
-          "description": "groceries"
-        },
-        {
-          "id": 10,
-          "wallet_id": 4,
-          "party_id": 2,
-          "created_at": "2020-11-20T17:06:47.329695+01:00",
-          "updated_at": "2020-11-20T17:06:47.329695+01:00",
-          "timestamp": "2020-11-20T17:06:47.327376+01:00",
-          "amount": "6.99",
-          "description": "cigarettes"
-        }
-      ]
-    }
-    ```
-
-  - `401 Unauthorized`
-
-    The provided token is not valid.
+  The provided token is not valid.
