@@ -8,7 +8,8 @@
     - [Running the dev server](#running-the-dev-server)
     - [Running the test suite](#running-the-test-suite)
     - [Building the dockerized application](#building-the-dockerized-application)
-  - [Architecture](#architecture)
+  - [Backend Architecture](#backend-architecture)
+  - [Database](#database)
   - [Documentation](#documentation)
     - [Authentication](#authentication)
       - [Sign Up](#sign-up)
@@ -137,9 +138,15 @@ To build the application together with a running database you can use the provid
 docker-compose up --build
 ```
 
-## Architecture
+## Backend Architecture
 
 ![Architecture Diagram](docs/XpenseBackend.png)
+
+The live version is running on Digital Ocean Ubuntu 20.4 Droplet. Nginx serves as a reverse proxy within Docker and redirects HTTP traffic to HTTPS and adds SSL credentals, protocols, and security headers. It redirects all incoming requests to the containerized golang application. Internally the application also has access to the Postgres DB also running in a Docker container. All containers are running within the same network.
+
+## Database
+
+![ER-model](docs/ER.png)
 
 ## Documentation
 
