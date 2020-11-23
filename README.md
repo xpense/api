@@ -38,6 +38,7 @@
       - [Update Transaction](#update-transaction)
       - [Delete Transaction](#delete-transaction)
       - [List all Transactions](#list-all-transactions)
+  - [Contributors](#contributors)
 
 ## Introduction
 
@@ -1142,3 +1143,7 @@ Responses:
 - `401 Unauthorized`
 
   The provided token is not valid.
+
+## Contributors
+
+@desi-belokonska and @sanevillain have pair-programmed the entire project together
