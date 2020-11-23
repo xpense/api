@@ -1,0 +1,16 @@
+version: "3.6"
+services:
+  postgres:
+    image: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      DATABASE_HOST: ${DB_HOST}
+    volumes:
+      - "xpense_postgresql:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+volumes:
+  xpense_postgresql:

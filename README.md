@@ -7,6 +7,7 @@
     - [Setting up environment variables](#setting-up-environment-variables)
     - [Running the dev server](#running-the-dev-server)
     - [Running the test suite](#running-the-test-suite)
+    - [Building the dockerized application](#building-the-dockerized-application)
   - [Documentation](#documentation)
     - [Authentication](#authentication)
       - [Sign Up](#sign-up)
@@ -79,14 +80,11 @@ For `Linux` and `Windows` users - please use the linked resources to download th
 
   You need a running [PostgreSQL](https://www.postgresql.org/download/) server to use the API.
 
-  `Docker` users can run the provided `docker-compose.yml` file.
+  `Docker` users can run the provided `docker-compose.dev.yml` file.
 
   ```sh
-  # create a volume first to persist data
-  docker volume create xpense_postgresql
-
-  # start the docker container
-  docker-compose up
+  # start the dev docker container
+  docker-compose -f docker-compose.dev.yml up
   ```
 
 - **Postman (optional)**
@@ -103,7 +101,7 @@ For `Linux` and `Windows` users - please use the linked resources to download th
 Copy the example `env` file and set the required variables
 
 ```sh
-cp .env.example.yml .env.yml
+cp .env.example .env
 ```
 
 ### Running the dev server
@@ -128,6 +126,14 @@ To run all the tests:
 
 ```sh
 go test ./...
+```
+
+### Building the dockerized application
+
+To build the application together with a running database you can use the provided `docker-compose.yml` file.
+
+```sh
+docker-compose up --build
 ```
 
 ## Documentation

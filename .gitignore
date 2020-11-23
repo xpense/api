@@ -16,4 +16,4 @@
 tmp/
 
 # Environment variables
-.env.yml
+.env

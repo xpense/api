@@ -17,17 +17,19 @@ import (
 )
 
 func main() {
-	if _, err := os.Stat(".env.yml"); err != nil {
+	if _, err := os.Stat(".env"); err != nil {
 		panic(fmt.Sprintf("couldn't find env file: %v", err))
 	}
 
-	if err := godotenv.Load(".env.yml"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		panic(fmt.Sprintf("couldn't load env file: %v", err))
 	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = ":8080"
+	} else {
+		port = ":" + port
 	}
 
 	issuer := os.Getenv("JWT_ISSUER")
@@ -40,9 +42,13 @@ func main() {
 		panic("JWT_SECRET not set!")
 	}
 
-	postgresURI := os.Getenv("POSTGRES_CONNECTION")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+	postgresConnection := fmt.Sprintf("postgresql://%s:%s@%s:5432/%s", dbUser, dbPassword, dbHost, dbName)
 
-	db, err := gorm.Open(postgres.Open(postgresURI), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(postgresConnection), &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags),
 			logger.Config{
