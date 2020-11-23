@@ -2,7 +2,9 @@ on:
   push:
     branches:
       - main
-      - fix/workflow
+  pull_request:
+    branches:
+      - main
 
 name: Test
 
@@ -10,7 +12,7 @@ jobs:
   test:
     strategy:
       matrix:
-        platform: [ ubuntu-latest, macos-latest ]
+        platform: [ubuntu-latest, macos-latest]
 
     runs-on: ${{ matrix.platform }}
     steps:
