@@ -17,6 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install Mockery
+        run: go get github.com/vektra/mockery/v2/.../
+
       - name: Generate mocks
         run: ./mocks.sh
 
