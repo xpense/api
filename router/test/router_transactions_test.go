@@ -225,11 +225,11 @@ func TestCreateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
-				Amount:    decimal.NewFromInt32(100),
-				UserID:    userID,
-				WalletID:  walletID,
-				PartyID:   partyID,
+				// Timestamp: time.Now().Round(0),
+				Amount:   decimal.NewFromInt32(100),
+				UserID:   userID,
+				WalletID: walletID,
+				PartyID:  partyID,
 			}
 
 			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
