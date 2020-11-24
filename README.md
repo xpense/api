@@ -96,8 +96,8 @@ For `Linux` and `Windows` users - please use the linked resources to download th
 
   1. Download [Postman](https://www.postman.com/downloads/).
   2. Import the collection from `/docs`
-  3. Use the `/auth/signup` method to register
-  4. Use the `/auth/login` method to login with your newly created account (an authentication token will be saved automatically for you and you will be able to make subsequent requests to all routes without having to set the `Authorization` header)
+  3. Use the `/v1/auth/signup` method to register
+  4. Use the `/v1/auth/login` method to login with your newly created account (an authentication token will be saved automatically for you and you will be able to make subsequent requests to all routes without having to set the `Authorization` header)
 
 ### Setting up environment variables
 
@@ -151,6 +151,8 @@ The live version is running on Digital Ocean Ubuntu 20.4 Droplet. Nginx serves a
 
 ## Documentation
 
+The backend is versioned. The current version is `v1`.
+
 All endpoints may return `500 Internal Server Error`, when something unexpected happens on the server side.
 
 ### Authentication
@@ -162,7 +164,7 @@ The API uses the [JWT standard](https://jwt.io/) to authenticate users and prote
 Endpoint:
 
 ```text
-POST /auth/signup
+POST /v1/auth/signup
 ```
 
 Request payload:
@@ -197,7 +199,7 @@ Responses:
 Endpoint:
 
 ```text
-POST /auth/login
+POST /v1/auth/login
 ```
 
 Request payload:
@@ -233,7 +235,7 @@ Responses:
 
 ### Account
 
-All routes are protected and require the following header with a valid authentication token (can be obtained from `/auth/login`):
+All routes are protected and require the following header with a valid authentication token (can be obtained from [Login](#login)):
 
 ```text
 Authorization: Bearer <token>
@@ -244,7 +246,7 @@ Authorization: Bearer <token>
 Endpoint:
 
 ```text
-GET /account
+GET /v1/account
 ```
 
 Responses:
@@ -283,7 +285,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /account
+PATCH /v1/account
 ```
 
 Request payload:
@@ -332,7 +334,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /account
+DELETE /v1/account
 ```
 
 Responses:
@@ -353,7 +355,7 @@ Responses:
 
 A wallet represents a group of transactions belonging to a user. One user can have multiple wallets (e.g. one for cash, one for the bank, one for work)
 
-All routes are protected and require the following header with a valid authentication token (can be obtained from `/auth/login`):
+All routes are protected and require the following header with a valid authentication token (can be obtained from [Login](#login)):
 
 ```text
 Authorization: Bearer <token>
@@ -364,7 +366,7 @@ Authorization: Bearer <token>
 Endpoint:
 
 ```text
-POST /wallets
+POST /v1/wallets
 ```
 
 Request payload:
@@ -411,7 +413,7 @@ Responses:
 Endpoint:
 
 ```text
-GET /wallets/:id
+GET /v1/wallets/:id
 ```
 
 where `:id` is the ID of the wallet you want to retrieve
@@ -451,7 +453,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /wallets/:id
+PATCH /v1/wallets/:id
 ```
 
 where `:id` is the ID of the wallet you want to update
@@ -508,7 +510,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /wallets/:id
+DELETE /v1/wallets/:id
 ```
 
 where `:id` is the ID of the wallet you want to delete
@@ -538,7 +540,7 @@ Lists all wallets which belong to the currently logged-in user.
 Endpoint:
 
 ```text
-GET /wallets
+GET /v1/wallets
 ```
 
 Responses:
@@ -586,7 +588,7 @@ Lists all transactions which are associated with the wallet with the specified I
 Endpoint:
 
 ```text
-GET /wallets/:id/transactions
+GET /v1/wallets/:id/transactions
 ```
 
 Responses:
@@ -637,7 +639,7 @@ Responses:
 
 A party represents the sender or the recipient of a transaction created by the user. If the transaction is an expense, then the party represents the recipient, whereas if the transaction is an income, then the party represents the sender.
 
-All routes are protected and require the following header with a valid authentication token (can be obtained from `/auth/login`):
+All routes are protected and require the following header with a valid authentication token (can be obtained from [Login](#login)):
 
 ```text
 Authorization: Bearer <token>
@@ -648,7 +650,7 @@ Authorization: Bearer <token>
 Endpoint:
 
 ```text
-POST /parties
+POST /v1/parties
 ```
 
 Request payload:
@@ -693,7 +695,7 @@ Responses:
 Endpoint:
 
 ```text
-GET /parties/:id
+GET /v1/parties/:id
 ```
 
 where `:id` is the ID of the party you want to retrieve
@@ -732,7 +734,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /parties/:id
+PATCH /v1/parties/:id
 ```
 
 where `:id` is the ID of the party you want to update
@@ -787,7 +789,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /parties/:id
+DELETE /v1/parties/:id
 ```
 
 where `:id` is the ID of the party you want to delete
@@ -817,7 +819,7 @@ Lists all parties which belong to the currently logged-in user.
 Endpoint:
 
 ```text
-GET /parties
+GET /v1/parties
 ```
 
 Responses:
@@ -863,7 +865,7 @@ Lists all transactions which are associated with the party with the specified ID
 Endpoint:
 
 ```text
-GET /parties/:id/transactions
+GET /v1/parties/:id/transactions
 ```
 
 Responses:
@@ -912,12 +914,20 @@ Responses:
 
 ### Transactions
 
+A transaction is either an income (when the amount is positive) or an expense (when the amount is negative. Each transaction belongs to a specific user and is associated with a wallet and a party.)
+
+All routes are protected and require the following header with a valid authentication token (can be obtained from [Login](#login)):
+
+```text
+Authorization: Bearer <token>
+```
+
 #### Create Transaction
 
 Endpoint:
 
 ```text
-POST /transactions
+POST /v1/transactions
 ```
 
 Request payload:
@@ -969,7 +979,7 @@ Responses:
 Endpoint:
 
 ```text
-GET /transactions/:id
+GET /v1/transactions/:id
 ```
 
 where `:id` is the ID of the transaction you want to retrieve
@@ -1012,7 +1022,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /transactions/:id
+PATCH /v1/transactions/:id
 ```
 
 where `:id` is the ID of the transaction you want to update
@@ -1071,7 +1081,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /transactions/:id
+DELETE /v1/transactions/:id
 ```
 
 where `:id` is the ID of the transaction you want to delete
@@ -1101,7 +1111,7 @@ Lists all transactions.
 Endpoint:
 
 ```text
-GET /transactions
+GET /v1/transactions
 ```
 
 Responses:
