@@ -70,7 +70,7 @@ func TestCreateTransaction(t *testing.T) {
 
 		t.Run("Create transaction with valid data but missing wallet id", func(t *testing.T) {
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 			}
@@ -89,7 +89,7 @@ func TestCreateTransaction(t *testing.T) {
 		t.Run("Create transaction with valid data with non-existent wallet id", func(t *testing.T) {
 			walletID := uint(1)
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 				WalletID:  walletID,
@@ -114,7 +114,7 @@ func TestCreateTransaction(t *testing.T) {
 				UserID: userID + 1,
 			}
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 				WalletID:  walletID,
@@ -139,7 +139,7 @@ func TestCreateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 				WalletID:  walletID,
@@ -165,7 +165,7 @@ func TestCreateTransaction(t *testing.T) {
 			}
 			partyID := uint(2)
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 				WalletID:  walletID,
@@ -196,7 +196,7 @@ func TestCreateTransaction(t *testing.T) {
 				UserID: userID + 1,
 			}
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 				WalletID:  walletID,
@@ -227,7 +227,7 @@ func TestCreateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 				WalletID:  walletID,
@@ -311,7 +311,7 @@ func TestGetTransaction(t *testing.T) {
 		t.Run("Get transaction with valid id that belongs to another user", func(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID + 1,
 			}
@@ -329,7 +329,7 @@ func TestGetTransaction(t *testing.T) {
 		t.Run("Get transaction with valid id", func(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID,
 			}
@@ -404,7 +404,7 @@ func TestUpdateTransaction(t *testing.T) {
 		t.Run("Try to update transaction with valid id that belongs to another user", func(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID + 1,
 			}
@@ -620,7 +620,7 @@ func TestDeleteTransaction(t *testing.T) {
 		t.Run("Try to delete transaction with valid id that belongs to another user", func(t *testing.T) {
 			id := uint(1)
 			transaction := &model.Transaction{
-				Timestamp: time.Now().Round(0),
+				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
 				UserID:    userID + 1,
 			}
