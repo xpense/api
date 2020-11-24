@@ -15,6 +15,8 @@ import (
 	"testing"
 )
 
+const baseAccountPath = "/account/"
+
 func TestGetAccount(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
@@ -23,7 +25,7 @@ func TestGetAccount(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newAccountRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, "/account/", nil)
+		req, _ := http.NewRequest(http.MethodGet, baseAccountPath, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
@@ -83,7 +85,7 @@ func TestUpdateAccount(t *testing.T) {
 
 	newAccountRequest := func(user *model.User, token string) *http.Request {
 		body := createRequestBody(user)
-		req, _ := http.NewRequest(http.MethodPatch, "/account/", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPatch, baseAccountPath, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -178,7 +180,7 @@ func TestDeleteAccount(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newAccountRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodDelete, "/account/", nil)
+		req, _ := http.NewRequest(http.MethodDelete, baseAccountPath, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}

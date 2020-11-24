@@ -16,6 +16,8 @@ import (
 	"testing"
 )
 
+const baseAuthPath = "/auth"
+
 func TestSignUp(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
@@ -25,7 +27,7 @@ func TestSignUp(t *testing.T) {
 
 	newUserRequest := func(user *model.User) *http.Request {
 		body := createRequestBody(user)
-		req, _ := http.NewRequest(http.MethodPost, "/auth/signup", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPost, baseAuthPath+"/signup", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		return req
 	}
@@ -148,7 +150,7 @@ func TestLogin(t *testing.T) {
 
 	newLoginRequest := func(login *handlers.LoginInfo) *http.Request {
 		body := createRequestBody(login)
-		req, _ := http.NewRequest(http.MethodPost, "/auth/login", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPost, baseAuthPath+"/login", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		return req
 	}

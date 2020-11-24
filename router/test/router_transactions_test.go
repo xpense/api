@@ -19,6 +19,8 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const baseTransactionsPath = "/transactions/"
+
 func TestCreateTransaction(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
@@ -28,7 +30,7 @@ func TestCreateTransaction(t *testing.T) {
 
 	newTransactionRequest := func(transaction *model.Transaction, token string) *http.Request {
 		body := createRequestBody(transaction)
-		req, _ := http.NewRequest(http.MethodPost, "/transactions/", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPost, baseTransactionsPath, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -225,11 +227,11 @@ func TestCreateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 			transaction := &model.Transaction{
-				// Timestamp: time.Now().Round(0),
-				Amount:   decimal.NewFromInt32(100),
-				UserID:   userID,
-				WalletID: walletID,
-				PartyID:  partyID,
+				Timestamp: time.Now().Round(0),
+				Amount:    decimal.NewFromInt32(100),
+				UserID:    userID,
+				WalletID:  walletID,
+				PartyID:   partyID,
 			}
 
 			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
@@ -257,7 +259,7 @@ func TestGetTransaction(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/transactions/%d", id)
+		url := fmt.Sprintf("%s%d", baseTransactionsPath, id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -355,7 +357,7 @@ func TestUpdateTransaction(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionRequest := func(id uint, transaction *model.Transaction, token string) *http.Request {
-		url := fmt.Sprintf("/transactions/%d", id)
+		url := fmt.Sprintf("%s%d", baseTransactionsPath, id)
 		body := createRequestBody(transaction)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -577,7 +579,7 @@ func TestDeleteTransaction(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	newTransactionRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("/transactions/%d", id)
+		url := fmt.Sprintf("%s%d", baseTransactionsPath, id)
 		req, _ := http.NewRequest(http.MethodDelete, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -668,7 +670,7 @@ func TestListTransactions(t *testing.T) {
 	}
 
 	newTransactionRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, "/transactions/", nil)
+		req, _ := http.NewRequest(http.MethodGet, baseTransactionsPath, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
