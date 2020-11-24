@@ -19,7 +19,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-const baseTransactionsPath = "/transactions/"
+const baseTransactionsPath = "/v1/transactions/"
 
 func TestCreateTransaction(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}

@@ -609,7 +609,7 @@
 		{
 			"id": "591d4af8-c7e0-48d6-bb50-340211c77122",
 			"key": "prefix",
-			"value": "http://localhost:8080"
+			"value": "http://localhost:8080/v1"
 		},
 		{
 			"id": "6075a16f-126d-4f06-9788-857da9e15041",

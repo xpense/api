@@ -38,7 +38,9 @@ func Setup(
 
 	handler := handlers.New(repo, jwtService, hasher)
 
-	auth := router.Group("/auth")
+	v1 := router.Group("/v1")
+
+	auth := v1.Group("/auth")
 	{
 		auth.POST("/signup", handler.SignUp)
 		auth.POST("/login", handler.Login)
@@ -47,14 +49,14 @@ func Setup(
 	commonM := middleware.NewCommonMiddleware()
 	authM := auth_middleware.New(jwtService)
 
-	account := router.Group("/account").Use(authM.IsAuthenticated)
+	account := v1.Group("/account").Use(authM.IsAuthenticated)
 	{
 		account.GET("/", handler.GetAccount)
 		account.PATCH("/", handler.UpdateAccount)
 		account.DELETE("/", handler.DeleteAccount)
 	}
 
-	wallets := router.Group("/wallets").Use(authM.IsAuthenticated)
+	wallets := v1.Group("/wallets").Use(authM.IsAuthenticated)
 	{
 		walletsM := wallets_middleware.New(repo)
 
@@ -66,7 +68,7 @@ func Setup(
 		wallets.GET("/:id/transactions", commonM.SetIDParamToContext, walletsM.ValidateOwnership, handler.ListTransactionsByWallet)
 	}
 
-	parties := router.Group("/parties").Use(authM.IsAuthenticated)
+	parties := v1.Group("/parties").Use(authM.IsAuthenticated)
 	{
 		partiesM := parties_middleware.New(repo)
 
@@ -78,7 +80,7 @@ func Setup(
 		parties.GET("/:id/transactions", commonM.SetIDParamToContext, partiesM.ValidateOwnership, handler.ListTransactionsByParty)
 	}
 
-	transactions := router.Group("/transactions").Use(authM.IsAuthenticated)
+	transactions := v1.Group("/transactions").Use(authM.IsAuthenticated)
 	{
 		txM := transactions_middleware.New(repo)
 
