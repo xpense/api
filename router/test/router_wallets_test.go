@@ -17,7 +17,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-const baseWalletsPath = "/v1/wallets/"
+const baseWalletsPath = "/api/v1/wallets/"
 
 func TestCreateWallet(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}

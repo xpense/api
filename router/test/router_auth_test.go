@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-const baseAuthPath = "/v1/auth"
+const baseAuthPath = "/api/v1/auth"
 
 func TestSignUp(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}

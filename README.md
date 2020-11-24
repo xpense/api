@@ -96,8 +96,8 @@ For `Linux` and `Windows` users - please use the linked resources to download th
 
   1. Download [Postman](https://www.postman.com/downloads/).
   2. Import the collection from `/docs`
-  3. Use the `/v1/auth/signup` method to register
-  4. Use the `/v1/auth/login` method to login with your newly created account (an authentication token will be saved automatically for you and you will be able to make subsequent requests to all routes without having to set the `Authorization` header)
+  3. Use the `/api/v1/auth/signup` method to register
+  4. Use the `/api/v1/auth/login` method to login with your newly created account (an authentication token will be saved automatically for you and you will be able to make subsequent requests to all routes without having to set the `Authorization` header)
 
 ### Setting up environment variables
 
@@ -164,7 +164,7 @@ The API uses the [JWT standard](https://jwt.io/) to authenticate users and prote
 Endpoint:
 
 ```text
-POST /v1/auth/signup
+POST /api/v1/auth/signup
 ```
 
 Request payload:
@@ -199,7 +199,7 @@ Responses:
 Endpoint:
 
 ```text
-POST /v1/auth/login
+POST /api/v1/auth/login
 ```
 
 Request payload:
@@ -246,7 +246,7 @@ Authorization: Bearer <token>
 Endpoint:
 
 ```text
-GET /v1/account
+GET /api/v1/account
 ```
 
 Responses:
@@ -285,7 +285,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /v1/account
+PATCH /api/v1/account
 ```
 
 Request payload:
@@ -334,7 +334,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /v1/account
+DELETE /api/v1/account
 ```
 
 Responses:
@@ -366,7 +366,7 @@ Authorization: Bearer <token>
 Endpoint:
 
 ```text
-POST /v1/wallets
+POST /api/v1/wallets
 ```
 
 Request payload:
@@ -413,7 +413,7 @@ Responses:
 Endpoint:
 
 ```text
-GET /v1/wallets/:id
+GET /api/v1/wallets/:id
 ```
 
 where `:id` is the ID of the wallet you want to retrieve
@@ -453,7 +453,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /v1/wallets/:id
+PATCH /api/v1/wallets/:id
 ```
 
 where `:id` is the ID of the wallet you want to update
@@ -510,7 +510,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /v1/wallets/:id
+DELETE /api/v1/wallets/:id
 ```
 
 where `:id` is the ID of the wallet you want to delete
@@ -540,7 +540,7 @@ Lists all wallets which belong to the currently logged-in user.
 Endpoint:
 
 ```text
-GET /v1/wallets
+GET /api/v1/wallets
 ```
 
 Responses:
@@ -588,7 +588,7 @@ Lists all transactions which are associated with the wallet with the specified I
 Endpoint:
 
 ```text
-GET /v1/wallets/:id/transactions
+GET /api/v1/wallets/:id/transactions
 ```
 
 Responses:
@@ -650,7 +650,7 @@ Authorization: Bearer <token>
 Endpoint:
 
 ```text
-POST /v1/parties
+POST /api/v1/parties
 ```
 
 Request payload:
@@ -695,7 +695,7 @@ Responses:
 Endpoint:
 
 ```text
-GET /v1/parties/:id
+GET /api/v1/parties/:id
 ```
 
 where `:id` is the ID of the party you want to retrieve
@@ -734,7 +734,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /v1/parties/:id
+PATCH /api/v1/parties/:id
 ```
 
 where `:id` is the ID of the party you want to update
@@ -789,7 +789,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /v1/parties/:id
+DELETE /api/v1/parties/:id
 ```
 
 where `:id` is the ID of the party you want to delete
@@ -819,7 +819,7 @@ Lists all parties which belong to the currently logged-in user.
 Endpoint:
 
 ```text
-GET /v1/parties
+GET /api/v1/parties
 ```
 
 Responses:
@@ -865,7 +865,7 @@ Lists all transactions which are associated with the party with the specified ID
 Endpoint:
 
 ```text
-GET /v1/parties/:id/transactions
+GET /api/v1/parties/:id/transactions
 ```
 
 Responses:
@@ -927,7 +927,7 @@ Authorization: Bearer <token>
 Endpoint:
 
 ```text
-POST /v1/transactions
+POST /api/v1/transactions
 ```
 
 Request payload:
@@ -979,7 +979,7 @@ Responses:
 Endpoint:
 
 ```text
-GET /v1/transactions/:id
+GET /api/v1/transactions/:id
 ```
 
 where `:id` is the ID of the transaction you want to retrieve
@@ -1022,7 +1022,7 @@ Responses:
 Endpoint:
 
 ```text
-PATCH /v1/transactions/:id
+PATCH /api/v1/transactions/:id
 ```
 
 where `:id` is the ID of the transaction you want to update
@@ -1081,7 +1081,7 @@ Responses:
 Endpoint:
 
 ```text
-DELETE /v1/transactions/:id
+DELETE /api/v1/transactions/:id
 ```
 
 where `:id` is the ID of the transaction you want to delete
@@ -1111,7 +1111,7 @@ Lists all transactions.
 Endpoint:
 
 ```text
-GET /v1/transactions
+GET /api/v1/transactions
 ```
 
 Responses:

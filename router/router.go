@@ -38,7 +38,7 @@ func Setup(
 
 	handler := handlers.New(repo, jwtService, hasher)
 
-	v1 := router.Group("/v1")
+	v1 := router.Group("/api/v1")
 
 	auth := v1.Group("/auth")
 	{

@@ -17,7 +17,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-const basePartiesPath = "/v1/parties/"
+const basePartiesPath = "/api/v1/parties/"
 
 func TestCreateParty(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}

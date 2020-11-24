@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-const baseAccountPath = "/v1/account/"
+const baseAccountPath = "/api/v1/account/"
 
 func TestGetAccount(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
