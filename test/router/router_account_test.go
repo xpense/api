@@ -48,7 +48,7 @@ func TestGetAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Get existing user", func(t *testing.T) {
@@ -61,7 +61,7 @@ func TestGetAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertUserResponseBody(t, res, user)
 		})
 	})
@@ -108,7 +108,7 @@ func TestUpdateAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Update existing user with empty body", func(t *testing.T) {
@@ -121,7 +121,7 @@ func TestUpdateAccount(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorEmptyBody.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -135,7 +135,7 @@ func TestUpdateAccount(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorEmail.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -149,7 +149,7 @@ func TestUpdateAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertUserResponseBody(t, res, user)
 		})
 	})
@@ -189,7 +189,7 @@ func TestDeleteAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Delete existing user", func(t *testing.T) {
@@ -200,7 +200,7 @@ func TestDeleteAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNoContent)
+			AssertStatusCode(t, res, http.StatusNoContent)
 		})
 	})
 }

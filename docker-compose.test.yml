@@ -9,8 +9,8 @@ services:
       POSTGRES_DB: ${TEST_DB_NAME}
       DATABASE_HOST: ${TEST_DB_HOST}
     volumes:
-      - "xpense_postgresql:/var/lib/postgresql/data"
+      - "test_xpense_postgresql:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
 volumes:
-  xpense_postgresql:
+  test_xpense_postgresql:

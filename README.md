@@ -8,6 +8,9 @@
     - [Running the dev server](#running-the-dev-server)
     - [Generating test mocks](#generating-test-mocks)
     - [Running the test suite](#running-the-test-suite)
+      - [Unit tests](#unit-tests)
+      - [Integration tests](#integration-tests)
+      - [All tests](#all-tests)
   - [Backend Architecture](#backend-architecture)
   - [Database](#database)
   - [Documentation](#documentation)
@@ -79,6 +82,16 @@ For `Linux` and `Windows` users - please use the linked resources to download th
   brew install mockery
   ```
 
+- **godotenv**
+
+  Needed for loading `.env` file for testing: [joho/godotenv](https://github.com/joho/godotenv)
+
+  As a bin command:
+
+  ```sh
+  go get github.com/joho/godotenv/cmd/godotenv
+  ```
+
 - **Postgres**
 
   You need a running [PostgreSQL](https://www.postgresql.org/download/) server to use the API.
@@ -133,10 +146,40 @@ make generate-mocks
 
 ### Running the test suite
 
-To run all the tests:
+#### Unit tests
+
+To run unit tests:
 
 ```sh
 make test
+```
+
+#### Integration tests
+
+For the following tests you need to run the test database:
+
+```sh
+make start-test-db
+```
+
+To run only integration tests:
+
+```sh
+make test-integration
+```
+
+#### All tests
+
+To run all tests:
+
+```sh
+make test-all
+```
+
+You can stop the db with:
+
+```sh
+make stop-test-db
 ```
 
 ## Backend Architecture

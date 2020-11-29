@@ -30,7 +30,7 @@ func TestSignUp(t *testing.T) {
 
 		wantErrorMessage := handlers.ErrorName.Error()
 
-		assertStatusCode(t, res, http.StatusBadRequest)
+		AssertStatusCode(t, res, http.StatusBadRequest)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
@@ -44,7 +44,7 @@ func TestSignUp(t *testing.T) {
 
 		wantErrorMessage := handlers.ErrorName.Error()
 
-		assertStatusCode(t, res, http.StatusBadRequest)
+		AssertStatusCode(t, res, http.StatusBadRequest)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
@@ -59,7 +59,7 @@ func TestSignUp(t *testing.T) {
 
 		wantErrorMessage := handlers.ErrorEmail.Error()
 
-		assertStatusCode(t, res, http.StatusBadRequest)
+		AssertStatusCode(t, res, http.StatusBadRequest)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
@@ -75,7 +75,7 @@ func TestSignUp(t *testing.T) {
 
 		wantErrorMessage := utils.ErrorPasswordLength.Error()
 
-		assertStatusCode(t, res, http.StatusBadRequest)
+		AssertStatusCode(t, res, http.StatusBadRequest)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
@@ -107,7 +107,7 @@ func TestSignUp(t *testing.T) {
 
 		wantErrorMessage := handlers.ErrorEmailConflict.Error()
 
-		assertStatusCode(t, res, http.StatusConflict)
+		AssertStatusCode(t, res, http.StatusConflict)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
@@ -137,7 +137,7 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		assertStatusCode(t, res, http.StatusCreated)
+		AssertStatusCode(t, res, http.StatusCreated)
 	})
 }
 
@@ -176,7 +176,7 @@ func TestLogin(t *testing.T) {
 
 				wantErrorMessage := handlers.ErrorMissingPasswordOrEmail.Error()
 
-				assertStatusCode(t, res, http.StatusBadRequest)
+				AssertStatusCode(t, res, http.StatusBadRequest)
 				assertErrorMessage(t, res, wantErrorMessage)
 			})
 		}
@@ -197,7 +197,7 @@ func TestLogin(t *testing.T) {
 
 		wantErrorMessage := handlers.ErrorNonExistentUser.Error()
 
-		assertStatusCode(t, res, http.StatusNotFound)
+		AssertStatusCode(t, res, http.StatusNotFound)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
@@ -214,7 +214,7 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		assertStatusCode(t, res, http.StatusInternalServerError)
+		AssertStatusCode(t, res, http.StatusInternalServerError)
 	})
 
 	t.Run("Shouldn't log in if an error occurs while trying to hash password", func(t *testing.T) {
@@ -232,7 +232,7 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		assertStatusCode(t, res, http.StatusInternalServerError)
+		AssertStatusCode(t, res, http.StatusInternalServerError)
 	})
 
 	t.Run("Shouldn't log in if there's a password mismatch", func(t *testing.T) {
@@ -255,7 +255,7 @@ func TestLogin(t *testing.T) {
 
 		wantErrorMessage := handlers.ErrorWrongPassword.Error()
 
-		assertStatusCode(t, res, http.StatusBadRequest)
+		AssertStatusCode(t, res, http.StatusBadRequest)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
@@ -280,7 +280,7 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		assertStatusCode(t, res, http.StatusInternalServerError)
+		AssertStatusCode(t, res, http.StatusInternalServerError)
 	})
 
 	t.Run("Should log in user and return access token", func(t *testing.T) {
@@ -307,7 +307,7 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		assertStatusCode(t, res, http.StatusOK)
+		AssertStatusCode(t, res, http.StatusOK)
 		assertLoginTokenResponseBody(t, res, loginToken)
 	})
 }

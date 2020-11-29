@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func assertStatusCode(t *testing.T, res *httptest.ResponseRecorder, expectedStatusCode int) {
+func AssertStatusCode(t *testing.T, res *httptest.ResponseRecorder, expectedStatusCode int) {
 	t.Helper()
 
 	if res.Code != expectedStatusCode {
@@ -20,7 +20,7 @@ func assertStatusCode(t *testing.T, res *httptest.ResponseRecorder, expectedStat
 func assertErrorMessage(t *testing.T, res *httptest.ResponseRecorder, expected string) {
 	t.Helper()
 
-	jsonResponse := parseJSON(t, res)
+	jsonResponse := ParseJSON(t, res)
 	got := jsonResponse["message"].(string)
 
 	notEqualMsg := fmt.Sprintf("expected error message: '%v', instead got error message: '%v'", expected, got)
@@ -28,7 +28,7 @@ func assertErrorMessage(t *testing.T, res *httptest.ResponseRecorder, expected s
 	assert.Equal(t, expected, got, notEqualMsg)
 }
 
-func parseJSON(t *testing.T, res *httptest.ResponseRecorder) map[string]interface{} {
+func ParseJSON(t *testing.T, res *httptest.ResponseRecorder) map[string]interface{} {
 	t.Helper()
 
 	jsonResponse := map[string]interface{}{}

@@ -27,7 +27,7 @@ func UnauthorizedTestCases(
 
 			wantErrorMessage := auth_middleware.ErrMsgMalformedToken
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			AssertStatusCode(t, res, http.StatusUnauthorized)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -38,7 +38,7 @@ func UnauthorizedTestCases(
 			res := httptest.NewRecorder()
 			r.ServeHTTP(res, invalidTokenReq)
 
-			assertStatusCode(t, res, http.StatusUnauthorized)
+			AssertStatusCode(t, res, http.StatusUnauthorized)
 		})
 	}
 }

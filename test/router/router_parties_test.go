@@ -56,7 +56,7 @@ func TestCreateParty(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorPartyNameTaken.Error()
 
-			assertStatusCode(t, res, http.StatusConflict)
+			AssertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -75,7 +75,7 @@ func TestCreateParty(t *testing.T) {
 
 			resBody := handlers.PartyModelToResponse(party)
 
-			assertStatusCode(t, res, http.StatusCreated)
+			AssertStatusCode(t, res, http.StatusCreated)
 			assertSinglePartyResponseBody(t, res, resBody)
 		})
 	})
@@ -115,7 +115,7 @@ func TestGetParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 		})
 
 		t.Run("Get party with non-existent id", func(t *testing.T) {
@@ -128,7 +128,7 @@ func TestGetParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Get party with valid id that belongs to another user", func(t *testing.T) {
@@ -146,7 +146,7 @@ func TestGetParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Get party with valid id", func(t *testing.T) {
@@ -165,7 +165,7 @@ func TestGetParty(t *testing.T) {
 
 			resBody := handlers.PartyModelToResponse(party)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertSinglePartyResponseBody(t, res, resBody)
 		})
 	})
@@ -211,7 +211,7 @@ func TestUpdateParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Try to update party with valid id that belongs to another user", func(t *testing.T) {
@@ -229,7 +229,7 @@ func TestUpdateParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Try to update a party with already existing name, belonging to the same user", func(t *testing.T) {
@@ -249,7 +249,7 @@ func TestUpdateParty(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorPartyNameTaken.Error()
 
-			assertStatusCode(t, res, http.StatusConflict)
+			AssertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -270,7 +270,7 @@ func TestUpdateParty(t *testing.T) {
 
 			resBody := handlers.PartyModelToResponse(party)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertSinglePartyResponseBody(t, res, resBody)
 		})
 	})
@@ -312,7 +312,7 @@ func TestDeleteParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Try to delete party with valid id that belongs to another user", func(t *testing.T) {
@@ -330,7 +330,7 @@ func TestDeleteParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Delete existing party", func(t *testing.T) {
@@ -348,7 +348,7 @@ func TestDeleteParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNoContent)
+			AssertStatusCode(t, res, http.StatusNoContent)
 		})
 	})
 }
@@ -396,7 +396,7 @@ func TestListParties(t *testing.T) {
 
 			expected := newPartyListResponse([]*handlers.Party{})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListPartyResponseBody(t, res, expected)
 		})
 
@@ -412,7 +412,7 @@ func TestListParties(t *testing.T) {
 
 			expected := newPartyListResponse([]*handlers.Party{{}})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListPartyResponseBody(t, res, expected)
 		})
 	})
@@ -460,7 +460,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("List transactions of a party that belongs to another user", func(t *testing.T) {
@@ -474,7 +474,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("List transactions when there are no transactions", func(t *testing.T) {
@@ -493,7 +493,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 			expected := newTransactionListResponse([]*handlers.Transaction{})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
 		})
 
@@ -513,7 +513,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
 		})
 	})

@@ -58,7 +58,7 @@ func TestCreateWallet(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorWalletNameTaken.Error()
 
-			assertStatusCode(t, res, http.StatusConflict)
+			AssertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -79,7 +79,7 @@ func TestCreateWallet(t *testing.T) {
 
 			resBody := handlers.WalletModelToResponse(wallet)
 
-			assertStatusCode(t, res, http.StatusCreated)
+			AssertStatusCode(t, res, http.StatusCreated)
 			assertSingleWalletResponseBody(t, res, resBody)
 		})
 	})
@@ -119,7 +119,7 @@ func TestGetWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 		})
 
 		t.Run("Get wallet with non-existent id", func(t *testing.T) {
@@ -132,7 +132,7 @@ func TestGetWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Get wallet with valid id that belongs to another user", func(t *testing.T) {
@@ -149,7 +149,7 @@ func TestGetWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Get wallet with valid id", func(t *testing.T) {
@@ -168,7 +168,7 @@ func TestGetWallet(t *testing.T) {
 
 			resBody := handlers.WalletModelToResponse(wallet)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertSingleWalletResponseBody(t, res, resBody)
 		})
 	})
@@ -214,7 +214,7 @@ func TestUpdateWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Try to update wallet with valid id that belongs to another user", func(t *testing.T) {
@@ -231,7 +231,7 @@ func TestUpdateWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Try to update a wallet with already existing name, belonging to the same user", func(t *testing.T) {
@@ -251,7 +251,7 @@ func TestUpdateWallet(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorWalletNameTaken.Error()
 
-			assertStatusCode(t, res, http.StatusConflict)
+			AssertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -272,7 +272,7 @@ func TestUpdateWallet(t *testing.T) {
 
 			resBody := handlers.WalletModelToResponse(wallet)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertSingleWalletResponseBody(t, res, resBody)
 		})
 	})
@@ -314,7 +314,7 @@ func TestDeleteWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Try to delete wallet with valid id that belongs to another user", func(t *testing.T) {
@@ -331,7 +331,7 @@ func TestDeleteWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Delete existing wallet", func(t *testing.T) {
@@ -349,7 +349,7 @@ func TestDeleteWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNoContent)
+			AssertStatusCode(t, res, http.StatusNoContent)
 		})
 	})
 }
@@ -397,7 +397,7 @@ func TestListWallets(t *testing.T) {
 
 			expected := newWalletListResponse([]*handlers.Wallet{})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListWalletResponseBody(t, res, expected)
 		})
 
@@ -413,7 +413,7 @@ func TestListWallets(t *testing.T) {
 
 			expected := newWalletListResponse([]*handlers.Wallet{{}})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListWalletResponseBody(t, res, expected)
 		})
 	})
@@ -461,7 +461,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("List transactions of a wallet that belongs to another user", func(t *testing.T) {
@@ -475,7 +475,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("List transactions when there are no transactions", func(t *testing.T) {
@@ -494,7 +494,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 			expected := newTransactionListResponse([]*handlers.Transaction{})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
 		})
 
@@ -514,7 +514,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
 		})
 	})

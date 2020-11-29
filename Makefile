@@ -9,6 +9,12 @@ start-db:
 stop-db:
 	docker-compose -f docker-compose.dev.yml down
 
+start-test-db:
+	docker-compose -f docker-compose.test.yml up -d
+
+stop-test-db:
+	docker-compose -f docker-compose.test.yml down
+
 generate-mocks:
 	# Repository
 	mockery --name Repository --filename repository_spy.go --dir internal/repository --output test/spies --outpkg spies --structname RepositorySpy
@@ -21,4 +27,7 @@ test:
 	go test ./... -short
 
 test-all:
-	go test ./...
+	godotenv go test ./...
+
+test-integration:
+	godotenv go test ./test/integration

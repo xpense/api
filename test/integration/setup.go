@@ -35,9 +35,13 @@ func Setup() *gin.Engine {
 	env := NewTestingEnvironment()
 	env.LoadVariables()
 
-	dbConn, err := repository.NewConnection(env.DBUser.Value, env.DBPassword.Value, env.DBHost.Value, env.DBName.Value)
+	dbConn, err := repository.NewConnection(env.DBUser.Value, env.DBPassword.Value, env.DBHost.Value, env.DBName.Value, nil)
 	if err != nil {
 		panic(fmt.Sprintf("couldn't establish postgres connection: %v", err))
+	}
+
+	if err := repository.Cleanup(dbConn); err != nil {
+		panic(fmt.Sprintf("error cleaning up database: %v", err))
 	}
 
 	if err := repository.Migrate(dbConn); err != nil {
@@ -48,5 +52,5 @@ func Setup() *gin.Engine {
 	jwtService := auth.NewJWTService(env.Issuer.Value, env.Secret.Value)
 	hasher := utils.NewPasswordHasher()
 
-	return router.Setup(repository, jwtService, hasher, router.DefaultConfig)
+	return router.Setup(repository, jwtService, hasher, router.TestConfig)
 }

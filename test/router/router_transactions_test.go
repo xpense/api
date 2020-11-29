@@ -53,7 +53,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 		})
 
 		t.Run("Create transaction with valid data but missing wallet id", func(t *testing.T) {
@@ -69,7 +69,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -90,7 +90,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -114,7 +114,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorBadWalletID.Error()
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -138,7 +138,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -165,7 +165,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -195,7 +195,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorBadPartyID.Error()
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -232,7 +232,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			resBody := handlers.TransactionModelToResponse(transaction)
 
-			assertStatusCode(t, res, http.StatusCreated)
+			AssertStatusCode(t, res, http.StatusCreated)
 			assertSingleTransactionResponseBody(t, res, resBody)
 		})
 	})
@@ -272,7 +272,7 @@ func TestGetTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 		})
 
 		t.Run("Get transaction with non-existent id", func(t *testing.T) {
@@ -285,7 +285,7 @@ func TestGetTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Get transaction with valid id that belongs to another user", func(t *testing.T) {
@@ -303,7 +303,7 @@ func TestGetTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Get transaction with valid id", func(t *testing.T) {
@@ -323,7 +323,7 @@ func TestGetTransaction(t *testing.T) {
 
 			resBody := handlers.TransactionModelToResponse(transaction)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertSingleTransactionResponseBody(t, res, resBody)
 		})
 	})
@@ -369,7 +369,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Try to update transaction with valid id that belongs to another user", func(t *testing.T) {
@@ -389,7 +389,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Change a transaction's wallet ID to one that doesn't exist", func(t *testing.T) {
@@ -414,7 +414,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -447,7 +447,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorBadWalletID.Error()
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -479,7 +479,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
 
-			assertStatusCode(t, res, http.StatusBadRequest)
+			AssertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -516,7 +516,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			wantErrorMessage := handlers.ErrorBadPartyID.Error()
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
@@ -544,7 +544,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			resBody := handlers.TransactionModelToResponse(updateTransaction)
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertSingleTransactionResponseBody(t, res, resBody)
 		})
 	})
@@ -586,7 +586,7 @@ func TestDeleteTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNotFound)
+			AssertStatusCode(t, res, http.StatusNotFound)
 		})
 
 		t.Run("Try to delete transaction with valid id that belongs to another user", func(t *testing.T) {
@@ -604,7 +604,7 @@ func TestDeleteTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusForbidden)
+			AssertStatusCode(t, res, http.StatusForbidden)
 		})
 
 		t.Run("Delete existing transaction", func(t *testing.T) {
@@ -622,7 +622,7 @@ func TestDeleteTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			assertStatusCode(t, res, http.StatusNoContent)
+			AssertStatusCode(t, res, http.StatusNoContent)
 		})
 	})
 }
@@ -670,7 +670,7 @@ func TestListTransactions(t *testing.T) {
 
 			expected := newTransactionListResponse([]*handlers.Transaction{})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
 		})
 
@@ -686,7 +686,7 @@ func TestListTransactions(t *testing.T) {
 
 			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
-			assertStatusCode(t, res, http.StatusOK)
+			AssertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
 		})
 	})
