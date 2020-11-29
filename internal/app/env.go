@@ -3,8 +3,6 @@ package app
 import (
 	"fmt"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -47,10 +45,6 @@ func NewDefaultEnviroment() *Environment {
 }
 
 func (e *Environment) LoadVariables() {
-	if err := godotenv.Load(".env"); err != nil {
-		panic(fmt.Sprintf("couldn't load env file: %v", err))
-	}
-
 	if port := os.Getenv(e.Port.Name); port == "" {
 		e.Port.Value = ":8080"
 	} else {

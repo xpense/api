@@ -6,13 +6,25 @@ import (
 	"expense-api/internal/router"
 	"expense-api/internal/utils"
 	"fmt"
+
+	"github.com/joho/godotenv"
 )
 
 func Run() {
+	if err := godotenv.Load(".env"); err != nil {
+		panic(fmt.Sprintf("couldn't load env file: %v", err))
+	}
+
 	env := NewDefaultEnviroment()
 	env.LoadVariables()
 
-	dbConn, err := repository.NewConnection(env.DBUser.Value, env.DBPassword.Value, env.DBHost.Value, env.DBName.Value)
+	dbConn, err := repository.NewConnection(
+		env.DBUser.Value,
+		env.DBPassword.Value,
+		env.DBHost.Value,
+		env.DBName.Value,
+		repository.DefaultConfig,
+	)
 	if err != nil {
 		panic(fmt.Sprintf("couldn't establish postgres connection: %v", err))
 	}
