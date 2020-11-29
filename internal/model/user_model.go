@@ -22,17 +22,3 @@ func UserValidateUpdateBody(firstName, lastName, email string) error {
 
 	return nil
 }
-
-func UserValidateCreateBody(firstName, lastName, email, password string) error {
-	if firstName == "" || lastName == "" {
-		return ErrorName
-	}
-
-	if !utils.IsEmailValid(email) {
-		return ErrorEmail
-	}
-
-	_, err := utils.IsPasswordStrong(password)
-
-	return err
-}

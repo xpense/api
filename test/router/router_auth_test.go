@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"expense-api/internal/handlers"
+	"expense-api/internal/handlers/auth"
 	"expense-api/internal/model"
 	"expense-api/internal/repository"
 	"expense-api/internal/router"
@@ -25,8 +25,8 @@ func TestSignUp(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newUserRequest := func(user *model.User) *http.Request {
-		body := createRequestBody(user)
+	newSignUpRequest := func(signUp *auth.SignUpInfo) *http.Request {
+		body := createRequestBody(signUp)
 		req, _ := http.NewRequest(http.MethodPost, baseAuthPath+"/signup", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		return req
@@ -34,7 +34,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'first_name'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := newUserRequest(&model.User{})
+		req := newSignUpRequest(&auth.SignUpInfo{})
 
 		r.ServeHTTP(res, req)
 
@@ -46,7 +46,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'last_name'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := newUserRequest(&model.User{
+		req := newSignUpRequest(&auth.SignUpInfo{
 			FirstName: "First Name",
 		})
 
@@ -60,7 +60,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'email'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := newUserRequest(&model.User{
+		req := newSignUpRequest(&auth.SignUpInfo{
 			FirstName: "First Name",
 			LastName:  "Last Name",
 		})
@@ -75,7 +75,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'password'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := newUserRequest(&model.User{
+		req := newSignUpRequest(&auth.SignUpInfo{
 			FirstName: "First Name",
 			LastName:  "Last Name",
 			Email:     "john@doe.com",
@@ -106,11 +106,16 @@ func TestSignUp(t *testing.T) {
 		repoSpy.On("UserCreate", user.FirstName, user.LastName, user.Email, hashedPassword, salt).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 		res := httptest.NewRecorder()
-		req := newUserRequest(user)
+		req := newSignUpRequest(&auth.SignUpInfo{
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+			Password:  user.Password,
+		})
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrMsgEmailConflict
+		wantErrorMessage := auth.ErrorEmailConflict.Error()
 
 		assertStatusCode(t, res, http.StatusConflict)
 		assertErrorMessage(t, res, wantErrorMessage)
@@ -133,7 +138,12 @@ func TestSignUp(t *testing.T) {
 		repoSpy.On("UserCreate", user.FirstName, user.LastName, user.Email, hashedPassword, salt).Return(user, nil).Once()
 
 		res := httptest.NewRecorder()
-		req := newUserRequest(user)
+		req := newSignUpRequest(&auth.SignUpInfo{
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+			Password:  user.Password,
+		})
 
 		r.ServeHTTP(res, req)
 
@@ -148,7 +158,7 @@ func TestLogin(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newLoginRequest := func(login *handlers.LoginInfo) *http.Request {
+	newLoginRequest := func(login *auth.LoginInfo) *http.Request {
 		body := createRequestBody(login)
 		req, _ := http.NewRequest(http.MethodPost, baseAuthPath+"/login", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -158,19 +168,19 @@ func TestLogin(t *testing.T) {
 	t.Run("Invalid request body", func(t *testing.T) {
 		testCases := []struct {
 			desc    string
-			reqBody *handlers.LoginInfo
+			reqBody *auth.LoginInfo
 		}{
 			{
 				desc:    "Shouldn't allow login with empty body",
-				reqBody: &handlers.LoginInfo{},
+				reqBody: &auth.LoginInfo{},
 			},
 			{
 				desc:    "Shouldn't allow login with missing password",
-				reqBody: &handlers.LoginInfo{Email: "john@doe.com"},
+				reqBody: &auth.LoginInfo{Email: "john@doe.com"},
 			},
 			{
 				desc:    "Shouldn't allow login with missing email",
-				reqBody: &handlers.LoginInfo{Password: "123Password!{}"},
+				reqBody: &auth.LoginInfo{Password: "123Password!{}"},
 			},
 		}
 
@@ -181,7 +191,7 @@ func TestLogin(t *testing.T) {
 
 				r.ServeHTTP(res, req)
 
-				wantErrorMessage := handlers.ErrMsgMissingPasswordOrEmail
+				wantErrorMessage := auth.ErrorMissingPasswordOrEmail.Error()
 
 				assertStatusCode(t, res, http.StatusBadRequest)
 				assertErrorMessage(t, res, wantErrorMessage)
@@ -190,7 +200,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("Shouldn't log in non-existent user", func(t *testing.T) {
-		reqBody := &handlers.LoginInfo{
+		reqBody := &auth.LoginInfo{
 			Email:    "john@doe.com",
 			Password: "123Password!{}",
 		}
@@ -202,14 +212,14 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrMsgNonExistentUser
+		wantErrorMessage := auth.ErrorNonExistentUser.Error()
 
 		assertStatusCode(t, res, http.StatusNotFound)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't log in if an error occurs while trying to query for user", func(t *testing.T) {
-		reqBody := &handlers.LoginInfo{
+		reqBody := &auth.LoginInfo{
 			Email:    "john@doe.com",
 			Password: "123Password!{}",
 		}
@@ -225,7 +235,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("Shouldn't log in if an error occurs while trying to hash password", func(t *testing.T) {
-		reqBody := &handlers.LoginInfo{
+		reqBody := &auth.LoginInfo{
 			Email:    "john@doe.com",
 			Password: "123Password!{}",
 		}
@@ -243,7 +253,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("Shouldn't log in if there's a password mismatch", func(t *testing.T) {
-		reqBody := &handlers.LoginInfo{
+		reqBody := &auth.LoginInfo{
 			Email:    "john@doe.com",
 			Password: "123Password!{}",
 		}
@@ -260,14 +270,14 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrMsgWrongPassword
+		wantErrorMessage := auth.ErrorWrongPassword.Error()
 
 		assertStatusCode(t, res, http.StatusBadRequest)
 		assertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't log in if there's an error while generating the access token", func(t *testing.T) {
-		reqBody := &handlers.LoginInfo{
+		reqBody := &auth.LoginInfo{
 			Email:    "john@doe.com",
 			Password: "123Password!{}",
 		}
@@ -291,7 +301,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("Should log in user and return access token", func(t *testing.T) {
-		reqBody := &handlers.LoginInfo{
+		reqBody := &auth.LoginInfo{
 			Email:    "john@doe.com",
 			Password: "123Password!{}",
 		}
@@ -301,7 +311,7 @@ func TestLogin(t *testing.T) {
 			Password: "good-password",
 		}
 		user.ID = 1
-		loginToken := &handlers.LoginToken{
+		loginToken := &auth.LoginToken{
 			Token: "token",
 		}
 
@@ -319,10 +329,10 @@ func TestLogin(t *testing.T) {
 	})
 }
 
-func assertLoginTokenResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *handlers.LoginToken) {
+func assertLoginTokenResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *auth.LoginToken) {
 	t.Helper()
 
-	var got handlers.LoginToken
+	var got auth.LoginToken
 	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)
 	}

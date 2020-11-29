@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"expense-api/internal/model"
+	"expense-api/internal/handlers/auth"
 	"expense-api/internal/repository"
 	"net/http"
 
@@ -13,37 +13,14 @@ type AuthHandler interface {
 	Login(ctx *gin.Context)
 }
 
-type (
-	LoginInfo struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
-	LoginToken struct {
-		Token string `json:"token"`
-	}
-)
-
-const (
-	ErrMsgMissingPasswordOrEmail = "both email and password are required for login"
-	ErrMsgNonExistentUser        = "user with this email does not exist"
-	ErrMsgEmailConflict          = "user with this email already exists"
-	ErrMsgWrongPassword          = "wrong password"
-)
-
 func (h *handler) SignUp(ctx *gin.Context) {
-	var userBody model.User
-	if err := ctx.Bind(&userBody); err != nil {
+	var signUpInfo auth.SignUpInfo
+	if err := ctx.Bind(&signUpInfo); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	if err := model.UserValidateCreateBody(
-		userBody.FirstName,
-		userBody.LastName,
-		userBody.Email,
-		userBody.Password,
-	); err != nil {
+	if err := auth.ValidateSignUpInfo(signUpInfo); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -56,22 +33,22 @@ func (h *handler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := h.hasher.HashPassword(userBody.Password, salt)
+	hashedPassword, err := h.hasher.HashPassword(signUpInfo.Password, salt)
 	if err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
 
 	if _, err := h.repo.UserCreate(
-		userBody.FirstName,
-		userBody.LastName,
-		userBody.Email,
+		signUpInfo.FirstName,
+		signUpInfo.LastName,
+		signUpInfo.Email,
 		hashedPassword,
 		salt,
 	); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrMsgEmailConflict,
+				"message": auth.ErrorEmailConflict.Error(),
 			})
 			return
 		}
@@ -84,7 +61,7 @@ func (h *handler) SignUp(ctx *gin.Context) {
 }
 
 func (h *handler) Login(ctx *gin.Context) {
-	var loginInfo LoginInfo
+	var loginInfo auth.LoginInfo
 	if err := ctx.Bind(&loginInfo); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		return
@@ -92,7 +69,7 @@ func (h *handler) Login(ctx *gin.Context) {
 
 	if loginInfo.Email == "" || loginInfo.Password == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": ErrMsgMissingPasswordOrEmail,
+			"message": auth.ErrorMissingPasswordOrEmail.Error(),
 		})
 		return
 	}
@@ -101,7 +78,7 @@ func (h *handler) Login(ctx *gin.Context) {
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.JSON(http.StatusNotFound, gin.H{
-				"message": ErrMsgNonExistentUser,
+				"message": auth.ErrorNonExistentUser.Error(),
 			})
 			return
 		}
@@ -117,7 +94,7 @@ func (h *handler) Login(ctx *gin.Context) {
 
 	if user.Password != hashedPassword {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": ErrMsgWrongPassword,
+			"message": auth.ErrorWrongPassword.Error(),
 		})
 		return
 	}
@@ -128,6 +105,6 @@ func (h *handler) Login(ctx *gin.Context) {
 		return
 	}
 
-	response := &LoginToken{token}
+	response := &auth.LoginToken{Token: token}
 	ctx.JSON(http.StatusOK, response)
 }
