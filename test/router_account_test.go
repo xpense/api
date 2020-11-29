@@ -8,7 +8,7 @@ import (
 	"expense-api/internal/model"
 	"expense-api/internal/repository"
 	"expense-api/internal/router"
-	"expense-api/internal/router/test/spies"
+	"expense-api/test/spies"
 	"net/http"
 	"net/http/httptest"
 	"reflect"

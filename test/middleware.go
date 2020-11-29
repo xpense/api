@@ -3,7 +3,7 @@ package test
 import (
 	"errors"
 	auth_middleware "expense-api/internal/middleware/auth"
-	"expense-api/internal/router/test/spies"
+	"expense-api/test/spies"
 	"net/http"
 	"net/http/httptest"
 	"testing"
