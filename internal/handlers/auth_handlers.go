@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"expense-api/internal/handlers/auth"
 	"expense-api/internal/repository"
 	"net/http"
 
@@ -14,13 +13,13 @@ type AuthHandler interface {
 }
 
 func (h *handler) SignUp(ctx *gin.Context) {
-	var signUpInfo auth.SignUpInfo
+	var signUpInfo SignUpInfo
 	if err := ctx.Bind(&signUpInfo); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	if err := auth.ValidateSignUpInfo(signUpInfo); err != nil {
+	if err := signUpInfo.Validate(); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -48,7 +47,7 @@ func (h *handler) SignUp(ctx *gin.Context) {
 	); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusConflict, gin.H{
-				"message": auth.ErrorEmailConflict.Error(),
+				"message": ErrorEmailConflict.Error(),
 			})
 			return
 		}
@@ -61,7 +60,7 @@ func (h *handler) SignUp(ctx *gin.Context) {
 }
 
 func (h *handler) Login(ctx *gin.Context) {
-	var loginInfo auth.LoginInfo
+	var loginInfo LoginInfo
 	if err := ctx.Bind(&loginInfo); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		return
@@ -69,7 +68,7 @@ func (h *handler) Login(ctx *gin.Context) {
 
 	if loginInfo.Email == "" || loginInfo.Password == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": auth.ErrorMissingPasswordOrEmail.Error(),
+			"message": ErrorMissingPasswordOrEmail.Error(),
 		})
 		return
 	}
@@ -78,7 +77,7 @@ func (h *handler) Login(ctx *gin.Context) {
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
 			ctx.JSON(http.StatusNotFound, gin.H{
-				"message": auth.ErrorNonExistentUser.Error(),
+				"message": ErrorNonExistentUser.Error(),
 			})
 			return
 		}
@@ -94,7 +93,7 @@ func (h *handler) Login(ctx *gin.Context) {
 
 	if user.Password != hashedPassword {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": auth.ErrorWrongPassword.Error(),
+			"message": ErrorWrongPassword.Error(),
 		})
 		return
 	}
@@ -105,6 +104,6 @@ func (h *handler) Login(ctx *gin.Context) {
 		return
 	}
 
-	response := &auth.LoginToken{Token: token}
+	response := &LoginToken{Token: token}
 	ctx.JSON(http.StatusOK, response)
 }

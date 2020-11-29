@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"expense-api/internal/middleware/auth"
-	"expense-api/internal/model"
 	"expense-api/internal/repository"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,28 +14,6 @@ type AccountHandler interface {
 	DeleteAccount(ctx *gin.Context)
 }
 
-// Account is a user with an omitted 'password' field
-type Account struct {
-	ID        uint      `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Email     string    `json:"email"`
-}
-
-// UserModelToAccountResponse cretes a user struct that doesn't expose the password of a user
-func UserModelToAccountResponse(u *model.User) *Account {
-	return &Account{
-		ID:        u.ID,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-		Email:     u.Email,
-	}
-}
-
 func (h *handler) UpdateAccount(ctx *gin.Context) {
 	id, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
@@ -45,17 +21,13 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 		return
 	}
 
-	var userBody model.User
-	if err := ctx.Bind(&userBody); err != nil {
+	var accountBody Account
+	if err := ctx.Bind(&accountBody); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	if err := model.UserValidateUpdateBody(
-		userBody.FirstName,
-		userBody.LastName,
-		userBody.Email,
-	); err != nil {
+	if err := accountBody.ValidateUpdateBody(); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -64,9 +36,9 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 
 	userModel, err := h.repo.UserUpdate(
 		id,
-		userBody.FirstName,
-		userBody.LastName,
-		userBody.Email,
+		accountBody.FirstName,
+		accountBody.LastName,
+		accountBody.Email,
 	)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
