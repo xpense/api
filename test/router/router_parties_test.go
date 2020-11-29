@@ -1,4 +1,4 @@
-package test
+package router
 
 import (
 	"bytes"
@@ -17,29 +17,29 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-const baseWalletsPath = "/api/v1/wallets/"
+const basePartiesPath = "/api/v1/parties/"
 
-func TestCreateWallet(t *testing.T) {
+func TestCreateParty(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(wallet *model.Wallet, token string) *http.Request {
-		body := createRequestBody(wallet)
-		req, _ := http.NewRequest(http.MethodPost, baseWalletsPath, bytes.NewReader(body))
+	newPartyRequest := func(party *model.Party, token string) *http.Request {
+		body := createRequestBody(party)
+		req, _ := http.NewRequest(http.MethodPost, basePartiesPath, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		wallet := &model.Wallet{}
+		party := &model.Party{}
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(wallet, token)
-		invalidTokenReq := newWalletRequest(wallet, token)
+		missingTokenReq := newPartyRequest(party, token)
+		invalidTokenReq := newPartyRequest(party, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -53,54 +53,55 @@ func TestCreateWallet(t *testing.T) {
 		}
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
-		t.Run("Try to create a wallet with already existing name, belonging to the same user", func(t *testing.T) {
-			wallet := &model.Wallet{
-				Name:   "cash",
+		t.Run("Try to create a party with already existing name, belonging to the same user", func(t *testing.T) {
+			party := &model.Party{
+				Name:   "Amazon",
 				UserID: userID,
 			}
 
-			repoSpy.On("WalletCreate", wallet).Return(repository.ErrorUniqueConstaintViolation).Once()
+			repoSpy.On("PartyCreate", party).Return(repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(wallet, token)
+			req := newPartyRequest(party, token)
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgWalletNameTaken
+			wantErrorMessage := handlers.ErrMsgPartyNameTaken
 
 			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
-		t.Run("Create wallet with valid data", func(t *testing.T) {
-			wallet := &model.Wallet{
+		t.Run("Create party with valid data", func(t *testing.T) {
+			party := &model.Party{
+				Name:   "Rewe",
 				UserID: userID,
 			}
 
-			repoSpy.On("WalletCreate", wallet).Return(nil).Once()
+			repoSpy.On("PartyCreate", party).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(wallet, token)
+			req := newPartyRequest(party, token)
 
 			r.ServeHTTP(res, req)
 
-			wallet.UserID = 0
+			party.UserID = 0
 
 			assertStatusCode(t, res, http.StatusCreated)
-			assertSingleWalletResponseBody(t, res, wallet)
+			assertSinglePartyResponseBody(t, res, party)
 		})
 	})
 }
 
-func TestGetWallet(t *testing.T) {
+func TestGetParty(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseWalletsPath, id)
+	newPartyRequest := func(id uint, token string) *http.Request {
+		url := fmt.Sprintf("%s%d", basePartiesPath, id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -110,8 +111,8 @@ func TestGetWallet(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, token)
-		invalidTokenReq := newWalletRequest(id, token)
+		missingTokenReq := newPartyRequest(id, token)
+		invalidTokenReq := newPartyRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -125,79 +126,80 @@ func TestGetWallet(t *testing.T) {
 		}
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
-		t.Run("Get wallet with id = 0", func(t *testing.T) {
+		t.Run("Get party with id = 0", func(t *testing.T) {
 			id := uint(0)
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusBadRequest)
 		})
 
-		t.Run("Get wallet with non-existent id", func(t *testing.T) {
+		t.Run("Get party with non-existent id", func(t *testing.T) {
 			id := uint(10)
 
-			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
+			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusNotFound)
 		})
 
-		t.Run("Get wallet with valid id that belongs to another user", func(t *testing.T) {
+		t.Run("Get party with valid id that belongs to another user", func(t *testing.T) {
 			id := uint(1)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
-				UserID: userID + 1,
+			anotherUsersID := uint(6)
+			party := &model.Party{
+				Name:   "new party",
+				UserID: anotherUsersID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
-		t.Run("Get wallet with valid id", func(t *testing.T) {
+		t.Run("Get party with valid id", func(t *testing.T) {
 			id := uint(1)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
+			party := &model.Party{
+				Name:   "new party",
 				UserID: userID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Twice()
+			repoSpy.On("PartyGet", id).Return(party, nil).Twice()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
-			wallet.UserID = 0
+			party.UserID = 0
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSingleWalletResponseBody(t, res, wallet)
+			assertSinglePartyResponseBody(t, res, party)
 		})
 	})
 }
 
-func TestUpdateWallet(t *testing.T) {
+func TestUpdateParty(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(id uint, wallet *model.Wallet, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseWalletsPath, id)
-		body := createRequestBody(wallet)
+	newPartyRequest := func(id uint, party *model.Party, token string) *http.Request {
+		url := fmt.Sprintf("%s%d", basePartiesPath, id)
+		body := createRequestBody(party)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
@@ -206,11 +208,11 @@ func TestUpdateWallet(t *testing.T) {
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		wallet := &model.Wallet{}
+		party := &model.Party{}
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, wallet, token)
-		invalidTokenReq := newWalletRequest(id, wallet, token)
+		missingTokenReq := newPartyRequest(id, party, token)
+		invalidTokenReq := newPartyRequest(id, party, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -224,93 +226,94 @@ func TestUpdateWallet(t *testing.T) {
 		}
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
-		t.Run("Update non-existent wallet", func(t *testing.T) {
+		t.Run("Update non-existent party", func(t *testing.T) {
 			id := uint(1)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
+			party := &model.Party{
+				Name:   "new party",
 				UserID: userID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
+			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := newPartyRequest(id, party, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusNotFound)
 		})
 
-		t.Run("Try to update wallet with valid id that belongs to another user", func(t *testing.T) {
+		t.Run("Try to update party with valid id that belongs to another user", func(t *testing.T) {
 			id := uint(1)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
-				UserID: userID + 1,
+			anotherUsersID := uint(6)
+			party := &model.Party{
+				Name:   "new party",
+				UserID: anotherUsersID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := newPartyRequest(id, party, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
-		t.Run("Try to update a wallet with already existing name, belonging to the same user", func(t *testing.T) {
+		t.Run("Try to update a party with already existing name, belonging to the same user", func(t *testing.T) {
 			id := uint(1)
-			wallet := &model.Wallet{
-				Name:   "cash",
+			party := &model.Party{
+				Name:   "Kaufland",
 				UserID: userID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
-			repoSpy.On("WalletUpdate", id, wallet).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
+			repoSpy.On("PartyUpdate", id, party).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := newPartyRequest(id, party, token)
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgWalletNameTaken
+			wantErrorMessage := handlers.ErrMsgPartyNameTaken
 
 			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
 		})
 
-		t.Run("Update existing wallet with valid arguments", func(t *testing.T) {
+		t.Run("Update existing party with valid arguments", func(t *testing.T) {
 			id := uint(3)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
+			party := &model.Party{
+				Name:   "new party",
 				UserID: userID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
-			repoSpy.On("WalletUpdate", id, wallet).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
+			repoSpy.On("PartyUpdate", id, party).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := newPartyRequest(id, party, token)
 
 			r.ServeHTTP(res, req)
 
-			wallet.UserID = 0
+			party.UserID = 0
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSingleWalletResponseBody(t, res, wallet)
+			assertSinglePartyResponseBody(t, res, party)
 		})
 	})
 }
 
-func TestDeleteWallet(t *testing.T) {
+func TestDeleteParty(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseWalletsPath, id)
+	newPartyRequest := func(id uint, token string) *http.Request {
+		url := fmt.Sprintf("%s%d", basePartiesPath, id)
 		req, _ := http.NewRequest(http.MethodDelete, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -320,8 +323,8 @@ func TestDeleteWallet(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, token)
-		invalidTokenReq := newWalletRequest(id, token)
+		missingTokenReq := newPartyRequest(id, token)
+		invalidTokenReq := newPartyRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -335,48 +338,49 @@ func TestDeleteWallet(t *testing.T) {
 		}
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
-		t.Run("Delete non-existent wallet", func(t *testing.T) {
+		t.Run("Delete non-existent party", func(t *testing.T) {
 			id := uint(1)
 
-			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
+			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusNotFound)
 		})
 
-		t.Run("Try to delete wallet with valid id that belongs to another user", func(t *testing.T) {
+		t.Run("Try to delete party with valid id that belongs to another user", func(t *testing.T) {
 			id := uint(1)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
-				UserID: userID + 1,
+			anotherUsersID := uint(6)
+			party := &model.Party{
+				Name:   "new party",
+				UserID: anotherUsersID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusForbidden)
 		})
 
-		t.Run("Delete existing wallet", func(t *testing.T) {
+		t.Run("Delete existing party", func(t *testing.T) {
 			id := uint(2)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
+			party := &model.Party{
+				Name:   "new party",
 				UserID: userID,
 			}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
-			repoSpy.On("WalletDelete", id).Return(nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
+			repoSpy.On("PartyDelete", id).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -385,22 +389,22 @@ func TestDeleteWallet(t *testing.T) {
 	})
 }
 
-func TestListWallets(t *testing.T) {
+func TestListParties(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletListResponse := func(slice []*model.Wallet) *walletListResponse {
-		return &walletListResponse{
+	newPartyListResponse := func(slice []*model.Party) *partyListResponse {
+		return &partyListResponse{
 			Count:   len(slice),
 			Entries: slice,
 		}
 	}
 
-	newWalletRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, baseWalletsPath, nil)
+	newPartyRequest := func(token string) *http.Request {
+		req, _ := http.NewRequest(http.MethodGet, basePartiesPath, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
 	}
@@ -408,8 +412,8 @@ func TestListWallets(t *testing.T) {
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(token)
-		invalidTokenReq := newWalletRequest(token)
+		missingTokenReq := newPartyRequest(token)
+		invalidTokenReq := newPartyRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -423,40 +427,40 @@ func TestListWallets(t *testing.T) {
 		}
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
-		t.Run("List wallets when there are no wallets", func(t *testing.T) {
-			wallets := []*model.Wallet{}
-			repoSpy.On("WalletList", userID).Return(wallets, nil).Once()
+		t.Run("List parties when there are no parties", func(t *testing.T) {
+			parties := []*model.Party{}
+			repoSpy.On("PartyList", userID).Return(parties, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(token)
+			req := newPartyRequest(token)
 
 			r.ServeHTTP(res, req)
 
-			expected := newWalletListResponse(wallets)
+			expected := newPartyListResponse(parties)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertListWalletResponseBody(t, res, expected)
+			assertListPartyResponseBody(t, res, expected)
 		})
 
-		t.Run("List wallets when there are non-zero wallets", func(t *testing.T) {
-			wallets := []*model.Wallet{{}}
+		t.Run("List parties when there are non-zero parties", func(t *testing.T) {
+			parties := []*model.Party{{}}
 
-			repoSpy.On("WalletList", userID).Return(wallets, nil).Once()
+			repoSpy.On("PartyList", userID).Return(parties, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(token)
+			req := newPartyRequest(token)
 
 			r.ServeHTTP(res, req)
 
-			expected := newWalletListResponse(wallets)
+			expected := newPartyListResponse(parties)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertListWalletResponseBody(t, res, expected)
+			assertListPartyResponseBody(t, res, expected)
 		})
 	})
 }
 
-func TestListTransactionsByWallet(t *testing.T) {
+func TestListTransactionsByParty(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
 	hasherSpy := &spies.PasswordHasherSpy{}
@@ -470,8 +474,8 @@ func TestListTransactionsByWallet(t *testing.T) {
 		}
 	}
 
-	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d/transactions", baseWalletsPath, id)
+	newPartyRequest := func(id uint, token string) *http.Request {
+		url := fmt.Sprintf("%s%d/transactions", basePartiesPath, id)
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		return req
@@ -481,8 +485,8 @@ func TestListTransactionsByWallet(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, token)
-		invalidTokenReq := newWalletRequest(id, token)
+		missingTokenReq := newPartyRequest(id, token)
+		invalidTokenReq := newPartyRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -497,25 +501,25 @@ func TestListTransactionsByWallet(t *testing.T) {
 		}
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
-		t.Run("List transactions of a non-existent wallet", func(t *testing.T) {
-			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
+		t.Run("List transactions of a non-existent party", func(t *testing.T) {
+			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
 			assertStatusCode(t, res, http.StatusNotFound)
 		})
 
-		t.Run("List transactions of a wallet that belongs to another user", func(t *testing.T) {
-			wallet := &model.Wallet{
+		t.Run("List transactions of a party that belongs to another user", func(t *testing.T) {
+			party := &model.Party{
 				UserID: userID + 1,
 			}
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -523,16 +527,16 @@ func TestListTransactionsByWallet(t *testing.T) {
 		})
 
 		t.Run("List transactions when there are no transactions", func(t *testing.T) {
-			wallet := &model.Wallet{
+			party := &model.Party{
 				UserID: userID,
 			}
 			transactions := []*model.Transaction{}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
-			repoSpy.On("TransactionListByWallet", userID, id).Return(transactions, nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
+			repoSpy.On("TransactionListByParty", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -543,16 +547,16 @@ func TestListTransactionsByWallet(t *testing.T) {
 		})
 
 		t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
-			wallet := &model.Wallet{
+			party := &model.Party{
 				UserID: userID,
 			}
 			transactions := []*model.Transaction{{}}
 
-			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
-			repoSpy.On("TransactionListByWallet", userID, id).Return(transactions, nil).Once()
+			repoSpy.On("PartyGet", id).Return(party, nil).Once()
+			repoSpy.On("TransactionListByParty", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := newPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -564,28 +568,28 @@ func TestListTransactionsByWallet(t *testing.T) {
 	})
 }
 
-type walletListResponse struct {
-	Count   int             `json:"count"`
-	Entries []*model.Wallet `json:"entries"`
+type partyListResponse struct {
+	Count   int            `json:"count"`
+	Entries []*model.Party `json:"entries"`
 }
 
-func assertSingleWalletResponseBody(t *testing.T, res *httptest.ResponseRecorder, wallet *model.Wallet) {
+func assertSinglePartyResponseBody(t *testing.T, res *httptest.ResponseRecorder, party *model.Party) {
 	t.Helper()
 
-	var got model.Wallet
+	var got model.Party
 	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)
 	}
 
-	if !cmp.Equal(got, *wallet) {
-		t.Errorf("expected %+v, got %+v", *wallet, got)
+	if !cmp.Equal(got, *party) {
+		t.Errorf("expected %+v, got %+v", *party, got)
 	}
 }
 
-func assertListWalletResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *walletListResponse) {
+func assertListPartyResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *partyListResponse) {
 	t.Helper()
 
-	var got walletListResponse
+	var got partyListResponse
 	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)
 	}
