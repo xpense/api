@@ -1,7 +1,6 @@
 package router
 
 import (
-	"bytes"
 	"encoding/json"
 	"expense-api/internal/handlers"
 	"expense-api/internal/middleware/auth"
@@ -9,15 +8,12 @@ import (
 	"expense-api/internal/repository"
 	"expense-api/internal/router"
 	"expense-api/test/spies"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
-
-const basePartiesPath = "/api/v1/parties/"
 
 func TestCreateParty(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
@@ -26,20 +22,12 @@ func TestCreateParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyRequest := func(party *handlers.Party, token string) *http.Request {
-		body := createRequestBody(party)
-		req, _ := http.NewRequest(http.MethodPost, basePartiesPath, bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		party := &handlers.Party{}
 		token := "invalid-token"
 
-		missingTokenReq := newPartyRequest(party, token)
-		invalidTokenReq := newPartyRequest(party, token)
+		missingTokenReq := NewCreatePartyRequest(party, token)
+		invalidTokenReq := NewCreatePartyRequest(party, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -62,7 +50,7 @@ func TestCreateParty(t *testing.T) {
 			repoSpy.On("PartyCreate", party).Return(repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(&handlers.Party{Name: party.Name}, token)
+			req := NewCreatePartyRequest(&handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -81,7 +69,7 @@ func TestCreateParty(t *testing.T) {
 			repoSpy.On("PartyCreate", party).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(&handlers.Party{Name: party.Name}, token)
+			req := NewCreatePartyRequest(&handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -100,19 +88,12 @@ func TestGetParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", basePartiesPath, id)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newPartyRequest(id, token)
-		invalidTokenReq := newPartyRequest(id, token)
+		missingTokenReq := NewGetPartyRequest(id, token)
+		invalidTokenReq := NewGetPartyRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -130,7 +111,7 @@ func TestGetParty(t *testing.T) {
 			id := uint(0)
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewGetPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -143,7 +124,7 @@ func TestGetParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewGetPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -161,7 +142,7 @@ func TestGetParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewGetPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -178,7 +159,7 @@ func TestGetParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(party, nil).Twice()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewGetPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -197,22 +178,13 @@ func TestUpdateParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyRequest := func(id uint, party *handlers.Party, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", basePartiesPath, id)
-		body := createRequestBody(party)
-		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		party := &handlers.Party{}
 		token := "invalid-token"
 
-		missingTokenReq := newPartyRequest(id, party, token)
-		invalidTokenReq := newPartyRequest(id, party, token)
+		missingTokenReq := NewUpdatePartyRequest(id, party, token)
+		invalidTokenReq := NewUpdatePartyRequest(id, party, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -235,7 +207,7 @@ func TestUpdateParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, party, token)
+			req := NewUpdatePartyRequest(id, party, token)
 
 			r.ServeHTTP(res, req)
 
@@ -253,7 +225,7 @@ func TestUpdateParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, &handlers.Party{Name: party.Name}, token)
+			req := NewUpdatePartyRequest(id, &handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -271,7 +243,7 @@ func TestUpdateParty(t *testing.T) {
 			repoSpy.On("PartyUpdate", id, party).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, &handlers.Party{Name: party.Name}, token)
+			req := NewUpdatePartyRequest(id, &handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -292,7 +264,7 @@ func TestUpdateParty(t *testing.T) {
 			repoSpy.On("PartyUpdate", id, party).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, &handlers.Party{Name: party.Name}, token)
+			req := NewUpdatePartyRequest(id, &handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -311,19 +283,12 @@ func TestDeleteParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", basePartiesPath, id)
-		req, _ := http.NewRequest(http.MethodDelete, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newPartyRequest(id, token)
-		invalidTokenReq := newPartyRequest(id, token)
+		missingTokenReq := NewDeletePartyRequest(id, token)
+		invalidTokenReq := NewDeletePartyRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -343,7 +308,7 @@ func TestDeleteParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewDeletePartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -361,7 +326,7 @@ func TestDeleteParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewDeletePartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -379,7 +344,7 @@ func TestDeleteParty(t *testing.T) {
 			repoSpy.On("PartyDelete", id).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewDeletePartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -402,17 +367,11 @@ func TestListParties(t *testing.T) {
 		}
 	}
 
-	newPartyRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, basePartiesPath, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := newPartyRequest(token)
-		invalidTokenReq := newPartyRequest(token)
+		missingTokenReq := NewListPartiesRequest(token)
+		invalidTokenReq := NewListPartiesRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -431,7 +390,7 @@ func TestListParties(t *testing.T) {
 			repoSpy.On("PartyList", userID).Return(parties, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(token)
+			req := NewListPartiesRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -447,7 +406,7 @@ func TestListParties(t *testing.T) {
 			repoSpy.On("PartyList", userID).Return(parties, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(token)
+			req := NewListPartiesRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -473,19 +432,12 @@ func TestListTransactionsByParty(t *testing.T) {
 		}
 	}
 
-	newPartyRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d/transactions", basePartiesPath, id)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newPartyRequest(id, token)
-		invalidTokenReq := newPartyRequest(id, token)
+		missingTokenReq := NewListTransactionsByPartyRequest(id, token)
+		invalidTokenReq := NewListTransactionsByPartyRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -504,7 +456,7 @@ func TestListTransactionsByParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewListTransactionsByPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -518,7 +470,7 @@ func TestListTransactionsByParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewListTransactionsByPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -535,7 +487,7 @@ func TestListTransactionsByParty(t *testing.T) {
 			repoSpy.On("TransactionListByParty", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewListTransactionsByPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -555,7 +507,7 @@ func TestListTransactionsByParty(t *testing.T) {
 			repoSpy.On("TransactionListByParty", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, token)
+			req := NewListTransactionsByPartyRequest(id, token)
 
 			r.ServeHTTP(res, req)
 

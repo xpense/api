@@ -1,7 +1,6 @@
 package router
 
 import (
-	"bytes"
 	"encoding/json"
 	"expense-api/internal/handlers"
 	"expense-api/internal/middleware/auth"
@@ -9,7 +8,6 @@ import (
 	"expense-api/internal/repository"
 	"expense-api/internal/router"
 	"expense-api/test/spies"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,8 +17,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-const baseTransactionsPath = "/api/v1/transactions/"
-
 func TestCreateTransaction(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
@@ -28,20 +24,12 @@ func TestCreateTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionRequest := func(transaction *handlers.Transaction, token string) *http.Request {
-		body := createRequestBody(transaction)
-		req, _ := http.NewRequest(http.MethodPost, baseTransactionsPath, bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		transaction := &handlers.Transaction{}
 		token := "invalid-token"
 
-		missingTokenReq := newTransactionRequest(transaction, token)
-		invalidTokenReq := newTransactionRequest(transaction, token)
+		missingTokenReq := NewCreateTransactionRequest(transaction, token)
+		invalidTokenReq := NewCreateTransactionRequest(transaction, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -61,7 +49,7 @@ func TestCreateTransaction(t *testing.T) {
 			}
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := NewCreateTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -75,7 +63,7 @@ func TestCreateTransaction(t *testing.T) {
 			}
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := NewCreateTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -96,7 +84,7 @@ func TestCreateTransaction(t *testing.T) {
 			repoSpy.On("WalletGet", walletID).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := NewCreateTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -120,7 +108,7 @@ func TestCreateTransaction(t *testing.T) {
 			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := NewCreateTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -144,7 +132,7 @@ func TestCreateTransaction(t *testing.T) {
 			repoSpy.On("WalletGet", walletID).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := NewCreateTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -171,7 +159,7 @@ func TestCreateTransaction(t *testing.T) {
 			repoSpy.On("PartyGet", partyID).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := NewCreateTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -201,7 +189,7 @@ func TestCreateTransaction(t *testing.T) {
 			repoSpy.On("PartyGet", partyID).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := NewCreateTransactionRequest(transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -233,7 +221,7 @@ func TestCreateTransaction(t *testing.T) {
 			repoSpy.On("TransactionCreate", transaction).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(&handlers.Transaction{
+			req := NewCreateTransactionRequest(&handlers.Transaction{
 				Timestamp: transaction.Timestamp,
 				Amount:    transaction.Amount,
 				WalletID:  transaction.WalletID,
@@ -257,19 +245,12 @@ func TestGetTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseTransactionsPath, id)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newTransactionRequest(id, token)
-		invalidTokenReq := newTransactionRequest(id, token)
+		missingTokenReq := NewGetTransactionRequest(id, token)
+		invalidTokenReq := NewGetTransactionRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -287,7 +268,7 @@ func TestGetTransaction(t *testing.T) {
 			id := uint(0)
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, token)
+			req := NewGetTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -300,7 +281,7 @@ func TestGetTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, token)
+			req := NewGetTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -318,7 +299,7 @@ func TestGetTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, token)
+			req := NewGetTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -336,7 +317,7 @@ func TestGetTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(transaction, nil).Twice()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, token)
+			req := NewGetTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -355,22 +336,13 @@ func TestUpdateTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionRequest := func(id uint, transaction *handlers.Transaction, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseTransactionsPath, id)
-		body := createRequestBody(transaction)
-		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		transaction := &handlers.Transaction{}
 		token := "invalid-token"
 
-		missingTokenReq := newTransactionRequest(id, transaction, token)
-		invalidTokenReq := newTransactionRequest(id, transaction, token)
+		missingTokenReq := NewUpdateTransactionRequest(id, transaction, token)
+		invalidTokenReq := NewUpdateTransactionRequest(id, transaction, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -393,7 +365,7 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, transaction, token)
+			req := NewUpdateTransactionRequest(id, transaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -411,7 +383,7 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, &handlers.Transaction{
+			req := NewUpdateTransactionRequest(id, &handlers.Transaction{
 				Amount: transaction.Amount.Add(decimal.NewFromInt(100)),
 			}, token)
 
@@ -436,7 +408,7 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("WalletGet", walletID).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, updateTransaction, token)
+			req := NewUpdateTransactionRequest(id, updateTransaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -469,7 +441,7 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("TransactionUpdate", id, updateTransaction).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, updateTransaction, token)
+			req := NewUpdateTransactionRequest(id, updateTransaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -501,7 +473,7 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("PartyGet", nonExistentPartyID).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, updateTransaction, token)
+			req := NewUpdateTransactionRequest(id, updateTransaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -538,7 +510,7 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("PartyGet", anotherUsersPartyID).Return(anotherUsersParty, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, updateTransaction, token)
+			req := NewUpdateTransactionRequest(id, updateTransaction, token)
 
 			r.ServeHTTP(res, req)
 
@@ -564,7 +536,7 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("TransactionUpdate", id, updateTransaction).Return(updateTransaction, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, &handlers.Transaction{
+			req := NewUpdateTransactionRequest(id, &handlers.Transaction{
 				Amount: updateTransaction.Amount,
 			}, token)
 
@@ -585,19 +557,12 @@ func TestDeleteTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseTransactionsPath, id)
-		req, _ := http.NewRequest(http.MethodDelete, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newTransactionRequest(id, token)
-		invalidTokenReq := newTransactionRequest(id, token)
+		missingTokenReq := NewDeleteTransactionRequest(id, token)
+		invalidTokenReq := NewDeleteTransactionRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -617,7 +582,7 @@ func TestDeleteTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, token)
+			req := NewDeleteTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -635,7 +600,7 @@ func TestDeleteTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, token)
+			req := NewDeleteTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -653,7 +618,7 @@ func TestDeleteTransaction(t *testing.T) {
 			repoSpy.On("TransactionDelete", id).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, token)
+			req := NewDeleteTransactionRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -676,17 +641,11 @@ func TestListTransactions(t *testing.T) {
 		}
 	}
 
-	newTransactionRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, baseTransactionsPath, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := newTransactionRequest(token)
-		invalidTokenReq := newTransactionRequest(token)
+		missingTokenReq := NewListTransactionsRequest(token)
+		invalidTokenReq := NewListTransactionsRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -705,7 +664,7 @@ func TestListTransactions(t *testing.T) {
 			repoSpy.On("TransactionList", userID).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(token)
+			req := NewListTransactionsRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -721,7 +680,7 @@ func TestListTransactions(t *testing.T) {
 			repoSpy.On("TransactionList", userID).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(token)
+			req := NewListTransactionsRequest(token)
 
 			r.ServeHTTP(res, req)
 

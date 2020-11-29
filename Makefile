@@ -18,4 +18,7 @@ generate-mocks:
 	mockery --name JWTService --filename jwt_service_spy.go --dir internal/middleware/auth --output test/spies --outpkg spies --structname JWTServiceSpy
 
 test:
+	go test ./... -short
+
+test-all:
 	go test ./...

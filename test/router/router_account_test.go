@@ -1,7 +1,6 @@
 package router
 
 import (
-	"bytes"
 	"encoding/json"
 	"expense-api/internal/handlers"
 	auth_middleware "expense-api/internal/middleware/auth"
@@ -15,8 +14,6 @@ import (
 	"testing"
 )
 
-const baseAccountPath = "/api/v1/account/"
-
 func TestGetAccount(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
 	jwtServiceSpy := &spies.JWTServiceSpy{}
@@ -24,17 +21,11 @@ func TestGetAccount(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newAccountRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, baseAccountPath, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := newAccountRequest(token)
-		invalidTokenReq := newAccountRequest(token)
+		missingTokenReq := NewGetAccountRequest(token)
+		invalidTokenReq := NewGetAccountRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -53,7 +44,7 @@ func TestGetAccount(t *testing.T) {
 			repoSpy.On("UserGet", claims.ID).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(token)
+			req := NewGetAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -66,7 +57,7 @@ func TestGetAccount(t *testing.T) {
 			repoSpy.On("UserGet", claims.ID).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(token)
+			req := NewGetAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -83,20 +74,12 @@ func TestUpdateAccount(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newAccountRequest := func(user *model.User, token string) *http.Request {
-		body := createRequestBody(user)
-		req, _ := http.NewRequest(http.MethodPatch, baseAccountPath, bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		user := &model.User{}
 		token := "invalid-token"
 
-		missingTokenReq := newAccountRequest(user, token)
-		invalidTokenReq := newAccountRequest(user, token)
+		missingTokenReq := NewUpdateAccountRequest(user, token)
+		invalidTokenReq := NewUpdateAccountRequest(user, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -121,7 +104,7 @@ func TestUpdateAccount(t *testing.T) {
 			repoSpy.On("UserUpdate", claims.ID, user.FirstName, user.LastName, user.Email).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(user, token)
+			req := NewUpdateAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -132,7 +115,7 @@ func TestUpdateAccount(t *testing.T) {
 			user := &model.User{}
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(user, token)
+			req := NewUpdateAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -146,7 +129,7 @@ func TestUpdateAccount(t *testing.T) {
 			user := &model.User{Email: "@"}
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(user, token)
+			req := NewUpdateAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -162,7 +145,7 @@ func TestUpdateAccount(t *testing.T) {
 			repoSpy.On("UserUpdate", claims.ID, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(user, token)
+			req := NewUpdateAccountRequest(user, token)
 
 			r.ServeHTTP(res, req)
 
@@ -179,17 +162,11 @@ func TestDeleteAccount(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newAccountRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodDelete, baseAccountPath, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := newAccountRequest(token)
-		invalidTokenReq := newAccountRequest(token)
+		missingTokenReq := NewDeleteAccountRequest(token)
+		invalidTokenReq := NewDeleteAccountRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -208,7 +185,7 @@ func TestDeleteAccount(t *testing.T) {
 			repoSpy.On("UserDelete", claims.ID).Return(repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(token)
+			req := NewDeleteAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -219,7 +196,7 @@ func TestDeleteAccount(t *testing.T) {
 			repoSpy.On("UserDelete", claims.ID).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newAccountRequest(token)
+			req := NewDeleteAccountRequest(token)
 
 			r.ServeHTTP(res, req)
 

@@ -24,4 +24,4 @@ jobs:
         run: go mod download
 
       - name: Test
-        run: TZ="" go test ./...
+        run: TZ="" go test ./... -short

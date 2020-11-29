@@ -1,7 +1,6 @@
 package router
 
 import (
-	"bytes"
 	"encoding/json"
 	"expense-api/internal/handlers"
 	"expense-api/internal/middleware/auth"
@@ -9,15 +8,12 @@ import (
 	"expense-api/internal/repository"
 	"expense-api/internal/router"
 	"expense-api/test/spies"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
-
-const baseWalletsPath = "/api/v1/wallets/"
 
 func TestCreateWallet(t *testing.T) {
 	repoSpy := &spies.RepositorySpy{}
@@ -26,20 +22,12 @@ func TestCreateWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(wallet *handlers.Wallet, token string) *http.Request {
-		body := createRequestBody(wallet)
-		req, _ := http.NewRequest(http.MethodPost, baseWalletsPath, bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		wallet := &handlers.Wallet{}
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(wallet, token)
-		invalidTokenReq := newWalletRequest(wallet, token)
+		missingTokenReq := NewCreateWalletRequest(wallet, token)
+		invalidTokenReq := NewCreateWalletRequest(wallet, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -62,7 +50,7 @@ func TestCreateWallet(t *testing.T) {
 			repoSpy.On("WalletCreate", wallet).Return(repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(&handlers.Wallet{
+			req := NewCreateWalletRequest(&handlers.Wallet{
 				Name: wallet.Name,
 			}, token)
 
@@ -83,7 +71,7 @@ func TestCreateWallet(t *testing.T) {
 			repoSpy.On("WalletCreate", wallet).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(&handlers.Wallet{
+			req := NewCreateWalletRequest(&handlers.Wallet{
 				Name: wallet.Name,
 			}, token)
 
@@ -104,19 +92,12 @@ func TestGetWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseWalletsPath, id)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, token)
-		invalidTokenReq := newWalletRequest(id, token)
+		missingTokenReq := NewGetWalletRequest(id, token)
+		invalidTokenReq := NewGetWalletRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -134,7 +115,7 @@ func TestGetWallet(t *testing.T) {
 			id := uint(0)
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewGetWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -147,7 +128,7 @@ func TestGetWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewGetWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -164,7 +145,7 @@ func TestGetWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewGetWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -181,7 +162,7 @@ func TestGetWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Twice()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewGetWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -200,22 +181,13 @@ func TestUpdateWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(id uint, wallet *handlers.Wallet, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseWalletsPath, id)
-		body := createRequestBody(wallet)
-		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		wallet := &handlers.Wallet{}
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, wallet, token)
-		invalidTokenReq := newWalletRequest(id, wallet, token)
+		missingTokenReq := NewUpdateWalletRequest(id, wallet, token)
+		invalidTokenReq := NewUpdateWalletRequest(id, wallet, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -238,7 +210,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := NewUpdateWalletRequest(id, wallet, token)
 
 			r.ServeHTTP(res, req)
 
@@ -255,7 +227,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
+			req := NewUpdateWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -273,7 +245,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletUpdate", id, wallet).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
+			req := NewUpdateWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -294,7 +266,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletUpdate", id, wallet).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
+			req := NewUpdateWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -313,19 +285,12 @@ func TestDeleteWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d", baseWalletsPath, id)
-		req, _ := http.NewRequest(http.MethodDelete, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, token)
-		invalidTokenReq := newWalletRequest(id, token)
+		missingTokenReq := NewDeleteWalletRequest(id, token)
+		invalidTokenReq := NewDeleteWalletRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -345,7 +310,7 @@ func TestDeleteWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewDeleteWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -362,7 +327,7 @@ func TestDeleteWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewDeleteWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -380,7 +345,7 @@ func TestDeleteWallet(t *testing.T) {
 			repoSpy.On("WalletDelete", id).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewDeleteWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -403,17 +368,11 @@ func TestListWallets(t *testing.T) {
 		}
 	}
 
-	newWalletRequest := func(token string) *http.Request {
-		req, _ := http.NewRequest(http.MethodGet, baseWalletsPath, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(token)
-		invalidTokenReq := newWalletRequest(token)
+		missingTokenReq := NewListWalletsRequest(token)
+		invalidTokenReq := NewListWalletsRequest(token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -432,7 +391,7 @@ func TestListWallets(t *testing.T) {
 			repoSpy.On("WalletList", userID).Return(wallets, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(token)
+			req := NewListWalletsRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -448,7 +407,7 @@ func TestListWallets(t *testing.T) {
 			repoSpy.On("WalletList", userID).Return(wallets, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(token)
+			req := NewListWalletsRequest(token)
 
 			r.ServeHTTP(res, req)
 
@@ -474,19 +433,12 @@ func TestListTransactionsByWallet(t *testing.T) {
 		}
 	}
 
-	newWalletRequest := func(id uint, token string) *http.Request {
-		url := fmt.Sprintf("%s%d/transactions", baseWalletsPath, id)
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		return req
-	}
-
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := newWalletRequest(id, token)
-		invalidTokenReq := newWalletRequest(id, token)
+		missingTokenReq := NewListTransactionsByWalletRequest(id, token)
+		invalidTokenReq := NewListTransactionsByWalletRequest(id, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -505,7 +457,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewListTransactionsByWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -519,7 +471,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewListTransactionsByWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -536,7 +488,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("TransactionListByWallet", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewListTransactionsByWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
@@ -556,7 +508,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("TransactionListByWallet", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, token)
+			req := NewListTransactionsByWalletRequest(id, token)
 
 			r.ServeHTTP(res, req)
 
