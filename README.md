@@ -6,8 +6,8 @@
     - [Prerequisites](#prerequisites)
     - [Setting up environment variables](#setting-up-environment-variables)
     - [Running the dev server](#running-the-dev-server)
+    - [Generating test mocks](#generating-test-mocks)
     - [Running the test suite](#running-the-test-suite)
-    - [Building the dockerized application](#building-the-dockerized-application)
   - [Backend Architecture](#backend-architecture)
   - [Database](#database)
   - [Documentation](#documentation)
@@ -87,7 +87,7 @@ For `Linux` and `Windows` users - please use the linked resources to download th
 
   ```sh
   # start the dev docker container
-  docker-compose -f docker-compose.dev.yml up
+  make start-db
   ```
 
 - **Postman (optional)**
@@ -114,29 +114,29 @@ Run the following command inside the top-level directory:
 - If you installed `air` for live reloading:
 
   ```sh
-  air
+  make run
   ```
 
 - Standard `go` way (no live-reloading):
 
   ```sh
-  go run main.go
+  go run cmd/main.go
   ```
+
+### Generating test mocks
+
+To generate testing mocks based on interfaces:
+
+```sh
+make generate-mocks
+```
 
 ### Running the test suite
 
 To run all the tests:
 
 ```sh
-go test ./...
-```
-
-### Building the dockerized application
-
-To build the application together with a running database you can use the provided `docker-compose.yml` file.
-
-```sh
-docker-compose up --build
+make test
 ```
 
 ## Backend Architecture
