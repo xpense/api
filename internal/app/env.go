@@ -17,50 +17,68 @@ const (
 	DB_NAME     = "DB_NAME"
 )
 
-type environment struct {
-	Port       string
-	Issuer     string
-	Secret     string
-	DBUser     string
-	DBPassword string
-	DBHost     string
-	DBName     string
+type (
+	EnvironmentVariable struct {
+		Name  string
+		Value string
+	}
+
+	Environment struct {
+		Port       EnvironmentVariable
+		Issuer     EnvironmentVariable
+		Secret     EnvironmentVariable
+		DBUser     EnvironmentVariable
+		DBPassword EnvironmentVariable
+		DBHost     EnvironmentVariable
+		DBName     EnvironmentVariable
+	}
+)
+
+func NewDefaultEnviroment() *Environment {
+	return &Environment{
+		Port:       EnvironmentVariable{Name: PORT},
+		Issuer:     EnvironmentVariable{Name: JWT_ISSUER},
+		Secret:     EnvironmentVariable{Name: JWT_SECRET},
+		DBUser:     EnvironmentVariable{Name: DB_USER},
+		DBPassword: EnvironmentVariable{Name: DB_PASSWORD},
+		DBHost:     EnvironmentVariable{Name: DB_HOST},
+		DBName:     EnvironmentVariable{Name: DB_NAME},
+	}
 }
 
-func LoadEnvironmentVars() environment {
+func (e *Environment) LoadVariables() {
 	if err := godotenv.Load(".env"); err != nil {
 		panic(fmt.Sprintf("couldn't load env file: %v", err))
 	}
 
-	port := os.Getenv(PORT)
-	if port == "" {
-		port = ":8080"
+	if port := os.Getenv(e.Port.Name); port == "" {
+		e.Port.Value = ":8080"
 	} else {
-		port = ":" + port
+		e.Port.Value = ":" + port
 	}
 
-	issuer := os.Getenv(JWT_ISSUER)
-	if issuer == "" {
-		panic("JWT_ISSUER not set!")
-	}
+	e.Issuer.Value = os.Getenv(e.Issuer.Name)
+	assertEnvVarSet(e.Issuer)
 
-	secret := os.Getenv(JWT_SECRET)
-	if secret == "" {
-		panic("JWT_SECRET not set!")
-	}
+	e.Secret.Value = os.Getenv(e.Secret.Name)
+	assertEnvVarSet(e.Secret)
 
-	dbUser := os.Getenv(DB_USER)
-	dbPassword := os.Getenv(DB_PASSWORD)
-	dbHost := os.Getenv(DB_HOST)
-	dbName := os.Getenv(DB_NAME)
+	e.DBUser.Value = os.Getenv(e.DBUser.Name)
+	assertEnvVarSet(e.DBUser)
 
-	return environment{
-		Port:       port,
-		Issuer:     issuer,
-		Secret:     secret,
-		DBUser:     dbUser,
-		DBPassword: dbPassword,
-		DBHost:     dbHost,
-		DBName:     dbName,
+	e.DBPassword.Value = os.Getenv(e.DBPassword.Name)
+	assertEnvVarSet(e.DBPassword)
+
+	e.DBHost.Value = os.Getenv(e.DBHost.Name)
+	assertEnvVarSet(e.DBHost)
+
+	e.DBName.Value = os.Getenv(e.DBName.Name)
+	assertEnvVarSet(e.DBName)
+
+}
+
+func assertEnvVarSet(envVar EnvironmentVariable) {
+	if envVar.Value == "" {
+		panic(fmt.Sprintf("%s not set!", envVar.Name))
 	}
 }

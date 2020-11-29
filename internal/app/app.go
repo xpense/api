@@ -9,9 +9,10 @@ import (
 )
 
 func Run() {
-	env := LoadEnvironmentVars()
+	env := NewDefaultEnviroment()
+	env.LoadVariables()
 
-	dbConn, err := repository.NewConnection(env.DBUser, env.DBPassword, env.DBHost, env.DBName)
+	dbConn, err := repository.NewConnection(env.DBUser.Value, env.DBPassword.Value, env.DBHost.Value, env.DBName.Value)
 	if err != nil {
 		panic(fmt.Sprintf("couldn't establish postgres connection: %v", err))
 	}
@@ -21,9 +22,9 @@ func Run() {
 	}
 
 	repository := repository.New(dbConn)
-	jwtService := auth.NewJWTService(env.Issuer, env.Secret)
+	jwtService := auth.NewJWTService(env.Issuer.Value, env.Secret.Value)
 	hasher := utils.NewPasswordHasher()
 
 	r := router.Setup(repository, jwtService, hasher, router.DefaultConfig)
-	r.Run(env.Port)
+	r.Run(env.Port.Value)
 }
