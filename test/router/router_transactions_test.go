@@ -28,7 +28,7 @@ func TestCreateTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionRequest := func(transaction *model.Transaction, token string) *http.Request {
+	newTransactionRequest := func(transaction *handlers.Transaction, token string) *http.Request {
 		body := createRequestBody(transaction)
 		req, _ := http.NewRequest(http.MethodPost, baseTransactionsPath, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -37,7 +37,7 @@ func TestCreateTransaction(t *testing.T) {
 	}
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		transaction := &model.Transaction{}
+		transaction := &handlers.Transaction{}
 		token := "invalid-token"
 
 		missingTokenReq := newTransactionRequest(transaction, token)
@@ -56,7 +56,7 @@ func TestCreateTransaction(t *testing.T) {
 		jwtServiceSpy.On("ValidateJWT", token).Return(&claims, nil)
 
 		t.Run("Create transaction with amount = 0", func(t *testing.T) {
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Amount: decimal.Zero,
 			}
 
@@ -69,10 +69,9 @@ func TestCreateTransaction(t *testing.T) {
 		})
 
 		t.Run("Create transaction with valid data but missing wallet id", func(t *testing.T) {
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
-				UserID:    userID,
 			}
 
 			res := httptest.NewRecorder()
@@ -80,7 +79,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgRequiredWalletID
+			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
 
 			assertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -88,10 +87,9 @@ func TestCreateTransaction(t *testing.T) {
 
 		t.Run("Create transaction with valid data with non-existent wallet id", func(t *testing.T) {
 			walletID := uint(1)
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
-				UserID:    userID,
 				WalletID:  walletID,
 			}
 
@@ -102,7 +100,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgWalletNotFound
+			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
 
 			assertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -113,10 +111,9 @@ func TestCreateTransaction(t *testing.T) {
 			wallet := &model.Wallet{
 				UserID: userID + 1,
 			}
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
-				UserID:    userID,
 				WalletID:  walletID,
 			}
 
@@ -127,7 +124,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgBadWalletID
+			wantErrorMessage := handlers.ErrorBadWalletID.Error()
 
 			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -138,10 +135,9 @@ func TestCreateTransaction(t *testing.T) {
 			wallet := &model.Wallet{
 				UserID: userID,
 			}
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
-				UserID:    userID,
 				WalletID:  walletID,
 			}
 
@@ -152,7 +148,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgRequiredWalletID
+			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
 
 			assertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -164,10 +160,9 @@ func TestCreateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 			partyID := uint(2)
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
-				UserID:    userID,
 				WalletID:  walletID,
 				PartyID:   partyID,
 			}
@@ -180,7 +175,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgPartyNotFound
+			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
 
 			assertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -195,10 +190,9 @@ func TestCreateTransaction(t *testing.T) {
 			party := &model.Party{
 				UserID: userID + 1,
 			}
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Timestamp: time.Date(2020, 12, 3, 19, 20, 0, 0, time.UTC),
 				Amount:    decimal.NewFromInt32(100),
-				UserID:    userID,
 				WalletID:  walletID,
 				PartyID:   partyID,
 			}
@@ -211,7 +205,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgBadPartyID
+			wantErrorMessage := handlers.ErrorBadPartyID.Error()
 
 			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -239,14 +233,19 @@ func TestCreateTransaction(t *testing.T) {
 			repoSpy.On("TransactionCreate", transaction).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(transaction, token)
+			req := newTransactionRequest(&handlers.Transaction{
+				Timestamp: transaction.Timestamp,
+				Amount:    transaction.Amount,
+				WalletID:  transaction.WalletID,
+				PartyID:   transaction.PartyID,
+			}, token)
 
 			r.ServeHTTP(res, req)
 
-			transaction.UserID = 0
+			resBody := handlers.TransactionModelToResponse(transaction)
 
 			assertStatusCode(t, res, http.StatusCreated)
-			assertSingleTransactionResponseBody(t, res, transaction)
+			assertSingleTransactionResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -341,10 +340,10 @@ func TestGetTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			transaction.UserID = 0
+			resBody := handlers.TransactionModelToResponse(transaction)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSingleTransactionResponseBody(t, res, transaction)
+			assertSingleTransactionResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -356,7 +355,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionRequest := func(id uint, transaction *model.Transaction, token string) *http.Request {
+	newTransactionRequest := func(id uint, transaction *handlers.Transaction, token string) *http.Request {
 		url := fmt.Sprintf("%s%d", baseTransactionsPath, id)
 		body := createRequestBody(transaction)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
@@ -367,7 +366,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		transaction := &model.Transaction{}
+		transaction := &handlers.Transaction{}
 		token := "invalid-token"
 
 		missingTokenReq := newTransactionRequest(id, transaction, token)
@@ -387,7 +386,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 		t.Run("Update non-existent transaction", func(t *testing.T) {
 			id := uint(1)
-			transaction := &model.Transaction{
+			transaction := &handlers.Transaction{
 				Amount: decimal.NewFromInt32(100),
 			}
 
@@ -412,7 +411,9 @@ func TestUpdateTransaction(t *testing.T) {
 			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, transaction, token)
+			req := newTransactionRequest(id, &handlers.Transaction{
+				Amount: transaction.Amount.Add(decimal.NewFromInt(100)),
+			}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -427,7 +428,7 @@ func TestUpdateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 
-			updateTransaction := &model.Transaction{
+			updateTransaction := &handlers.Transaction{
 				WalletID: walletID,
 			}
 
@@ -439,7 +440,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgWalletNotFound
+			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
 
 			assertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -454,7 +455,7 @@ func TestUpdateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 
-			updateTransaction := &model.Transaction{
+			updateTransaction := &handlers.Transaction{
 				WalletID: anotherUsersWalletID,
 			}
 
@@ -472,7 +473,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgBadWalletID
+			wantErrorMessage := handlers.ErrorBadWalletID.Error()
 
 			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -491,9 +492,8 @@ func TestUpdateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 
-			updateTransaction := &model.Transaction{
+			updateTransaction := &handlers.Transaction{
 				PartyID: nonExistentPartyID,
-				UserID:  userID,
 			}
 
 			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
@@ -505,7 +505,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgPartyNotFound
+			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
 
 			assertStatusCode(t, res, http.StatusBadRequest)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -529,7 +529,7 @@ func TestUpdateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 
-			updateTransaction := &model.Transaction{
+			updateTransaction := &handlers.Transaction{
 				PartyID: anotherUsersPartyID,
 			}
 
@@ -542,7 +542,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgBadPartyID
+			wantErrorMessage := handlers.ErrorBadPartyID.Error()
 
 			assertStatusCode(t, res, http.StatusForbidden)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -555,18 +555,25 @@ func TestUpdateTransaction(t *testing.T) {
 				UserID: userID,
 			}
 
+			updateTransaction := &model.Transaction{
+				Amount: transaction.Amount.Add(decimal.NewFromInt(100)),
+				UserID: userID,
+			}
+
 			repoSpy.On("TransactionGet", id).Return(transaction, nil).Once()
-			repoSpy.On("TransactionUpdate", id, transaction).Return(transaction, nil).Once()
+			repoSpy.On("TransactionUpdate", id, updateTransaction).Return(updateTransaction, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newTransactionRequest(id, transaction, token)
+			req := newTransactionRequest(id, &handlers.Transaction{
+				Amount: updateTransaction.Amount,
+			}, token)
 
 			r.ServeHTTP(res, req)
 
-			transaction.UserID = 0
+			resBody := handlers.TransactionModelToResponse(updateTransaction)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSingleTransactionResponseBody(t, res, transaction)
+			assertSingleTransactionResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -662,7 +669,7 @@ func TestListTransactions(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionListResponse := func(slice []*model.Transaction) *transactionListResponse {
+	newTransactionListResponse := func(slice []*handlers.Transaction) *transactionListResponse {
 		return &transactionListResponse{
 			Count:   len(slice),
 			Entries: slice,
@@ -702,7 +709,7 @@ func TestListTransactions(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newTransactionListResponse(transactions)
+			expected := newTransactionListResponse([]*handlers.Transaction{})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
@@ -718,7 +725,7 @@ func TestListTransactions(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newTransactionListResponse(transactions)
+			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
@@ -727,14 +734,14 @@ func TestListTransactions(t *testing.T) {
 }
 
 type transactionListResponse struct {
-	Count   int                  `json:"count"`
-	Entries []*model.Transaction `json:"entries"`
+	Count   int                     `json:"count"`
+	Entries []*handlers.Transaction `json:"entries"`
 }
 
-func assertSingleTransactionResponseBody(t *testing.T, res *httptest.ResponseRecorder, transaction *model.Transaction) {
+func assertSingleTransactionResponseBody(t *testing.T, res *httptest.ResponseRecorder, transaction *handlers.Transaction) {
 	t.Helper()
 
-	var got model.Transaction
+	var got handlers.Transaction
 	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)
 	}

@@ -3,10 +3,8 @@ package handlers
 import (
 	"expense-api/internal/middleware"
 	auth_middleware "expense-api/internal/middleware/auth"
-	"expense-api/internal/model"
 	"expense-api/internal/repository"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,32 +17,6 @@ type PartiesHandler interface {
 	DeleteParty(ctx *gin.Context)
 	ListTransactionsByParty(ctx *gin.Context)
 }
-
-// Party is a list of transactions belonging to an account
-type Party struct {
-	ID        uint      `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Name      string    `json:"name"`
-}
-
-func PartyModelToResponse(p *model.Party) *Party {
-	return &Party{
-		ID:        p.ID,
-		CreatedAt: p.CreatedAt,
-		UpdatedAt: p.UpdatedAt,
-		Name:      p.Name,
-	}
-}
-
-func PartyRequestToModel(p *Party, userID uint) *model.Party {
-	return &model.Party{
-		Name:   p.Name,
-		UserID: userID,
-	}
-}
-
-const ErrMsgPartyNameTaken = "party with the same name, belonging to the same user already exists"
 
 func (h *handler) CreateParty(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
@@ -64,7 +36,7 @@ func (h *handler) CreateParty(ctx *gin.Context) {
 	if err := h.repo.PartyCreate(wModel); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrMsgPartyNameTaken,
+				"message": ErrorPartyNameTaken.Error(),
 			})
 			return
 		}
@@ -117,7 +89,7 @@ func (h *handler) UpdateParty(ctx *gin.Context) {
 		}
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrMsgPartyNameTaken,
+				"message": ErrorPartyNameTaken.Error(),
 			})
 			return
 		}

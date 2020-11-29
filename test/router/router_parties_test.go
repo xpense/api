@@ -26,7 +26,7 @@ func TestCreateParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyRequest := func(party *model.Party, token string) *http.Request {
+	newPartyRequest := func(party *handlers.Party, token string) *http.Request {
 		body := createRequestBody(party)
 		req, _ := http.NewRequest(http.MethodPost, basePartiesPath, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -35,7 +35,7 @@ func TestCreateParty(t *testing.T) {
 	}
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		party := &model.Party{}
+		party := &handlers.Party{}
 		token := "invalid-token"
 
 		missingTokenReq := newPartyRequest(party, token)
@@ -62,11 +62,11 @@ func TestCreateParty(t *testing.T) {
 			repoSpy.On("PartyCreate", party).Return(repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(party, token)
+			req := newPartyRequest(&handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgPartyNameTaken
+			wantErrorMessage := handlers.ErrorPartyNameTaken.Error()
 
 			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -81,14 +81,14 @@ func TestCreateParty(t *testing.T) {
 			repoSpy.On("PartyCreate", party).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(party, token)
+			req := newPartyRequest(&handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
-			party.UserID = 0
+			resBody := handlers.PartyModelToResponse(party)
 
 			assertStatusCode(t, res, http.StatusCreated)
-			assertSinglePartyResponseBody(t, res, party)
+			assertSinglePartyResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -182,10 +182,10 @@ func TestGetParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			party.UserID = 0
+			resBody := handlers.PartyModelToResponse(party)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSinglePartyResponseBody(t, res, party)
+			assertSinglePartyResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -197,7 +197,7 @@ func TestUpdateParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyRequest := func(id uint, party *model.Party, token string) *http.Request {
+	newPartyRequest := func(id uint, party *handlers.Party, token string) *http.Request {
 		url := fmt.Sprintf("%s%d", basePartiesPath, id)
 		body := createRequestBody(party)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
@@ -208,7 +208,7 @@ func TestUpdateParty(t *testing.T) {
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		party := &model.Party{}
+		party := &handlers.Party{}
 		token := "invalid-token"
 
 		missingTokenReq := newPartyRequest(id, party, token)
@@ -228,9 +228,8 @@ func TestUpdateParty(t *testing.T) {
 
 		t.Run("Update non-existent party", func(t *testing.T) {
 			id := uint(1)
-			party := &model.Party{
-				Name:   "new party",
-				UserID: userID,
+			party := &handlers.Party{
+				Name: "new party",
 			}
 
 			repoSpy.On("PartyGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
@@ -254,7 +253,7 @@ func TestUpdateParty(t *testing.T) {
 			repoSpy.On("PartyGet", id).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, party, token)
+			req := newPartyRequest(id, &handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -272,11 +271,11 @@ func TestUpdateParty(t *testing.T) {
 			repoSpy.On("PartyUpdate", id, party).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, party, token)
+			req := newPartyRequest(id, &handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgPartyNameTaken
+			wantErrorMessage := handlers.ErrorPartyNameTaken.Error()
 
 			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -293,14 +292,14 @@ func TestUpdateParty(t *testing.T) {
 			repoSpy.On("PartyUpdate", id, party).Return(party, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newPartyRequest(id, party, token)
+			req := newPartyRequest(id, &handlers.Party{Name: party.Name}, token)
 
 			r.ServeHTTP(res, req)
 
-			party.UserID = 0
+			resBody := handlers.PartyModelToResponse(party)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSinglePartyResponseBody(t, res, party)
+			assertSinglePartyResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -396,7 +395,7 @@ func TestListParties(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyListResponse := func(slice []*model.Party) *partyListResponse {
+	newPartyListResponse := func(slice []*handlers.Party) *partyListResponse {
 		return &partyListResponse{
 			Count:   len(slice),
 			Entries: slice,
@@ -436,7 +435,7 @@ func TestListParties(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newPartyListResponse(parties)
+			expected := newPartyListResponse([]*handlers.Party{})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListPartyResponseBody(t, res, expected)
@@ -452,7 +451,7 @@ func TestListParties(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newPartyListResponse(parties)
+			expected := newPartyListResponse([]*handlers.Party{{}})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListPartyResponseBody(t, res, expected)
@@ -467,7 +466,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionListResponse := func(slice []*model.Transaction) *transactionListResponse {
+	newTransactionListResponse := func(slice []*handlers.Transaction) *transactionListResponse {
 		return &transactionListResponse{
 			Count:   len(slice),
 			Entries: slice,
@@ -540,7 +539,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newTransactionListResponse(transactions)
+			expected := newTransactionListResponse([]*handlers.Transaction{})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
@@ -560,7 +559,7 @@ func TestListTransactionsByParty(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newTransactionListResponse(transactions)
+			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
@@ -569,14 +568,14 @@ func TestListTransactionsByParty(t *testing.T) {
 }
 
 type partyListResponse struct {
-	Count   int            `json:"count"`
-	Entries []*model.Party `json:"entries"`
+	Count   int               `json:"count"`
+	Entries []*handlers.Party `json:"entries"`
 }
 
-func assertSinglePartyResponseBody(t *testing.T, res *httptest.ResponseRecorder, party *model.Party) {
+func assertSinglePartyResponseBody(t *testing.T, res *httptest.ResponseRecorder, party *handlers.Party) {
 	t.Helper()
 
-	var got model.Party
+	var got handlers.Party
 	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)
 	}

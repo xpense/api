@@ -26,7 +26,7 @@ func TestCreateWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(wallet *model.Wallet, token string) *http.Request {
+	newWalletRequest := func(wallet *handlers.Wallet, token string) *http.Request {
 		body := createRequestBody(wallet)
 		req, _ := http.NewRequest(http.MethodPost, baseWalletsPath, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -35,7 +35,7 @@ func TestCreateWallet(t *testing.T) {
 	}
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		wallet := &model.Wallet{}
+		wallet := &handlers.Wallet{}
 		token := "invalid-token"
 
 		missingTokenReq := newWalletRequest(wallet, token)
@@ -62,11 +62,13 @@ func TestCreateWallet(t *testing.T) {
 			repoSpy.On("WalletCreate", wallet).Return(repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(wallet, token)
+			req := newWalletRequest(&handlers.Wallet{
+				Name: wallet.Name,
+			}, token)
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgWalletNameTaken
+			wantErrorMessage := handlers.ErrorWalletNameTaken.Error()
 
 			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -74,20 +76,23 @@ func TestCreateWallet(t *testing.T) {
 
 		t.Run("Create wallet with valid data", func(t *testing.T) {
 			wallet := &model.Wallet{
+				Name:   "cash",
 				UserID: userID,
 			}
 
 			repoSpy.On("WalletCreate", wallet).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(wallet, token)
+			req := newWalletRequest(&handlers.Wallet{
+				Name: wallet.Name,
+			}, token)
 
 			r.ServeHTTP(res, req)
 
-			wallet.UserID = 0
+			resBody := handlers.WalletModelToResponse(wallet)
 
 			assertStatusCode(t, res, http.StatusCreated)
-			assertSingleWalletResponseBody(t, res, wallet)
+			assertSingleWalletResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -180,10 +185,10 @@ func TestGetWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wallet.UserID = 0
+			resBody := handlers.WalletModelToResponse(wallet)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSingleWalletResponseBody(t, res, wallet)
+			assertSingleWalletResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -195,7 +200,7 @@ func TestUpdateWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletRequest := func(id uint, wallet *model.Wallet, token string) *http.Request {
+	newWalletRequest := func(id uint, wallet *handlers.Wallet, token string) *http.Request {
 		url := fmt.Sprintf("%s%d", baseWalletsPath, id)
 		body := createRequestBody(wallet)
 		req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
@@ -206,7 +211,7 @@ func TestUpdateWallet(t *testing.T) {
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		id := uint(1)
-		wallet := &model.Wallet{}
+		wallet := &handlers.Wallet{}
 		token := "invalid-token"
 
 		missingTokenReq := newWalletRequest(id, wallet, token)
@@ -226,9 +231,8 @@ func TestUpdateWallet(t *testing.T) {
 
 		t.Run("Update non-existent wallet", func(t *testing.T) {
 			id := uint(1)
-			wallet := &model.Wallet{
-				Name:   "new wallet",
-				UserID: userID,
+			wallet := &handlers.Wallet{
+				Name: "new wallet",
 			}
 
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
@@ -251,7 +255,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := newWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
 
 			r.ServeHTTP(res, req)
 
@@ -269,11 +273,11 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletUpdate", id, wallet).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := newWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrMsgWalletNameTaken
+			wantErrorMessage := handlers.ErrorWalletNameTaken.Error()
 
 			assertStatusCode(t, res, http.StatusConflict)
 			assertErrorMessage(t, res, wantErrorMessage)
@@ -290,14 +294,14 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletUpdate", id, wallet).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := newWalletRequest(id, wallet, token)
+			req := newWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
 
 			r.ServeHTTP(res, req)
 
-			wallet.UserID = 0
+			resBody := handlers.WalletModelToResponse(wallet)
 
 			assertStatusCode(t, res, http.StatusOK)
-			assertSingleWalletResponseBody(t, res, wallet)
+			assertSingleWalletResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -392,7 +396,7 @@ func TestListWallets(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletListResponse := func(slice []*model.Wallet) *walletListResponse {
+	newWalletListResponse := func(slice []*handlers.Wallet) *walletListResponse {
 		return &walletListResponse{
 			Count:   len(slice),
 			Entries: slice,
@@ -432,7 +436,7 @@ func TestListWallets(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newWalletListResponse(wallets)
+			expected := newWalletListResponse([]*handlers.Wallet{})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListWalletResponseBody(t, res, expected)
@@ -448,7 +452,7 @@ func TestListWallets(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newWalletListResponse(wallets)
+			expected := newWalletListResponse([]*handlers.Wallet{{}})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListWalletResponseBody(t, res, expected)
@@ -463,7 +467,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionListResponse := func(slice []*model.Transaction) *transactionListResponse {
+	newTransactionListResponse := func(slice []*handlers.Transaction) *transactionListResponse {
 		return &transactionListResponse{
 			Count:   len(slice),
 			Entries: slice,
@@ -536,7 +540,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newTransactionListResponse(transactions)
+			expected := newTransactionListResponse([]*handlers.Transaction{})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
@@ -556,7 +560,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			expected := newTransactionListResponse(transactions)
+			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
 			assertStatusCode(t, res, http.StatusOK)
 			assertListTransactionResponseBody(t, res, expected)
@@ -565,14 +569,14 @@ func TestListTransactionsByWallet(t *testing.T) {
 }
 
 type walletListResponse struct {
-	Count   int             `json:"count"`
-	Entries []*model.Wallet `json:"entries"`
+	Count   int                `json:"count"`
+	Entries []*handlers.Wallet `json:"entries"`
 }
 
-func assertSingleWalletResponseBody(t *testing.T, res *httptest.ResponseRecorder, wallet *model.Wallet) {
+func assertSingleWalletResponseBody(t *testing.T, res *httptest.ResponseRecorder, wallet *handlers.Wallet) {
 	t.Helper()
 
-	var got model.Wallet
+	var got handlers.Wallet
 	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
 		t.Errorf("couldn't parse json response: %v", err)
 	}

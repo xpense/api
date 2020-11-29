@@ -3,10 +3,8 @@ package handlers
 import (
 	"expense-api/internal/middleware"
 	auth_middleware "expense-api/internal/middleware/auth"
-	"expense-api/internal/model"
 	"expense-api/internal/repository"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,35 +17,6 @@ type WalletsHandler interface {
 	DeleteWallet(ctx *gin.Context)
 	ListTransactionsByWallet(ctx *gin.Context)
 }
-
-// Wallet is a list of transactions belonging to an account
-type Wallet struct {
-	ID          uint      `json:"id"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-}
-
-func WalletModelToResponse(w *model.Wallet) *Wallet {
-	return &Wallet{
-		ID:          w.ID,
-		CreatedAt:   w.CreatedAt,
-		UpdatedAt:   w.UpdatedAt,
-		Name:        w.Name,
-		Description: w.Description,
-	}
-}
-
-func WalletRequestToModel(w *Wallet, userID uint) *model.Wallet {
-	return &model.Wallet{
-		Name:        w.Name,
-		Description: w.Description,
-		UserID:      userID,
-	}
-}
-
-const ErrMsgWalletNameTaken = "wallet with the same name, belonging to the same user already exists"
 
 func (h *handler) CreateWallet(ctx *gin.Context) {
 	userID, err := auth_middleware.GetUserIDFromContext(ctx)
@@ -67,7 +36,7 @@ func (h *handler) CreateWallet(ctx *gin.Context) {
 	if err := h.repo.WalletCreate(wModel); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrMsgWalletNameTaken,
+				"message": ErrorWalletNameTaken.Error(),
 			})
 			return
 		}
@@ -103,7 +72,7 @@ func (h *handler) UpdateWallet(ctx *gin.Context) {
 		}
 		if err == repository.ErrorUniqueConstaintViolation {
 			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrMsgWalletNameTaken,
+				"message": ErrorWalletNameTaken.Error(),
 			})
 			return
 		}
