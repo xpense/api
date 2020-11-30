@@ -3,7 +3,6 @@ package router
 import (
 	"bytes"
 	"expense-api/internal/handlers"
-	"expense-api/internal/model"
 	"fmt"
 	"net/http"
 )
@@ -25,7 +24,7 @@ func NewGetAccountRequest(token string) *http.Request {
 	return req
 }
 
-func NewUpdateAccountRequest(user *model.User, token string) *http.Request {
+func NewUpdateAccountRequest(user *handlers.Account, token string) *http.Request {
 	body := createRequestBody(user)
 	req, _ := http.NewRequest(http.MethodPatch, BaseAccountPath, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")

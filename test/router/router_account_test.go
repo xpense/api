@@ -62,7 +62,7 @@ func TestGetAccount(t *testing.T) {
 			r.ServeHTTP(res, req)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertUserResponseBody(t, res, user)
+			assertUserResponseBody(t, res, &handlers.Account{})
 		})
 	})
 }
@@ -75,11 +75,11 @@ func TestUpdateAccount(t *testing.T) {
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
-		user := &model.User{}
+		account := &handlers.Account{}
 		token := "invalid-token"
 
-		missingTokenReq := NewUpdateAccountRequest(user, token)
-		invalidTokenReq := NewUpdateAccountRequest(user, token)
+		missingTokenReq := NewUpdateAccountRequest(account, token)
+		invalidTokenReq := NewUpdateAccountRequest(account, token)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -95,16 +95,16 @@ func TestUpdateAccount(t *testing.T) {
 		jwtServiceSpy.On("ValidateJWT", token).Return(claims, nil)
 
 		t.Run("Update non-existent user", func(t *testing.T) {
-			user := &model.User{
+			account := &handlers.Account{
 				FirstName: "Updated First Name",
 				LastName:  "Last Name",
 				Email:     "john@doe.com",
 			}
 
-			repoSpy.On("UserUpdate", claims.ID, user.FirstName, user.LastName, user.Email).Return(nil, repository.ErrorRecordNotFound).Once()
+			repoSpy.On("UserUpdate", claims.ID, account.FirstName, account.LastName, account.Email).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(user, token)
+			req := NewUpdateAccountRequest(account, token)
 
 			r.ServeHTTP(res, req)
 
@@ -112,10 +112,10 @@ func TestUpdateAccount(t *testing.T) {
 		})
 
 		t.Run("Update existing user with empty body", func(t *testing.T) {
-			user := &model.User{}
+			account := &handlers.Account{}
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(user, token)
+			req := NewUpdateAccountRequest(account, token)
 
 			r.ServeHTTP(res, req)
 
@@ -126,10 +126,10 @@ func TestUpdateAccount(t *testing.T) {
 		})
 
 		t.Run("Update existing user with invalid email", func(t *testing.T) {
-			user := &model.User{Email: "@"}
+			account := &handlers.Account{Email: "@"}
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(user, token)
+			req := NewUpdateAccountRequest(account, token)
 
 			r.ServeHTTP(res, req)
 
@@ -141,16 +141,17 @@ func TestUpdateAccount(t *testing.T) {
 
 		t.Run("Update existing user with valid email", func(t *testing.T) {
 			user := &model.User{Email: "john@doe.com"}
+			account := &handlers.Account{Email: user.Email}
 
 			repoSpy.On("UserUpdate", claims.ID, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(user, token)
+			req := NewUpdateAccountRequest(account, token)
 
 			r.ServeHTTP(res, req)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertUserResponseBody(t, res, user)
+			assertUserResponseBody(t, res, account)
 		})
 	})
 }
@@ -205,7 +206,7 @@ func TestDeleteAccount(t *testing.T) {
 	})
 }
 
-func assertUserResponseBody(t *testing.T, res *httptest.ResponseRecorder, user *model.User) {
+func assertUserResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *handlers.Account) {
 	t.Helper()
 
 	var got handlers.Account
@@ -213,7 +214,6 @@ func assertUserResponseBody(t *testing.T, res *httptest.ResponseRecorder, user *
 		t.Errorf("couldn't parse json response: %v", err)
 	}
 
-	expected := handlers.UserModelToAccountResponse(user)
 	if !reflect.DeepEqual(got, *expected) {
 		t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
 	}
