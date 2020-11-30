@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"errors"
 	"expense-api/internal/handlers"
 	"expense-api/internal/model"
@@ -11,7 +10,6 @@ import (
 	"expense-api/test/spies"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 )
 
@@ -31,7 +29,7 @@ func TestSignUp(t *testing.T) {
 		wantErrorMessage := handlers.ErrorName.Error()
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, res, wantErrorMessage)
+		AssertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't sign up with missing 'last_name'", func(t *testing.T) {
@@ -45,7 +43,7 @@ func TestSignUp(t *testing.T) {
 		wantErrorMessage := handlers.ErrorName.Error()
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, res, wantErrorMessage)
+		AssertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't sign up with missing 'email'", func(t *testing.T) {
@@ -60,7 +58,7 @@ func TestSignUp(t *testing.T) {
 		wantErrorMessage := handlers.ErrorEmail.Error()
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, res, wantErrorMessage)
+		AssertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't sign up with missing 'password'", func(t *testing.T) {
@@ -76,7 +74,7 @@ func TestSignUp(t *testing.T) {
 		wantErrorMessage := utils.ErrorPasswordLength.Error()
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, res, wantErrorMessage)
+		AssertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't sign up user with an already registered email", func(t *testing.T) {
@@ -108,7 +106,7 @@ func TestSignUp(t *testing.T) {
 		wantErrorMessage := handlers.ErrorEmailConflict.Error()
 
 		AssertStatusCode(t, res, http.StatusConflict)
-		assertErrorMessage(t, res, wantErrorMessage)
+		AssertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Should sign up user", func(t *testing.T) {
@@ -177,7 +175,7 @@ func TestLogin(t *testing.T) {
 				wantErrorMessage := handlers.ErrorMissingPasswordOrEmail.Error()
 
 				AssertStatusCode(t, res, http.StatusBadRequest)
-				assertErrorMessage(t, res, wantErrorMessage)
+				AssertErrorMessage(t, res, wantErrorMessage)
 			})
 		}
 	})
@@ -198,7 +196,7 @@ func TestLogin(t *testing.T) {
 		wantErrorMessage := handlers.ErrorNonExistentUser.Error()
 
 		AssertStatusCode(t, res, http.StatusNotFound)
-		assertErrorMessage(t, res, wantErrorMessage)
+		AssertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't log in if an error occurs while trying to query for user", func(t *testing.T) {
@@ -256,7 +254,7 @@ func TestLogin(t *testing.T) {
 		wantErrorMessage := handlers.ErrorWrongPassword.Error()
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
-		assertErrorMessage(t, res, wantErrorMessage)
+		AssertErrorMessage(t, res, wantErrorMessage)
 	})
 
 	t.Run("Shouldn't log in if there's an error while generating the access token", func(t *testing.T) {
@@ -308,19 +306,6 @@ func TestLogin(t *testing.T) {
 		r.ServeHTTP(res, req)
 
 		AssertStatusCode(t, res, http.StatusOK)
-		assertLoginTokenResponseBody(t, res, loginToken)
+		AssertResponseBody(t, res, loginToken)
 	})
-}
-
-func assertLoginTokenResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *handlers.LoginToken) {
-	t.Helper()
-
-	var got handlers.LoginToken
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !reflect.DeepEqual(got, *expected) {
-		t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
-	}
 }

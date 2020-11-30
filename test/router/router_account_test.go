@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"expense-api/internal/handlers"
 	auth_middleware "expense-api/internal/middleware/auth"
 	"expense-api/internal/model"
@@ -10,7 +9,6 @@ import (
 	"expense-api/test/spies"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 )
 
@@ -62,7 +60,7 @@ func TestGetAccount(t *testing.T) {
 			r.ServeHTTP(res, req)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertUserResponseBody(t, res, &handlers.Account{})
+			AssertResponseBody(t, res, &handlers.Account{})
 		})
 	})
 }
@@ -122,7 +120,7 @@ func TestUpdateAccount(t *testing.T) {
 			wantErrorMessage := handlers.ErrorEmptyBody.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Update existing user with invalid email", func(t *testing.T) {
@@ -136,7 +134,7 @@ func TestUpdateAccount(t *testing.T) {
 			wantErrorMessage := handlers.ErrorEmail.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Update existing user with valid email", func(t *testing.T) {
@@ -151,7 +149,7 @@ func TestUpdateAccount(t *testing.T) {
 			r.ServeHTTP(res, req)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertUserResponseBody(t, res, account)
+			AssertResponseBody(t, res, account)
 		})
 	})
 }
@@ -204,17 +202,4 @@ func TestDeleteAccount(t *testing.T) {
 			AssertStatusCode(t, res, http.StatusNoContent)
 		})
 	})
-}
-
-func assertUserResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *handlers.Account) {
-	t.Helper()
-
-	var got handlers.Account
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !reflect.DeepEqual(got, *expected) {
-		t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
-	}
 }

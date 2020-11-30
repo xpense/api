@@ -28,7 +28,7 @@ func UnauthorizedTestCases(
 			wantErrorMessage := auth_middleware.ErrMsgMalformedToken
 
 			AssertStatusCode(t, res, http.StatusUnauthorized)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Invalid token", func(t *testing.T) {

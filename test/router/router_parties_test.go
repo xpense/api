@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"expense-api/internal/handlers"
 	"expense-api/internal/middleware/auth"
 	"expense-api/internal/model"
@@ -11,8 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestCreateParty(t *testing.T) {
@@ -57,7 +54,7 @@ func TestCreateParty(t *testing.T) {
 			wantErrorMessage := handlers.ErrorPartyNameTaken.Error()
 
 			AssertStatusCode(t, res, http.StatusConflict)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create party with valid data", func(t *testing.T) {
@@ -76,7 +73,7 @@ func TestCreateParty(t *testing.T) {
 			resBody := handlers.PartyModelToResponse(party)
 
 			AssertStatusCode(t, res, http.StatusCreated)
-			assertSinglePartyResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -166,7 +163,7 @@ func TestGetParty(t *testing.T) {
 			resBody := handlers.PartyModelToResponse(party)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertSinglePartyResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -250,7 +247,7 @@ func TestUpdateParty(t *testing.T) {
 			wantErrorMessage := handlers.ErrorPartyNameTaken.Error()
 
 			AssertStatusCode(t, res, http.StatusConflict)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Update existing party with valid arguments", func(t *testing.T) {
@@ -271,7 +268,7 @@ func TestUpdateParty(t *testing.T) {
 			resBody := handlers.PartyModelToResponse(party)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertSinglePartyResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -397,7 +394,7 @@ func TestListParties(t *testing.T) {
 			expected := newPartyListResponse([]*handlers.Party{})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListPartyResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 
 		t.Run("List parties when there are non-zero parties", func(t *testing.T) {
@@ -413,7 +410,7 @@ func TestListParties(t *testing.T) {
 			expected := newPartyListResponse([]*handlers.Party{{}})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListPartyResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 	})
 }
@@ -494,7 +491,7 @@ func TestListTransactionsByParty(t *testing.T) {
 			expected := newTransactionListResponse([]*handlers.Transaction{})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListTransactionResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 
 		t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
@@ -514,38 +511,7 @@ func TestListTransactionsByParty(t *testing.T) {
 			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListTransactionResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 	})
-}
-
-type partyListResponse struct {
-	Count   int               `json:"count"`
-	Entries []*handlers.Party `json:"entries"`
-}
-
-func assertSinglePartyResponseBody(t *testing.T, res *httptest.ResponseRecorder, party *handlers.Party) {
-	t.Helper()
-
-	var got handlers.Party
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !cmp.Equal(got, *party) {
-		t.Errorf("expected %+v, got %+v", *party, got)
-	}
-}
-
-func assertListPartyResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *partyListResponse) {
-	t.Helper()
-
-	var got partyListResponse
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !cmp.Equal(got, *expected) {
-		t.Errorf("expected %+v, got %+v", *expected, got)
-	}
 }

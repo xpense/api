@@ -18,12 +18,10 @@ func TestIntegration(t *testing.T) {
 	var authToken string
 
 	t.Run("Signs up a user and then logs that user in", func(t *testing.T) {
-		var (
-			firstName = "First Name"
-			lastName  = "Last Name"
-			email     = "john@doe.com"
-			password  = "123Password!{}"
-		)
+		firstName := "First Name"
+		lastName := "Last Name"
+		email := "john@doe.com"
+		password := "123Password!{}"
 
 		// Sign up
 

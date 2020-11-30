@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"expense-api/internal/handlers"
 	"expense-api/internal/middleware/auth"
 	"expense-api/internal/model"
@@ -13,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/shopspring/decimal"
 )
 
@@ -70,7 +68,7 @@ func TestCreateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create transaction with valid data with non-existent wallet id", func(t *testing.T) {
@@ -91,7 +89,7 @@ func TestCreateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create transaction with valid data with existing wallet id that belongs to other user", func(t *testing.T) {
@@ -115,7 +113,7 @@ func TestCreateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorBadWalletID.Error()
 
 			AssertStatusCode(t, res, http.StatusForbidden)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create transaction with valid data but missing party id", func(t *testing.T) {
@@ -139,7 +137,7 @@ func TestCreateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create transaction with valid data with non-existent party id", func(t *testing.T) {
@@ -166,7 +164,7 @@ func TestCreateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create transaction with valid data with existing party id that belongs to another user", func(t *testing.T) {
@@ -196,7 +194,7 @@ func TestCreateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorBadPartyID.Error()
 
 			AssertStatusCode(t, res, http.StatusForbidden)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create transaction with valid data", func(t *testing.T) {
@@ -233,7 +231,7 @@ func TestCreateTransaction(t *testing.T) {
 			resBody := handlers.TransactionModelToResponse(transaction)
 
 			AssertStatusCode(t, res, http.StatusCreated)
-			assertSingleTransactionResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -324,7 +322,7 @@ func TestGetTransaction(t *testing.T) {
 			resBody := handlers.TransactionModelToResponse(transaction)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertSingleTransactionResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -415,7 +413,7 @@ func TestUpdateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Change a transaction's wallet ID to one that belongs to another user", func(t *testing.T) {
@@ -448,7 +446,7 @@ func TestUpdateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorBadWalletID.Error()
 
 			AssertStatusCode(t, res, http.StatusForbidden)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Change a transaction's party ID to one that doesn't exist", func(t *testing.T) {
@@ -480,7 +478,7 @@ func TestUpdateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Change a transaction's party ID to one that belongs to another user", func(t *testing.T) {
@@ -517,7 +515,7 @@ func TestUpdateTransaction(t *testing.T) {
 			wantErrorMessage := handlers.ErrorBadPartyID.Error()
 
 			AssertStatusCode(t, res, http.StatusForbidden)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Update existing transaction with valid arguments", func(t *testing.T) {
@@ -545,7 +543,7 @@ func TestUpdateTransaction(t *testing.T) {
 			resBody := handlers.TransactionModelToResponse(updateTransaction)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertSingleTransactionResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -671,7 +669,7 @@ func TestListTransactions(t *testing.T) {
 			expected := newTransactionListResponse([]*handlers.Transaction{})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListTransactionResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 
 		t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
@@ -687,38 +685,7 @@ func TestListTransactions(t *testing.T) {
 			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListTransactionResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 	})
-}
-
-type transactionListResponse struct {
-	Count   int                     `json:"count"`
-	Entries []*handlers.Transaction `json:"entries"`
-}
-
-func assertSingleTransactionResponseBody(t *testing.T, res *httptest.ResponseRecorder, transaction *handlers.Transaction) {
-	t.Helper()
-
-	var got handlers.Transaction
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !cmp.Equal(got, *transaction) {
-		t.Errorf("expected %+v, got %+v", *transaction, got)
-	}
-}
-
-func assertListTransactionResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *transactionListResponse) {
-	t.Helper()
-
-	var got transactionListResponse
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !cmp.Equal(got, *expected) {
-		t.Errorf("expected %+v ;%T, got %+v ;%T", *expected, *expected, got, got)
-	}
 }

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"expense-api/internal/handlers"
 	"expense-api/internal/middleware/auth"
 	"expense-api/internal/model"
@@ -11,8 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestCreateWallet(t *testing.T) {
@@ -59,7 +56,7 @@ func TestCreateWallet(t *testing.T) {
 			wantErrorMessage := handlers.ErrorWalletNameTaken.Error()
 
 			AssertStatusCode(t, res, http.StatusConflict)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Create wallet with valid data", func(t *testing.T) {
@@ -80,7 +77,7 @@ func TestCreateWallet(t *testing.T) {
 			resBody := handlers.WalletModelToResponse(wallet)
 
 			AssertStatusCode(t, res, http.StatusCreated)
-			assertSingleWalletResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -169,7 +166,7 @@ func TestGetWallet(t *testing.T) {
 			resBody := handlers.WalletModelToResponse(wallet)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertSingleWalletResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -252,7 +249,7 @@ func TestUpdateWallet(t *testing.T) {
 			wantErrorMessage := handlers.ErrorWalletNameTaken.Error()
 
 			AssertStatusCode(t, res, http.StatusConflict)
-			assertErrorMessage(t, res, wantErrorMessage)
+			AssertErrorMessage(t, res, wantErrorMessage)
 		})
 
 		t.Run("Update existing wallet with valid arguments", func(t *testing.T) {
@@ -273,7 +270,7 @@ func TestUpdateWallet(t *testing.T) {
 			resBody := handlers.WalletModelToResponse(wallet)
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertSingleWalletResponseBody(t, res, resBody)
+			AssertResponseBody(t, res, resBody)
 		})
 	})
 }
@@ -398,7 +395,7 @@ func TestListWallets(t *testing.T) {
 			expected := newWalletListResponse([]*handlers.Wallet{})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListWalletResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 
 		t.Run("List wallets when there are non-zero wallets", func(t *testing.T) {
@@ -414,7 +411,7 @@ func TestListWallets(t *testing.T) {
 			expected := newWalletListResponse([]*handlers.Wallet{{}})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListWalletResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 	})
 }
@@ -495,7 +492,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			expected := newTransactionListResponse([]*handlers.Transaction{})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListTransactionResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 
 		t.Run("List transactions when there are non-zero transactions", func(t *testing.T) {
@@ -515,38 +512,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			expected := newTransactionListResponse([]*handlers.Transaction{{}})
 
 			AssertStatusCode(t, res, http.StatusOK)
-			assertListTransactionResponseBody(t, res, expected)
+			AssertResponseBody(t, res, expected)
 		})
 	})
-}
-
-type walletListResponse struct {
-	Count   int                `json:"count"`
-	Entries []*handlers.Wallet `json:"entries"`
-}
-
-func assertSingleWalletResponseBody(t *testing.T, res *httptest.ResponseRecorder, wallet *handlers.Wallet) {
-	t.Helper()
-
-	var got handlers.Wallet
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !cmp.Equal(got, *wallet) {
-		t.Errorf("expected %+v, got %+v", *wallet, got)
-	}
-}
-
-func assertListWalletResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected *walletListResponse) {
-	t.Helper()
-
-	var got walletListResponse
-	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-		t.Errorf("couldn't parse json response: %v", err)
-	}
-
-	if !cmp.Equal(got, *expected) {
-		t.Errorf("expected %+v, got %+v", *expected, got)
-	}
 }
