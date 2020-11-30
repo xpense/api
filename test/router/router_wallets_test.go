@@ -358,8 +358,8 @@ func TestListWallets(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newWalletListResponse := func(slice []*handlers.Wallet) *walletListResponse {
-		return &walletListResponse{
+	newWalletListResponse := func(slice []*handlers.Wallet) *WalletListResponse {
+		return &WalletListResponse{
 			Count:   len(slice),
 			Entries: slice,
 		}
@@ -423,8 +423,8 @@ func TestListTransactionsByWallet(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionListResponse := func(slice []*handlers.Transaction) *transactionListResponse {
-		return &transactionListResponse{
+	newTransactionListResponse := func(slice []*handlers.Transaction) *TransactionListResponse {
+		return &TransactionListResponse{
 			Count:   len(slice),
 			Entries: slice,
 		}

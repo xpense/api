@@ -357,8 +357,8 @@ func TestListParties(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newPartyListResponse := func(slice []*handlers.Party) *partyListResponse {
-		return &partyListResponse{
+	newPartyListResponse := func(slice []*handlers.Party) *PartyListResponse {
+		return &PartyListResponse{
 			Count:   len(slice),
 			Entries: slice,
 		}
@@ -422,8 +422,8 @@ func TestListTransactionsByParty(t *testing.T) {
 
 	r := router.Setup(repoSpy, jwtServiceSpy, hasherSpy, router.TestConfig)
 
-	newTransactionListResponse := func(slice []*handlers.Transaction) *transactionListResponse {
-		return &transactionListResponse{
+	newTransactionListResponse := func(slice []*handlers.Transaction) *TransactionListResponse {
+		return &TransactionListResponse{
 			Count:   len(slice),
 			Entries: slice,
 		}

@@ -12,22 +12,23 @@ import (
 )
 
 type (
-	partyListResponse struct {
+	PartyListResponse struct {
 		Count   int               `json:"count"`
 		Entries []*handlers.Party `json:"entries"`
 	}
 
-	transactionListResponse struct {
+	TransactionListResponse struct {
 		Count   int                     `json:"count"`
 		Entries []*handlers.Transaction `json:"entries"`
 	}
 
-	walletListResponse struct {
+	WalletListResponse struct {
 		Count   int                `json:"count"`
 		Entries []*handlers.Wallet `json:"entries"`
 	}
 )
 
+// Assertions
 func AssertEqual(t *testing.T, got, expected interface{}) {
 	t.Helper()
 
@@ -58,69 +59,55 @@ func AssertErrorMessage(t *testing.T, res *httptest.ResponseRecorder, expected s
 func AssertResponseBody(t *testing.T, res *httptest.ResponseRecorder, expected interface{}) {
 	t.Helper()
 
-	// Single entity
 	switch expected := expected.(type) {
+	// Single entities
+	case *handlers.LoginToken:
+		var got handlers.LoginToken
+		ParseLoginTokenJSONResponse(t, res, &got)
+		AssertEqual(t, got, *expected)
+
 	case *handlers.Account:
 		var got handlers.Account
-		if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-			t.Errorf("couldn't parse json response: %v", err)
-		}
-
+		ParseAccountJSONResponse(t, res, &got)
 		AssertEqual(t, got, *expected)
 
 	case *handlers.Party:
 		var got handlers.Party
-		if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-			t.Errorf("couldn't parse json response: %v", err)
-		}
-
+		ParsePartyJSONResponse(t, res, &got)
 		AssertEqual(t, got, *expected)
 
 	case *handlers.Wallet:
 		var got handlers.Wallet
-		if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-			t.Errorf("couldn't parse json response: %v", err)
-		}
-
+		ParseWalletJSONResponse(t, res, &got)
 		AssertEqual(t, got, *expected)
 
 	case *handlers.Transaction:
 		var got handlers.Transaction
-		if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-			t.Errorf("couldn't parse json response: %v", err)
-		}
-
+		ParseTransactionJSONResponse(t, res, &got)
 		AssertEqual(t, got, *expected)
-	}
 
 	// List of entities
-	switch expected := expected.(type) {
-	case *partyListResponse:
-		var got partyListResponse
-		if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-			t.Errorf("couldn't parse json response: %v", err)
-		}
-
+	case *PartyListResponse:
+		var got PartyListResponse
+		ParsePartyListJSONResponse(t, res, &got)
 		AssertEqual(t, got, *expected)
 
-	case *walletListResponse:
-		var got walletListResponse
-		if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-			t.Errorf("couldn't parse json response: %v", err)
-		}
-
+	case *WalletListResponse:
+		var got WalletListResponse
+		ParseWalletListJSONResponse(t, res, &got)
 		AssertEqual(t, got, *expected)
 
-	case *transactionListResponse:
-		var got transactionListResponse
-		if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
-			t.Errorf("couldn't parse json response: %v", err)
-		}
-
+	case *TransactionListResponse:
+		var got TransactionListResponse
+		ParseTransactionListJSONResponse(t, res, &got)
 		AssertEqual(t, got, *expected)
+
+	default:
+		t.Errorf("unknown type %v", expected)
 	}
 }
 
+// Parsing
 func ParseJSON(t *testing.T, res *httptest.ResponseRecorder) map[string]interface{} {
 	t.Helper()
 
@@ -132,6 +119,55 @@ func ParseJSON(t *testing.T, res *httptest.ResponseRecorder) map[string]interfac
 	return jsonResponse
 }
 
+func ParseLoginTokenJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *handlers.LoginToken) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func ParseAccountJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *handlers.Account) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func ParsePartyJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *handlers.Party) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func ParseWalletJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *handlers.Wallet) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func ParseTransactionJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *handlers.Transaction) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func ParsePartyListJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *PartyListResponse) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func ParseWalletListJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *WalletListResponse) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+func ParseTransactionListJSONResponse(t *testing.T, res *httptest.ResponseRecorder, into *TransactionListResponse) {
+	if err := json.NewDecoder(res.Body).Decode(&into); err != nil {
+		t.Errorf("couldn't parse json response: %v", err)
+	}
+}
+
+// Other
 func createRequestBody(model interface{}) []byte {
 	body, _ := json.Marshal(model)
 	return body
