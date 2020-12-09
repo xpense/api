@@ -28,9 +28,7 @@ func (h *handler) UpdateAccount(ctx *gin.Context) {
 	}
 
 	if err := accountBody.ValidateUpdateBody(); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
 

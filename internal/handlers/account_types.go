@@ -16,7 +16,7 @@ type Account struct {
 	Email     string    `json:"email"`
 }
 
-func (a *Account) ValidateUpdateBody() error {
+func (a *Account) ValidateUpdateBody() *ErrorMessage {
 	if a.FirstName == "" && a.LastName == "" && a.Email == "" {
 		return ErrorEmptyBody
 	}

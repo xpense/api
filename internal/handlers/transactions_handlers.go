@@ -32,9 +32,7 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 	}
 
 	if tRequest.Amount.Cmp(decimal.Zero) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": ErrorRequiredAmount.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, ErrorRequiredAmount)
 		return
 	}
 
@@ -42,18 +40,14 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 
 	{ // Validate wallet ownership
 		if tModel.WalletID == 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"message": ErrorRequiredWalletID.Error(),
-			})
+			ctx.JSON(http.StatusBadRequest, ErrorRequiredWalletID)
 			return
 		}
 
 		wallet, err := h.repo.WalletGet(tModel.WalletID)
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"message": ErrorWalletNotFound.Error(),
-				})
+				ctx.JSON(http.StatusBadRequest, ErrorWalletNotFound)
 				return
 			}
 			ctx.Status(http.StatusInternalServerError)
@@ -61,27 +55,21 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 		}
 
 		if wallet.UserID != userID {
-			ctx.JSON(http.StatusForbidden, gin.H{
-				"message": ErrorBadWalletID.Error(),
-			})
+			ctx.JSON(http.StatusForbidden, ErrorBadWalletID)
 			return
 		}
 	}
 
 	{ // Validate party ownership
 		if tModel.PartyID == 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"message": ErrorRequiredPartyID.Error(),
-			})
+			ctx.JSON(http.StatusBadRequest, ErrorRequiredPartyID)
 			return
 		}
 
 		party, err := h.repo.PartyGet(tModel.PartyID)
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"message": ErrorPartyNotFound.Error(),
-				})
+				ctx.JSON(http.StatusBadRequest, ErrorPartyNotFound)
 				return
 			}
 			ctx.Status(http.StatusInternalServerError)
@@ -89,9 +77,7 @@ func (h *handler) CreateTransaction(ctx *gin.Context) {
 		}
 
 		if party.UserID != userID {
-			ctx.JSON(http.StatusForbidden, gin.H{
-				"message": ErrorBadPartyID.Error(),
-			})
+			ctx.JSON(http.StatusForbidden, ErrorBadPartyID)
 			return
 		}
 	}
@@ -144,9 +130,7 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		wallet, err := h.repo.WalletGet(tModel.WalletID)
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"message": ErrorWalletNotFound.Error(),
-				})
+				ctx.JSON(http.StatusBadRequest, ErrorWalletNotFound)
 				return
 			}
 			ctx.Status(http.StatusInternalServerError)
@@ -154,9 +138,7 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		}
 
 		if wallet.UserID != userID {
-			ctx.JSON(http.StatusForbidden, gin.H{
-				"message": ErrorBadWalletID.Error(),
-			})
+			ctx.JSON(http.StatusForbidden, ErrorBadWalletID)
 			return
 		}
 	}
@@ -166,9 +148,7 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		party, err := h.repo.PartyGet(tModel.PartyID)
 		if err != nil {
 			if err == repository.ErrorRecordNotFound {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"message": ErrorPartyNotFound.Error(),
-				})
+				ctx.JSON(http.StatusBadRequest, ErrorPartyNotFound)
 				return
 			}
 			ctx.Status(http.StatusInternalServerError)
@@ -176,9 +156,7 @@ func (h *handler) UpdateTransaction(ctx *gin.Context) {
 		}
 
 		if party.UserID != userID {
-			ctx.JSON(http.StatusForbidden, gin.H{
-				"message": ErrorBadPartyID.Error(),
-			})
+			ctx.JSON(http.StatusForbidden, ErrorBadPartyID)
 			return
 		}
 	}

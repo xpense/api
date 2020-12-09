@@ -1,27 +1,29 @@
 package handlers
 
-import "errors"
+type ErrorMessage struct {
+	Message string `json:"message"`
+}
 
 var (
 	// Generic
-	ErrorEmptyBody = errors.New("empty body")
+	ErrorEmptyBody = &ErrorMessage{Message: "empty body"}
 	// Auth/Account
-	ErrorName                   = errors.New("first and/or last name missing")
-	ErrorEmail                  = errors.New("invalid email address")
-	ErrorMissingPasswordOrEmail = errors.New("both email and password are required for login")
-	ErrorNonExistentUser        = errors.New("user with this email does not exist")
-	ErrorEmailConflict          = errors.New("user with this email already exists")
-	ErrorWrongPassword          = errors.New("wrong password")
+	ErrorName                   = &ErrorMessage{Message: "first and/or last name missing"}
+	ErrorEmail                  = &ErrorMessage{Message: "invalid email address"}
+	ErrorMissingPasswordOrEmail = &ErrorMessage{Message: "both email and password are required for login"}
+	ErrorNonExistentUser        = &ErrorMessage{Message: "user with this email does not exist"}
+	ErrorEmailConflict          = &ErrorMessage{Message: "user with this email already exists"}
+	ErrorWrongPassword          = &ErrorMessage{Message: "wrong password"}
 	// Party
-	ErrorPartyNameTaken = errors.New("party with the same name, belonging to the same user already exists")
+	ErrorPartyNameTaken = &ErrorMessage{Message: "party with the same name, belonging to the same user already exists"}
 	// Wallet
-	ErrorWalletNameTaken = errors.New("wallet with the same name, belonging to the same user already exists")
+	ErrorWalletNameTaken = &ErrorMessage{Message: "wallet with the same name, belonging to the same user already exists"}
 	// Transaction
-	ErrorRequiredAmount   = errors.New("cannot create new transaction with an amount of 0")
-	ErrorRequiredWalletID = errors.New("a valid wallet id must be specified to register a new transaction")
-	ErrorRequiredPartyID  = errors.New("a valid wallet id must be specified to register a new transaction")
-	ErrorWalletNotFound   = errors.New("wallet with specified id not found")
-	ErrorBadWalletID      = errors.New("wallet with specified id belongs to another user")
-	ErrorPartyNotFound    = errors.New("party with specified id not found")
-	ErrorBadPartyID       = errors.New("party with specified id belongs to another user")
+	ErrorRequiredAmount   = &ErrorMessage{Message: "cannot create new transaction with an amount of 0"}
+	ErrorRequiredWalletID = &ErrorMessage{Message: "a valid wallet id must be specified to register a new transaction"}
+	ErrorRequiredPartyID  = &ErrorMessage{Message: "a valid wallet id must be specified to register a new transaction"}
+	ErrorWalletNotFound   = &ErrorMessage{Message: "wallet with specified id not found"}
+	ErrorBadWalletID      = &ErrorMessage{Message: "wallet with specified id belongs to another user"}
+	ErrorPartyNotFound    = &ErrorMessage{Message: "party with specified id not found"}
+	ErrorBadPartyID       = &ErrorMessage{Message: "party with specified id belongs to another user"}
 )

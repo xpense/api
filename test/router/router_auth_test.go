@@ -26,7 +26,7 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrorName.Error()
+		wantErrorMessage := handlers.ErrorName.Message
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
 		AssertErrorMessage(t, res, wantErrorMessage)
@@ -40,7 +40,7 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrorName.Error()
+		wantErrorMessage := handlers.ErrorName.Message
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
 		AssertErrorMessage(t, res, wantErrorMessage)
@@ -55,7 +55,7 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrorEmail.Error()
+		wantErrorMessage := handlers.ErrorEmail.Message
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
 		AssertErrorMessage(t, res, wantErrorMessage)
@@ -103,7 +103,7 @@ func TestSignUp(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrorEmailConflict.Error()
+		wantErrorMessage := handlers.ErrorEmailConflict.Message
 
 		AssertStatusCode(t, res, http.StatusConflict)
 		AssertErrorMessage(t, res, wantErrorMessage)
@@ -172,7 +172,7 @@ func TestLogin(t *testing.T) {
 
 				r.ServeHTTP(res, req)
 
-				wantErrorMessage := handlers.ErrorMissingPasswordOrEmail.Error()
+				wantErrorMessage := handlers.ErrorMissingPasswordOrEmail.Message
 
 				AssertStatusCode(t, res, http.StatusBadRequest)
 				AssertErrorMessage(t, res, wantErrorMessage)
@@ -193,7 +193,7 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrorNonExistentUser.Error()
+		wantErrorMessage := handlers.ErrorNonExistentUser.Message
 
 		AssertStatusCode(t, res, http.StatusNotFound)
 		AssertErrorMessage(t, res, wantErrorMessage)
@@ -251,7 +251,7 @@ func TestLogin(t *testing.T) {
 
 		r.ServeHTTP(res, req)
 
-		wantErrorMessage := handlers.ErrorWrongPassword.Error()
+		wantErrorMessage := handlers.ErrorWrongPassword.Message
 
 		AssertStatusCode(t, res, http.StatusBadRequest)
 		AssertErrorMessage(t, res, wantErrorMessage)

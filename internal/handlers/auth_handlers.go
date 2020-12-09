@@ -20,9 +20,7 @@ func (h *handler) SignUp(ctx *gin.Context) {
 	}
 
 	if err := signUpInfo.Validate(); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
 
@@ -46,9 +44,7 @@ func (h *handler) SignUp(ctx *gin.Context) {
 		salt,
 	); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
-			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrorEmailConflict.Error(),
-			})
+			ctx.JSON(http.StatusConflict, ErrorEmailConflict)
 			return
 		}
 
@@ -57,6 +53,8 @@ func (h *handler) SignUp(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
+
+	// ctx.Status(http.StatusCreated)
 }
 
 func (h *handler) Login(ctx *gin.Context) {
@@ -67,18 +65,14 @@ func (h *handler) Login(ctx *gin.Context) {
 	}
 
 	if loginInfo.Email == "" || loginInfo.Password == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": ErrorMissingPasswordOrEmail.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, ErrorMissingPasswordOrEmail)
 		return
 	}
 
 	user, err := h.repo.UserGetWithEmail(loginInfo.Email)
 	if err != nil {
 		if err == repository.ErrorRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{
-				"message": ErrorNonExistentUser.Error(),
-			})
+			ctx.JSON(http.StatusNotFound, ErrorNonExistentUser)
 			return
 		}
 		ctx.Status(http.StatusInternalServerError)
@@ -92,9 +86,7 @@ func (h *handler) Login(ctx *gin.Context) {
 	}
 
 	if user.Password != hashedPassword {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": ErrorWrongPassword.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, ErrorWrongPassword)
 		return
 	}
 

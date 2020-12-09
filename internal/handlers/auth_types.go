@@ -20,7 +20,7 @@ type SignUpInfo struct {
 	Password  string `json:"password"`
 }
 
-func (s *SignUpInfo) Validate() error {
+func (s *SignUpInfo) Validate() *ErrorMessage {
 	if s.FirstName == "" || s.LastName == "" {
 		return ErrorName
 	}
@@ -29,7 +29,11 @@ func (s *SignUpInfo) Validate() error {
 		return ErrorEmail
 	}
 
-	_, err := utils.IsPasswordStrong(s.Password)
+	if _, err := utils.IsPasswordStrong(s.Password); err != nil {
+		return &ErrorMessage{
+			Message: err.Error(),
+		}
+	}
 
-	return err
+	return nil
 }

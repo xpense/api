@@ -117,7 +117,7 @@ func TestUpdateAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorEmptyBody.Error()
+			wantErrorMessage := handlers.ErrorEmptyBody.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -131,7 +131,7 @@ func TestUpdateAccount(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorEmail.Error()
+			wantErrorMessage := handlers.ErrorEmail.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)

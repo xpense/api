@@ -35,9 +35,7 @@ func (h *handler) CreateParty(ctx *gin.Context) {
 
 	if err := h.repo.PartyCreate(wModel); err != nil {
 		if err == repository.ErrorUniqueConstaintViolation {
-			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrorPartyNameTaken.Error(),
-			})
+			ctx.JSON(http.StatusConflict, ErrorPartyNameTaken)
 			return
 		}
 		ctx.Status(http.StatusInternalServerError)
@@ -88,9 +86,7 @@ func (h *handler) UpdateParty(ctx *gin.Context) {
 			return
 		}
 		if err == repository.ErrorUniqueConstaintViolation {
-			ctx.JSON(http.StatusConflict, gin.H{
-				"message": ErrorPartyNameTaken.Error(),
-			})
+			ctx.JSON(http.StatusConflict, ErrorPartyNameTaken)
 			return
 		}
 		ctx.Status(http.StatusInternalServerError)

@@ -65,7 +65,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
+			wantErrorMessage := handlers.ErrorRequiredWalletID.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -86,7 +86,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
+			wantErrorMessage := handlers.ErrorWalletNotFound.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -110,7 +110,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorBadWalletID.Error()
+			wantErrorMessage := handlers.ErrorBadWalletID.Message
 
 			AssertStatusCode(t, res, http.StatusForbidden)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -134,7 +134,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorRequiredWalletID.Error()
+			wantErrorMessage := handlers.ErrorRequiredWalletID.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -161,7 +161,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
+			wantErrorMessage := handlers.ErrorPartyNotFound.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -191,7 +191,7 @@ func TestCreateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorBadPartyID.Error()
+			wantErrorMessage := handlers.ErrorBadPartyID.Message
 
 			AssertStatusCode(t, res, http.StatusForbidden)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -410,7 +410,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorWalletNotFound.Error()
+			wantErrorMessage := handlers.ErrorWalletNotFound.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -443,7 +443,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorBadWalletID.Error()
+			wantErrorMessage := handlers.ErrorBadWalletID.Message
 
 			AssertStatusCode(t, res, http.StatusForbidden)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -475,7 +475,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorPartyNotFound.Error()
+			wantErrorMessage := handlers.ErrorPartyNotFound.Message
 
 			AssertStatusCode(t, res, http.StatusBadRequest)
 			AssertErrorMessage(t, res, wantErrorMessage)
@@ -512,7 +512,7 @@ func TestUpdateTransaction(t *testing.T) {
 
 			r.ServeHTTP(res, req)
 
-			wantErrorMessage := handlers.ErrorBadPartyID.Error()
+			wantErrorMessage := handlers.ErrorBadPartyID.Message
 
 			AssertStatusCode(t, res, http.StatusForbidden)
 			AssertErrorMessage(t, res, wantErrorMessage)
