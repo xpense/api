@@ -48,19 +48,12 @@ func (r *repository) UserDelete(id uint) error {
 
 func (r *repository) UserGet(id uint) (*model.User, error) {
 	var user model.User
-	err := genericGet(r, &user, id)
+	err := genericGet(r, &user, int(id), nil)
 	return &user, err
 }
 
 func (r *repository) UserGetWithEmail(email string) (*model.User, error) {
 	var user model.User
-
-	if tx := r.db.Where("email = ?", email).First(&user); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return &user, nil
+	err := genericGet(r, &user, -1, map[string]interface{}{"email": email})
+	return &user, err
 }

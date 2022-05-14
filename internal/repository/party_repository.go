@@ -33,7 +33,7 @@ func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, e
 
 func (r *repository) PartyGet(id uint) (*model.Party, error) {
 	var party model.Party
-	err := genericGet(r, &party, id)
+	err := genericGet(r, &party, int(id), nil)
 	return &party, err
 }
 

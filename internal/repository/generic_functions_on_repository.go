@@ -26,8 +26,15 @@ func genericGet[
 		*model.Wallet |
 		*model.Transaction |
 		*model.Party,
-](r *repository, model M, id uint) error {
-	if tx := r.db.First(&model, id); tx.Error != nil {
+](r *repository, model M, id int, query map[string]interface{}) error {
+	tx := r.db.Where(query)
+	if id >= 0 {
+		tx = tx.First(&model, id)
+	} else {
+		tx = tx.First(&model)
+	}
+
+	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
 			return ErrorRecordNotFound
 		}
@@ -42,7 +49,7 @@ func genericDelete[
 		*model.Transaction |
 		*model.Party,
 ](r *repository, model M, id uint) error {
-	if err := genericGet(r, model, id); err != nil {
+	if err := genericGet(r, model, int(id), nil); err != nil {
 		return err
 	}
 	if tx := r.db.Delete(model); tx.Error != nil {

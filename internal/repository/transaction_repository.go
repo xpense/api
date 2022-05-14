@@ -47,7 +47,7 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 
 func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
 	var transaction model.Transaction
-	err := genericGet(r, &transaction, id)
+	err := genericGet(r, &transaction, int(id), nil)
 	return &transaction, err
 }
 

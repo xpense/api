@@ -37,7 +37,7 @@ func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet
 
 func (r *repository) WalletGet(id uint) (*model.Wallet, error) {
 	var wallet model.Wallet
-	err := genericGet(r, &wallet, id)
+	err := genericGet(r, &wallet, int(id), nil)
 	return &wallet, err
 }
 
