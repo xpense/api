@@ -35,3 +35,18 @@ func genericGet[
 	}
 	return nil
 }
+
+func genericDelete[
+	M *model.User |
+		*model.Wallet |
+		*model.Transaction |
+		*model.Party,
+](r *repository, model M, id uint) error {
+	if err := genericGet(r, model, id); err != nil {
+		return err
+	}
+	if tx := r.db.Delete(model); tx.Error != nil {
+		return ErrorOther
+	}
+	return nil
+}

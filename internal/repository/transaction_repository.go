@@ -52,16 +52,8 @@ func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
 }
 
 func (r *repository) TransactionDelete(id uint) error {
-	transaction, err := r.TransactionGet(id)
-	if err != nil {
-		return err
-	}
-
-	if tx := r.db.Delete(transaction); tx.Error != nil {
-		return ErrorOther
-	}
-
-	return nil
+	var transaction model.Transaction
+	return genericDelete(r, &transaction, id)
 }
 
 func (r *repository) TransactionList(userID uint) ([]*model.Transaction, error) {

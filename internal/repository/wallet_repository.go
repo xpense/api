@@ -42,16 +42,8 @@ func (r *repository) WalletGet(id uint) (*model.Wallet, error) {
 }
 
 func (r *repository) WalletDelete(id uint) error {
-	wallet, err := r.WalletGet(id)
-	if err != nil {
-		return err
-	}
-
-	if tx := r.db.Delete(wallet); tx.Error != nil {
-		return ErrorOther
-	}
-
-	return nil
+	var wallet model.Wallet
+	return genericDelete(r, &wallet, id)
 }
 
 func (r *repository) WalletList(userID uint) ([]*model.Wallet, error) {

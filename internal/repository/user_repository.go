@@ -42,16 +42,8 @@ func (r *repository) UserUpdate(id uint, firstName, lastName, email string) (*mo
 }
 
 func (r *repository) UserDelete(id uint) error {
-	user, err := r.UserGet(id)
-	if err != nil {
-		return err
-	}
-
-	if tx := r.db.Delete(user); tx.Error != nil {
-		return ErrorOther
-	}
-
-	return nil
+	var user model.User
+	return genericDelete(r, &user, id)
 }
 
 func (r *repository) UserGet(id uint) (*model.User, error) {

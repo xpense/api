@@ -38,16 +38,8 @@ func (r *repository) PartyGet(id uint) (*model.Party, error) {
 }
 
 func (r *repository) PartyDelete(id uint) error {
-	party, err := r.PartyGet(id)
-	if err != nil {
-		return err
-	}
-
-	if tx := r.db.Delete(party); tx.Error != nil {
-		return ErrorOther
-	}
-
-	return nil
+	var party model.Party
+	return genericDelete(r, &party, id)
 }
 
 func (r *repository) PartyList(userID uint) ([]*model.Party, error) {
