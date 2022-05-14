@@ -3,7 +3,6 @@ module expense-api
 go 1.18
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.0
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.0
@@ -15,6 +14,8 @@ require (
 	gorm.io/driver/postgres v1.0.5
 	gorm.io/gorm v1.20.5
 )
+
+require github.com/golang-jwt/jwt v3.2.2+incompatible
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
