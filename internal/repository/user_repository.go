@@ -7,23 +7,13 @@ import (
 )
 
 func (r *repository) UserCreate(firstName, lastName, email, password, salt string) (*model.User, error) {
-	user := &model.User{
+	return genericCreate(r, &model.User{
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
 		Password:  password,
 		Salt:      salt,
-	}
-
-	if tx := r.db.Create(user); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return nil, ErrorUniqueConstaintViolation
-		}
-
-		return nil, ErrorOther
-	}
-
-	return user, nil
+	})
 }
 
 func (r *repository) UserUpdate(id uint, firstName, lastName, email string) (*model.User, error) {

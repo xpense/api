@@ -7,14 +7,8 @@ import (
 )
 
 func (r *repository) WalletCreate(w *model.Wallet) error {
-	if tx := r.db.Create(w); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return ErrorUniqueConstaintViolation
-		}
-		return ErrorOther
-	}
-
-	return nil
+	_, err := genericCreate(r, w)
+	return err
 }
 
 func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet, error) {

@@ -7,14 +7,8 @@ import (
 )
 
 func (r *repository) PartyCreate(p *model.Party) error {
-	if tx := r.db.Create(p); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return ErrorUniqueConstaintViolation
-		}
-		return ErrorOther
-	}
-
-	return nil
+	_, err := genericCreate(r, p)
+	return err
 }
 
 func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, error) {
