@@ -2,8 +2,6 @@ package repository
 
 import (
 	"expense-api/internal/model"
-
-	"gorm.io/gorm"
 )
 
 func (r *repository) WalletCreate(w *model.Wallet) error {
@@ -48,13 +46,6 @@ func (r *repository) WalletDelete(id uint) error {
 
 func (r *repository) WalletList(userID uint) ([]*model.Wallet, error) {
 	var wallets []*model.Wallet
-
-	if tx := r.db.Where("user_id = ?", userID).Find(&wallets); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return wallets, nil
+	err := genericList(r, &wallets, map[string]interface{}{"user_id": userID})
+	return wallets, err
 }

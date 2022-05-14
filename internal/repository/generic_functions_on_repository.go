@@ -57,3 +57,18 @@ func genericDelete[
 	}
 	return nil
 }
+
+func genericList[
+	M *model.User |
+		*model.Wallet |
+		*model.Transaction |
+		*model.Party,
+](r *repository, models *[]M, query map[string]interface{}) error {
+	if tx := r.db.Where(query).Find(models); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return ErrorRecordNotFound
+		}
+		return ErrorOther
+	}
+	return nil
+}

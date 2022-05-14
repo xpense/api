@@ -2,8 +2,6 @@ package repository
 
 import (
 	"expense-api/internal/model"
-
-	"gorm.io/gorm"
 )
 
 func (r *repository) UserCreate(firstName, lastName, email, password, salt string) (*model.User, error) {

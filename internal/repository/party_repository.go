@@ -2,8 +2,6 @@ package repository
 
 import (
 	"expense-api/internal/model"
-
-	"gorm.io/gorm"
 )
 
 func (r *repository) PartyCreate(p *model.Party) error {
@@ -44,13 +42,6 @@ func (r *repository) PartyDelete(id uint) error {
 
 func (r *repository) PartyList(userID uint) ([]*model.Party, error) {
 	var partys []*model.Party
-
-	if tx := r.db.Where("user_id = ?", userID).Find(&partys); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return partys, nil
+	err := genericList(r, &partys, map[string]interface{}{"user_id": userID})
+	return partys, err
 }
