@@ -56,15 +56,8 @@ func (r *repository) UserDelete(id uint) error {
 
 func (r *repository) UserGet(id uint) (*model.User, error) {
 	var user model.User
-
-	if tx := r.db.First(&user, id); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return &user, nil
+	err := genericGet(r, &user, id)
+	return &user, err
 }
 
 func (r *repository) UserGetWithEmail(email string) (*model.User, error) {

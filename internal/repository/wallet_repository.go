@@ -37,15 +37,8 @@ func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet
 
 func (r *repository) WalletGet(id uint) (*model.Wallet, error) {
 	var wallet model.Wallet
-
-	if tx := r.db.First(&wallet, id); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return &wallet, nil
+	err := genericGet(r, &wallet, id)
+	return &wallet, err
 }
 
 func (r *repository) WalletDelete(id uint) error {

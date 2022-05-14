@@ -33,15 +33,8 @@ func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, e
 
 func (r *repository) PartyGet(id uint) (*model.Party, error) {
 	var party model.Party
-
-	if tx := r.db.First(&party, id); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return &party, nil
+	err := genericGet(r, &party, id)
+	return &party, err
 }
 
 func (r *repository) PartyDelete(id uint) error {

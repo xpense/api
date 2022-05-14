@@ -47,15 +47,8 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 
 func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
 	var transaction model.Transaction
-
-	if tx := r.db.First(&transaction, id); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return &transaction, nil
+	err := genericGet(r, &transaction, id)
+	return &transaction, err
 }
 
 func (r *repository) TransactionDelete(id uint) error {

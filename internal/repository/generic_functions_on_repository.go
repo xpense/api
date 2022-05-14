@@ -1,6 +1,10 @@
 package repository
 
-import "expense-api/internal/model"
+import (
+	"expense-api/internal/model"
+
+	"gorm.io/gorm"
+)
 
 func genericCreate[
 	M *model.User |
@@ -15,4 +19,19 @@ func genericCreate[
 		return nil, ErrorOther
 	}
 	return model, nil
+}
+
+func genericGet[
+	M *model.User |
+		*model.Wallet |
+		*model.Transaction |
+		*model.Party,
+](r *repository, model M, id uint) error {
+	if tx := r.db.First(&model, id); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return ErrorRecordNotFound
+		}
+		return ErrorOther
+	}
+	return nil
 }
