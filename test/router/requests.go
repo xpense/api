@@ -17,32 +17,29 @@ var (
 )
 
 // Account
-
-func NewGetAccountRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BaseAccountPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
-}
-
-func NewUpdateAccountRequest(user *handlers.Account, token string) *http.Request {
+func NewAccountRequest(method string, token string, user *handlers.Account) *http.Request {
 	body := createRequestBody(user)
-	req, _ := http.NewRequest(http.MethodPatch, BaseAccountPath, bytes.NewReader(body))
+	req, _ := http.NewRequest(method, BaseAccountPath, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	return req
 }
 
+func NewGetAccountRequest(token string) *http.Request {
+	return NewAccountRequest(http.MethodGet, token, nil)
+}
+
+func NewUpdateAccountRequest(user *handlers.Account, token string) *http.Request {
+	return NewAccountRequest(http.MethodPatch, token, user)
+}
+
 func NewDeleteAccountRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodDelete, BaseAccountPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewAccountRequest(http.MethodDelete, token, nil)
 }
 
 // Auth
-
 func NewAuthRequest(handler interface{}) *http.Request {
 	body := createRequestBody(handler)
-
 	path := ""
 	switch handler.(type) {
 	case *handlers.SignUpInfo:
@@ -50,7 +47,6 @@ func NewAuthRequest(handler interface{}) *http.Request {
 	case *handlers.LoginInfo:
 		path += "/login"
 	}
-
 	req, _ := http.NewRequest(http.MethodPost, BaseAuthPath+path, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	return req
