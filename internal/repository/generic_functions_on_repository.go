@@ -2,12 +2,11 @@ package repository
 
 import (
 	"expense-api/internal/model"
-	"reflect"
 
 	"gorm.io/gorm"
 )
 
-func genericCreate[M model.GormModel](r *repository, model M) error {
+func genericCreate[M model.GormModel](r *repository, model *M) error {
 	if tx := r.db.Create(model); tx.Error != nil {
 		if isUniqueConstaintViolationError(tx.Error) {
 			return ErrorUniqueConstaintViolation
@@ -17,15 +16,13 @@ func genericCreate[M model.GormModel](r *repository, model M) error {
 	return nil
 }
 
-func genericGet[M model.GormModel](r *repository, id int, query map[string]interface{}) (M, error) {
+func genericGet[M model.GormModel](r *repository, id int, query map[string]interface{}) (*M, error) {
 	var model M
-	model = reflect.New(reflect.TypeOf(model).Elem()).Interface().(M)
-
 	var tx *gorm.DB
 	if id >= 0 {
-		tx = r.db.Where(query).First(model, id)
+		tx = r.db.Where(query).First(&model, id)
 	} else {
-		tx = r.db.Where(query).First(model)
+		tx = r.db.Where(query).First(&model)
 	}
 
 	if tx.Error != nil {
@@ -34,7 +31,7 @@ func genericGet[M model.GormModel](r *repository, id int, query map[string]inter
 		}
 		return nil, ErrorOther
 	}
-	return model, nil
+	return &model, nil
 }
 
 func genericDelete[M model.GormModel](r *repository, id uint) error {
@@ -48,7 +45,7 @@ func genericDelete[M model.GormModel](r *repository, id uint) error {
 	return nil
 }
 
-func genericList[M model.GormModel](r *repository, models *[]M, query map[string]interface{}) error {
+func genericList[M model.GormModel](r *repository, models *[]*M, query map[string]interface{}) error {
 	if tx := r.db.Where(query).Find(models); tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
 			return ErrorRecordNotFound

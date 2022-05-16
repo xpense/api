@@ -42,13 +42,13 @@ func (r *repository) UserUpdate(id uint, firstName, lastName, email string) (*mo
 }
 
 func (r *repository) UserDelete(id uint) error {
-	return genericDelete[*model.User](r, id)
+	return genericDelete[model.User](r, id)
 }
 
 func (r *repository) UserGet(id uint) (*model.User, error) {
-	return genericGet[*model.User](r, int(id), nil)
+	return genericGet[model.User](r, int(id), nil)
 }
 
 func (r *repository) UserGetWithEmail(email string) (*model.User, error) {
-	return genericGet[*model.User](r, -1, map[string]interface{}{"email": email})
+	return genericGet[model.User](r, -1, map[string]interface{}{"email": email})
 }

@@ -29,11 +29,11 @@ func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, e
 }
 
 func (r *repository) PartyGet(id uint) (*model.Party, error) {
-	return genericGet[*model.Party](r, int(id), nil)
+	return genericGet[model.Party](r, int(id), nil)
 }
 
 func (r *repository) PartyDelete(id uint) error {
-	return genericDelete[*model.Party](r, id)
+	return genericDelete[model.Party](r, id)
 }
 
 func (r *repository) PartyList(userID uint) ([]*model.Party, error) {

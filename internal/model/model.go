@@ -7,7 +7,7 @@ import (
 )
 
 type GormModel interface {
-	*User | *Wallet | *Transaction | *Party
+	User | Wallet | Transaction | Party
 }
 
 type Model struct {
