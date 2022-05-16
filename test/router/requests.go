@@ -53,49 +53,36 @@ func NewAuthRequest(handler interface{}) *http.Request {
 }
 
 // Parties
-
-func NewCreatePartyRequest(party *handlers.Party, token string) *http.Request {
+func NewPartyRequest(method string, path string, token string, party *handlers.Party) *http.Request {
 	body := createRequestBody(party)
-	req, _ := http.NewRequest(http.MethodPost, BasePartiesPath, bytes.NewReader(body))
+	req, _ := http.NewRequest(method, BasePartiesPath+path, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	return req
+}
+
+func NewCreatePartyRequest(party *handlers.Party, token string) *http.Request {
+	return NewPartyRequest(http.MethodPost, "", token, party)
 }
 
 func NewGetPartyRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BasePartiesPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewPartyRequest(http.MethodGet, fmt.Sprintf("%d", id), token, nil)
 }
 
 func NewUpdatePartyRequest(id uint, party *handlers.Party, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BasePartiesPath, id)
-	body := createRequestBody(party)
-	req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewPartyRequest(http.MethodPatch, fmt.Sprintf("%d", id), token, party)
 }
 
 func NewDeletePartyRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BasePartiesPath, id)
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewPartyRequest(http.MethodDelete, fmt.Sprintf("%d", id), token, nil)
 }
 
 func NewListPartiesRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BasePartiesPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewPartyRequest(http.MethodGet, "", token, nil)
 }
 
 func NewListTransactionsByPartyRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d/transactions", BasePartiesPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewPartyRequest(http.MethodGet, fmt.Sprintf("%d/transactions", id), token, nil)
 }
 
 // Transactions
