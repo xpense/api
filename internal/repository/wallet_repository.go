@@ -33,14 +33,11 @@ func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet
 }
 
 func (r *repository) WalletGet(id uint) (*model.Wallet, error) {
-	var wallet model.Wallet
-	err := genericGet(r, &wallet, int(id), nil)
-	return &wallet, err
+	return genericGet[*model.Wallet](r, int(id), nil)
 }
 
 func (r *repository) WalletDelete(id uint) error {
-	var wallet model.Wallet
-	return genericDelete(r, &wallet, id)
+	return genericDelete[*model.Wallet](r, id)
 }
 
 func (r *repository) WalletList(userID uint) ([]*model.Wallet, error) {

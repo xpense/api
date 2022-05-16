@@ -44,14 +44,11 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 }
 
 func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
-	var transaction model.Transaction
-	err := genericGet(r, &transaction, int(id), nil)
-	return &transaction, err
+	return genericGet[*model.Transaction](r, int(id), nil)
 }
 
 func (r *repository) TransactionDelete(id uint) error {
-	var transaction model.Transaction
-	return genericDelete(r, &transaction, id)
+	return genericDelete[*model.Transaction](r, id)
 }
 
 func (r *repository) TransactionList(userID uint) ([]*model.Transaction, error) {

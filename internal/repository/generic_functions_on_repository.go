@@ -2,6 +2,7 @@ package repository
 
 import (
 	"expense-api/internal/model"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -16,25 +17,29 @@ func genericCreate[M model.GormModel](r *repository, model M) error {
 	return nil
 }
 
-func genericGet[M model.GormModel](r *repository, model M, id int, query map[string]interface{}) error {
-	tx := r.db.Where(query)
+func genericGet[M model.GormModel](r *repository, id int, query map[string]interface{}) (M, error) {
+	var model M
+	model = reflect.New(reflect.TypeOf(model).Elem()).Interface().(M)
+
+	var tx *gorm.DB
 	if id >= 0 {
-		tx = tx.First(&model, id)
+		tx = r.db.Where(query).First(model, id)
 	} else {
-		tx = tx.First(&model)
+		tx = r.db.Where(query).First(model)
 	}
 
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
-			return ErrorRecordNotFound
+			return nil, ErrorRecordNotFound
 		}
-		return ErrorOther
+		return nil, ErrorOther
 	}
-	return nil
+	return model, nil
 }
 
-func genericDelete[M model.GormModel](r *repository, model M, id uint) error {
-	if err := genericGet(r, model, int(id), nil); err != nil {
+func genericDelete[M model.GormModel](r *repository, id uint) error {
+	model, err := genericGet[M](r, int(id), nil)
+	if err != nil {
 		return err
 	}
 	if tx := r.db.Delete(model); tx.Error != nil {
