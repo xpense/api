@@ -1,10 +1,8 @@
 package repository
 
 import (
-	"errors"
 	"expense-api/internal/model"
 
-	"github.com/jackc/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -36,25 +34,10 @@ type Repository interface {
 	TransactionListByParty(userID, partyID uint) ([]*model.Transaction, error)
 }
 
-var (
-	ErrorRecordNotFound           = errors.New("resource not found")
-	ErrorOther                    = errors.New("an error occurred")
-	ErrorUniqueConstaintViolation = errors.New("record already exists (duplicate unique key)")
-)
-
 type repository struct {
 	db *gorm.DB
 }
 
 func New(db *gorm.DB) Repository {
 	return &repository{db}
-}
-
-func isUniqueConstaintViolationError(err error) bool {
-	if err, ok := err.(*pgconn.PgError); ok {
-		uniqueConstraintCode := "23505"
-		return err.Code == uniqueConstraintCode
-	}
-
-	return false
 }

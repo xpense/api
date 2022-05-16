@@ -5,19 +5,13 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
 )
 
 func (r *repository) TransactionCreate(t *model.Transaction) error {
 	if t.Timestamp.IsZero() {
 		t.Timestamp = time.Now()
 	}
-
-	if tx := r.db.Create(t); tx.Error != nil {
-		return ErrorOther
-	}
-
-	return nil
+	return genericCreate(r, t)
 }
 
 func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*model.Transaction, error) {
@@ -42,74 +36,36 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 		transaction.WalletID = updated.WalletID
 	}
 
-	if tx := r.db.Save(transaction); tx.Error != nil {
-		return nil, ErrorOther
-	}
-
-	return transaction, nil
+	err = genericSave(r, transaction)
+	return transaction, err
 }
 
 func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
-	var transaction model.Transaction
-
-	if tx := r.db.First(&transaction, id); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return &transaction, nil
+	return genericGet[model.Transaction](r, map[string]interface{}{"id": id})
 }
 
 func (r *repository) TransactionDelete(id uint) error {
-	transaction, err := r.TransactionGet(id)
-	if err != nil {
-		return err
-	}
-
-	if tx := r.db.Delete(transaction); tx.Error != nil {
-		return ErrorOther
-	}
-
-	return nil
+	return genericDelete[model.Transaction](r, id)
 }
 
 func (r *repository) TransactionList(userID uint) ([]*model.Transaction, error) {
-	query := map[string]interface{}{
-		"user_id": userID,
-	}
-
-	return r.transactionList(query)
+	return r.transactionList(map[string]interface{}{"user_id": userID})
 }
 
 func (r *repository) TransactionListByWallet(userID, walletID uint) ([]*model.Transaction, error) {
-	query := map[string]interface{}{
+	return r.transactionList(map[string]interface{}{
 		"user_id":   userID,
 		"wallet_id": walletID,
-	}
-
-	return r.transactionList(query)
+	})
 }
 
 func (r *repository) TransactionListByParty(userID, partyID uint) ([]*model.Transaction, error) {
-	query := map[string]interface{}{
+	return r.transactionList(map[string]interface{}{
 		"user_id":  userID,
 		"party_id": partyID,
-	}
-
-	return r.transactionList(query)
+	})
 }
 
 func (r *repository) transactionList(query map[string]interface{}) ([]*model.Transaction, error) {
-	var transactions []*model.Transaction
-
-	if tx := r.db.Where(query).Find(&transactions); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return transactions, nil
+	return genericList[model.Transaction](r, query)
 }

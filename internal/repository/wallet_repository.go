@@ -2,19 +2,10 @@ package repository
 
 import (
 	"expense-api/internal/model"
-
-	"gorm.io/gorm"
 )
 
 func (r *repository) WalletCreate(w *model.Wallet) error {
-	if tx := r.db.Create(w); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return ErrorUniqueConstaintViolation
-		}
-		return ErrorOther
-	}
-
-	return nil
+	return genericCreate(r, w)
 }
 
 func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet, error) {
@@ -31,51 +22,18 @@ func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet
 		wallet.Description = updated.Description
 	}
 
-	if tx := r.db.Save(wallet); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return nil, ErrorUniqueConstaintViolation
-		}
-		return nil, ErrorOther
-	}
-
-	return wallet, nil
+	err = genericSave(r, wallet)
+	return wallet, err
 }
 
 func (r *repository) WalletGet(id uint) (*model.Wallet, error) {
-	var wallet model.Wallet
-
-	if tx := r.db.First(&wallet, id); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return &wallet, nil
+	return genericGet[model.Wallet](r, map[string]interface{}{"id": id})
 }
 
 func (r *repository) WalletDelete(id uint) error {
-	wallet, err := r.WalletGet(id)
-	if err != nil {
-		return err
-	}
-
-	if tx := r.db.Delete(wallet); tx.Error != nil {
-		return ErrorOther
-	}
-
-	return nil
+	return genericDelete[model.Wallet](r, id)
 }
 
 func (r *repository) WalletList(userID uint) ([]*model.Wallet, error) {
-	var wallets []*model.Wallet
-
-	if tx := r.db.Where("user_id = ?", userID).Find(&wallets); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
-	}
-
-	return wallets, nil
+	return genericList[model.Wallet](r, map[string]interface{}{"user_id": userID})
 }

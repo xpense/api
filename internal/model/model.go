@@ -6,6 +6,10 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type GormModel interface {
+	User | Wallet | Transaction | Party
+}
+
 type Model struct {
 	ID        uint      `json:"id" gorm:"primarykey"`
 	CreatedAt time.Time `json:"created_at"`
