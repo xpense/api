@@ -22,7 +22,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'first_name'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := NewSignUpRequest(&handlers.SignUpInfo{})
+		req := NewAuthRequest(&handlers.SignUpInfo{})
 
 		r.ServeHTTP(res, req)
 
@@ -34,7 +34,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'last_name'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := NewSignUpRequest(&handlers.SignUpInfo{
+		req := NewAuthRequest(&handlers.SignUpInfo{
 			FirstName: "First Name",
 		})
 
@@ -48,7 +48,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'email'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := NewSignUpRequest(&handlers.SignUpInfo{
+		req := NewAuthRequest(&handlers.SignUpInfo{
 			FirstName: "First Name",
 			LastName:  "Last Name",
 		})
@@ -63,7 +63,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Shouldn't sign up with missing 'password'", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		req := NewSignUpRequest(&handlers.SignUpInfo{
+		req := NewAuthRequest(&handlers.SignUpInfo{
 			FirstName: "First Name",
 			LastName:  "Last Name",
 			Email:     "john@doe.com",
@@ -94,7 +94,7 @@ func TestSignUp(t *testing.T) {
 		repoSpy.On("UserCreate", user.FirstName, user.LastName, user.Email, hashedPassword, salt).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 		res := httptest.NewRecorder()
-		req := NewSignUpRequest(&handlers.SignUpInfo{
+		req := NewAuthRequest(&handlers.SignUpInfo{
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			Email:     user.Email,
@@ -126,7 +126,7 @@ func TestSignUp(t *testing.T) {
 		repoSpy.On("UserCreate", user.FirstName, user.LastName, user.Email, hashedPassword, salt).Return(user, nil).Once()
 
 		res := httptest.NewRecorder()
-		req := NewSignUpRequest(&handlers.SignUpInfo{
+		req := NewAuthRequest(&handlers.SignUpInfo{
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			Email:     user.Email,
@@ -168,7 +168,7 @@ func TestLogin(t *testing.T) {
 		for _, tC := range testCases {
 			t.Run(tC.desc, func(t *testing.T) {
 				res := httptest.NewRecorder()
-				req := NewLoginRequest(tC.reqBody)
+				req := NewAuthRequest(tC.reqBody)
 
 				r.ServeHTTP(res, req)
 
@@ -189,7 +189,7 @@ func TestLogin(t *testing.T) {
 		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(nil, repository.ErrorRecordNotFound).Once()
 
 		res := httptest.NewRecorder()
-		req := NewLoginRequest(reqBody)
+		req := NewAuthRequest(reqBody)
 
 		r.ServeHTTP(res, req)
 
@@ -208,7 +208,7 @@ func TestLogin(t *testing.T) {
 		repoSpy.On("UserGetWithEmail", reqBody.Email).Return(nil, errors.New("dummy error")).Once()
 
 		res := httptest.NewRecorder()
-		req := NewLoginRequest(reqBody)
+		req := NewAuthRequest(reqBody)
 
 		r.ServeHTTP(res, req)
 
@@ -226,7 +226,7 @@ func TestLogin(t *testing.T) {
 		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return("", errors.New("dummy error")).Once()
 
 		res := httptest.NewRecorder()
-		req := NewLoginRequest(reqBody)
+		req := NewAuthRequest(reqBody)
 
 		r.ServeHTTP(res, req)
 
@@ -247,7 +247,7 @@ func TestLogin(t *testing.T) {
 		hasherSpy.On("HashPassword", reqBody.Password, user.Salt).Return("bad-password", nil).Once()
 
 		res := httptest.NewRecorder()
-		req := NewLoginRequest(reqBody)
+		req := NewAuthRequest(reqBody)
 
 		r.ServeHTTP(res, req)
 
@@ -274,7 +274,7 @@ func TestLogin(t *testing.T) {
 		jwtServiceSpy.On("CreateJWT", user.ID, user.Email).Return("", errors.New("dummy error")).Once()
 
 		res := httptest.NewRecorder()
-		req := NewLoginRequest(reqBody)
+		req := NewAuthRequest(reqBody)
 
 		r.ServeHTTP(res, req)
 
@@ -301,7 +301,7 @@ func TestLogin(t *testing.T) {
 		jwtServiceSpy.On("CreateJWT", user.ID, user.Email).Return(loginToken.Token, nil).Once()
 
 		res := httptest.NewRecorder()
-		req := NewLoginRequest(reqBody)
+		req := NewAuthRequest(reqBody)
 
 		r.ServeHTTP(res, req)
 

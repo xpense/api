@@ -40,21 +40,23 @@ func NewDeleteAccountRequest(token string) *http.Request {
 
 // Auth
 
-func NewSignUpRequest(signUp *handlers.SignUpInfo) *http.Request {
-	body := createRequestBody(signUp)
-	req, _ := http.NewRequest(http.MethodPost, BaseAuthPath+"/signup", bytes.NewReader(body))
+func NewAuthRequest(handler interface{}) *http.Request {
+	body := createRequestBody(handler)
+
+	path := ""
+	switch handler.(type) {
+	case *handlers.SignUpInfo:
+		path += "/signup"
+	case *handlers.LoginInfo:
+		path += "/login"
+	}
+
+	req, _ := http.NewRequest(http.MethodPost, BaseAuthPath+path, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	return req
 }
 
-func NewLoginRequest(login *handlers.LoginInfo) *http.Request {
-	body := createRequestBody(login)
-	req, _ := http.NewRequest(http.MethodPost, BaseAuthPath+"/login", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	return req
-}
-
-// Parties`
+// Parties
 
 func NewCreatePartyRequest(party *handlers.Party, token string) *http.Request {
 	body := createRequestBody(party)
