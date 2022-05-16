@@ -115,47 +115,34 @@ func NewListTransactionsRequest(token string) *http.Request {
 }
 
 // Wallets
-
-func NewCreateWalletRequest(wallet *handlers.Wallet, token string) *http.Request {
+func NewWalletRequest(method, path string, token string, wallet *handlers.Wallet) *http.Request {
 	body := createRequestBody(wallet)
-	req, _ := http.NewRequest(http.MethodPost, BaseWalletsPath, bytes.NewReader(body))
+	req, _ := http.NewRequest(method, BaseWalletsPath+path, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	return req
+}
+
+func NewCreateWalletRequest(wallet *handlers.Wallet, token string) *http.Request {
+	return NewWalletRequest(http.MethodPost, "", token, wallet)
 }
 
 func NewGetWalletRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseWalletsPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewWalletRequest(http.MethodGet, fmt.Sprintf("%d", id), token, nil)
 }
 
 func NewUpdateWalletRequest(id uint, wallet *handlers.Wallet, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseWalletsPath, id)
-	body := createRequestBody(wallet)
-	req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewWalletRequest(http.MethodPatch, fmt.Sprintf("%d", id), token, wallet)
 }
 
 func NewDeleteWalletRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseWalletsPath, id)
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewWalletRequest(http.MethodDelete, fmt.Sprintf("%d", id), token, nil)
 }
 
 func NewListWalletsRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BaseWalletsPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewWalletRequest(http.MethodGet, "", token, nil)
 }
 
 func NewListTransactionsByWalletRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d/transactions", BaseWalletsPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewWalletRequest(http.MethodGet, fmt.Sprintf("%d/transactions", id), token, nil)
 }
