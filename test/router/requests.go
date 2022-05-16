@@ -17,7 +17,7 @@ var (
 )
 
 // Account
-func NewAccountRequest(method string, token string, user *handlers.Account) *http.Request {
+func NewAccountRequest(method, token string, user *handlers.Account) *http.Request {
 	body := createRequestBody(user)
 	req, _ := http.NewRequest(method, BaseAccountPath, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -53,7 +53,7 @@ func NewAuthRequest(handler interface{}) *http.Request {
 }
 
 // Parties
-func NewPartyRequest(method string, path string, token string, party *handlers.Party) *http.Request {
+func NewPartyRequest(method, path, token string, party *handlers.Party) *http.Request {
 	body := createRequestBody(party)
 	req, _ := http.NewRequest(method, BasePartiesPath+path, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -86,7 +86,7 @@ func NewListTransactionsByPartyRequest(id uint, token string) *http.Request {
 }
 
 // Transactions
-func NewTransactionRequest(method string, path string, token string, transaction *handlers.Transaction) *http.Request {
+func NewTransactionRequest(method, path, token string, transaction *handlers.Transaction) *http.Request {
 	body := createRequestBody(transaction)
 	req, _ := http.NewRequest(method, BaseTransactionsPath+path, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
