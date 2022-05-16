@@ -5,8 +5,7 @@ import (
 )
 
 func (r *repository) PartyCreate(p *model.Party) error {
-	_, err := genericCreate(r, p)
-	return err
+	return genericCreate(r, p)
 }
 
 func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, error) {

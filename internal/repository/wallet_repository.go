@@ -5,8 +5,7 @@ import (
 )
 
 func (r *repository) WalletCreate(w *model.Wallet) error {
-	_, err := genericCreate(r, w)
-	return err
+	return genericCreate(r, w)
 }
 
 func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet, error) {

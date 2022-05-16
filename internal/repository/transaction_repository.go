@@ -11,8 +11,7 @@ func (r *repository) TransactionCreate(t *model.Transaction) error {
 	if t.Timestamp.IsZero() {
 		t.Timestamp = time.Now()
 	}
-	_, err := genericCreate(r, t)
-	return err
+	return genericCreate(r, t)
 }
 
 func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*model.Transaction, error) {

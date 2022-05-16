@@ -6,14 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func genericCreate[M model.GormModel](r *repository, model M) (M, error) {
+func genericCreate[M model.GormModel](r *repository, model M) error {
 	if tx := r.db.Create(model); tx.Error != nil {
 		if isUniqueConstaintViolationError(tx.Error) {
-			return nil, ErrorUniqueConstaintViolation
+			return ErrorUniqueConstaintViolation
 		}
-		return nil, ErrorOther
+		return ErrorOther
 	}
-	return model, nil
+	return nil
 }
 
 func genericGet[M model.GormModel](r *repository, model M, id int, query map[string]interface{}) error {

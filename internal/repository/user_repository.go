@@ -5,13 +5,15 @@ import (
 )
 
 func (r *repository) UserCreate(firstName, lastName, email, password, salt string) (*model.User, error) {
-	return genericCreate(r, &model.User{
+	user := model.User{
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
 		Password:  password,
 		Salt:      salt,
-	})
+	}
+	err := genericCreate(r, &user)
+	return &user, err
 }
 
 func (r *repository) UserUpdate(id uint, firstName, lastName, email string) (*model.User, error) {
