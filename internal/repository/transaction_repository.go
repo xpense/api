@@ -41,7 +41,7 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 }
 
 func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {
-	return genericGet[model.Transaction](r, int(id), nil)
+	return genericGet[model.Transaction](r, map[string]interface{}{"id": id})
 }
 
 func (r *repository) TransactionDelete(id uint) error {

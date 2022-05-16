@@ -2,8 +2,6 @@ package repository
 
 import (
 	"expense-api/internal/model"
-
-	"gorm.io/gorm"
 )
 
 func genericCreate[M model.GormModel](r *repository, model *M) error {
@@ -20,23 +18,16 @@ func genericSave[M model.GormModel](r *repository, model *M) error {
 	return nil
 }
 
-func genericGet[M model.GormModel](r *repository, id int, query map[string]interface{}) (*M, error) {
+func genericGet[M model.GormModel](r *repository, query map[string]interface{}) (*M, error) {
 	var model M
-	var tx *gorm.DB
-	if id >= 0 {
-		tx = r.db.Where(query).First(&model, id)
-	} else {
-		tx = r.db.Where(query).First(&model)
-	}
-
-	if tx.Error != nil {
+	if tx := r.db.Where(query).First(&model); tx.Error != nil {
 		return nil, checkError(tx.Error)
 	}
 	return &model, nil
 }
 
 func genericDelete[M model.GormModel](r *repository, id uint) error {
-	model, err := genericGet[M](r, int(id), nil)
+	model, err := genericGet[M](r, map[string]interface{}{"id": id})
 	if err != nil {
 		return err
 	}
