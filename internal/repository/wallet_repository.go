@@ -41,7 +41,5 @@ func (r *repository) WalletDelete(id uint) error {
 }
 
 func (r *repository) WalletList(userID uint) ([]*model.Wallet, error) {
-	var wallets []*model.Wallet
-	err := genericList(r, &wallets, map[string]interface{}{"user_id": userID})
-	return wallets, err
+	return genericList[model.Wallet](r, map[string]interface{}{"user_id": userID})
 }

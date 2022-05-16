@@ -45,12 +45,13 @@ func genericDelete[M model.GormModel](r *repository, id uint) error {
 	return nil
 }
 
-func genericList[M model.GormModel](r *repository, models *[]*M, query map[string]interface{}) error {
-	if tx := r.db.Where(query).Find(models); tx.Error != nil {
+func genericList[M model.GormModel](r *repository, query map[string]interface{}) ([]*M, error) {
+	var models []*M
+	if tx := r.db.Where(query).Find(&models); tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
-			return ErrorRecordNotFound
+			return nil, ErrorRecordNotFound
 		}
-		return ErrorOther
+		return nil, ErrorOther
 	}
-	return nil
+	return models, nil
 }

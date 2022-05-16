@@ -37,7 +37,5 @@ func (r *repository) PartyDelete(id uint) error {
 }
 
 func (r *repository) PartyList(userID uint) ([]*model.Party, error) {
-	var partys []*model.Party
-	err := genericList(r, &partys, map[string]interface{}{"user_id": userID})
-	return partys, err
+	return genericList[model.Party](r, map[string]interface{}{"user_id": userID})
 }

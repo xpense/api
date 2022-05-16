@@ -70,7 +70,5 @@ func (r *repository) TransactionListByParty(userID, partyID uint) ([]*model.Tran
 }
 
 func (r *repository) transactionList(query map[string]interface{}) ([]*model.Transaction, error) {
-	var transactions []*model.Transaction
-	err := genericList(r, &transactions, query)
-	return transactions, err
+	return genericList[model.Transaction](r, query)
 }
