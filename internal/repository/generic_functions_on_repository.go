@@ -16,6 +16,16 @@ func genericCreate[M model.GormModel](r *repository, model *M) error {
 	return nil
 }
 
+func genericSave[M model.GormModel](r *repository, model *M) error {
+	if tx := r.db.Save(model); tx.Error != nil {
+		if isUniqueConstaintViolationError(tx.Error) {
+			return ErrorUniqueConstaintViolation
+		}
+		return ErrorOther
+	}
+	return nil
+}
+
 func genericGet[M model.GormModel](r *repository, id int, query map[string]interface{}) (*M, error) {
 	var model M
 	var tx *gorm.DB

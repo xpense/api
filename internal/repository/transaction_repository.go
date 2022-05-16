@@ -36,11 +36,8 @@ func (r *repository) TransactionUpdate(id uint, updated *model.Transaction) (*mo
 		transaction.WalletID = updated.WalletID
 	}
 
-	if tx := r.db.Save(transaction); tx.Error != nil {
-		return nil, ErrorOther
-	}
-
-	return transaction, nil
+	err = genericSave(r, transaction)
+	return transaction, err
 }
 
 func (r *repository) TransactionGet(id uint) (*model.Transaction, error) {

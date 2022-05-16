@@ -34,11 +34,8 @@ func (r *repository) UserUpdate(id uint, firstName, lastName, email string) (*mo
 		user.Email = email
 	}
 
-	if tx := r.db.Save(user); tx.Error != nil {
-		return nil, ErrorOther
-	}
-
-	return user, nil
+	err = genericSave(r, user)
+	return user, err
 }
 
 func (r *repository) UserDelete(id uint) error {

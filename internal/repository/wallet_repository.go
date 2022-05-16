@@ -22,14 +22,8 @@ func (r *repository) WalletUpdate(id uint, updated *model.Wallet) (*model.Wallet
 		wallet.Description = updated.Description
 	}
 
-	if tx := r.db.Save(wallet); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return nil, ErrorUniqueConstaintViolation
-		}
-		return nil, ErrorOther
-	}
-
-	return wallet, nil
+	err = genericSave(r, wallet)
+	return wallet, err
 }
 
 func (r *repository) WalletGet(id uint) (*model.Wallet, error) {

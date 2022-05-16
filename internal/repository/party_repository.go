@@ -18,14 +18,8 @@ func (r *repository) PartyUpdate(id uint, updated *model.Party) (*model.Party, e
 		party.Name = updated.Name
 	}
 
-	if tx := r.db.Save(party); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return nil, ErrorUniqueConstaintViolation
-		}
-		return nil, ErrorOther
-	}
-
-	return party, nil
+	err = genericSave(r, party)
+	return party, err
 }
 
 func (r *repository) PartyGet(id uint) (*model.Party, error) {
