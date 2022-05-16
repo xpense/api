@@ -8,20 +8,14 @@ import (
 
 func genericCreate[M model.GormModel](r *repository, model *M) error {
 	if tx := r.db.Create(model); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return ErrorUniqueConstaintViolation
-		}
-		return ErrorOther
+		return checkError(tx.Error)
 	}
 	return nil
 }
 
 func genericSave[M model.GormModel](r *repository, model *M) error {
 	if tx := r.db.Save(model); tx.Error != nil {
-		if isUniqueConstaintViolationError(tx.Error) {
-			return ErrorUniqueConstaintViolation
-		}
-		return ErrorOther
+		return checkError(tx.Error)
 	}
 	return nil
 }
@@ -36,10 +30,7 @@ func genericGet[M model.GormModel](r *repository, id int, query map[string]inter
 	}
 
 	if tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
+		return nil, checkError(tx.Error)
 	}
 	return &model, nil
 }
@@ -50,7 +41,7 @@ func genericDelete[M model.GormModel](r *repository, id uint) error {
 		return err
 	}
 	if tx := r.db.Delete(model); tx.Error != nil {
-		return ErrorOther
+		return checkError(tx.Error)
 	}
 	return nil
 }
@@ -58,10 +49,7 @@ func genericDelete[M model.GormModel](r *repository, id uint) error {
 func genericList[M model.GormModel](r *repository, query map[string]interface{}) ([]*M, error) {
 	var models []*M
 	if tx := r.db.Where(query).Find(&models); tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, ErrorRecordNotFound
-		}
-		return nil, ErrorOther
+		return nil, checkError(tx.Error)
 	}
 	return models, nil
 }

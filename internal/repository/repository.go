@@ -50,11 +50,19 @@ func New(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
+func checkError(err error) error {
+	if isUniqueConstaintViolationError(err) {
+		return ErrorUniqueConstaintViolation
+	} else if err == gorm.ErrRecordNotFound {
+		return ErrorRecordNotFound
+	}
+	return ErrorOther
+}
+
 func isUniqueConstaintViolationError(err error) bool {
+	uniqueConstraintCode := "23505"
 	if err, ok := err.(*pgconn.PgError); ok {
-		uniqueConstraintCode := "23505"
 		return err.Code == uniqueConstraintCode
 	}
-
 	return false
 }
