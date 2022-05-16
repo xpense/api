@@ -86,42 +86,32 @@ func NewListTransactionsByPartyRequest(id uint, token string) *http.Request {
 }
 
 // Transactions
-
-func NewCreateTransactionRequest(transaction *handlers.Transaction, token string) *http.Request {
+func NewTransactionRequest(method string, path string, token string, transaction *handlers.Transaction) *http.Request {
 	body := createRequestBody(transaction)
-	req, _ := http.NewRequest(http.MethodPost, BaseTransactionsPath, bytes.NewReader(body))
+	req, _ := http.NewRequest(method, BaseTransactionsPath+path, bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	return req
+}
+
+func NewCreateTransactionRequest(transaction *handlers.Transaction, token string) *http.Request {
+	return NewTransactionRequest(http.MethodPost, "", token, transaction)
 }
 
 func NewGetTransactionRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseTransactionsPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewTransactionRequest(http.MethodGet, fmt.Sprintf("%d", id), token, nil)
 }
 
 func NewUpdateTransactionRequest(id uint, transaction *handlers.Transaction, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseTransactionsPath, id)
-	body := createRequestBody(transaction)
-	req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewTransactionRequest(http.MethodPatch, fmt.Sprintf("%d", id), token, transaction)
 }
 
 func NewDeleteTransactionRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseTransactionsPath, id)
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewTransactionRequest(http.MethodDelete, fmt.Sprintf("%d", id), token, nil)
 }
 
 func NewListTransactionsRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BaseTransactionsPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewTransactionRequest(http.MethodGet, "", token, nil)
 }
 
 // Wallets
