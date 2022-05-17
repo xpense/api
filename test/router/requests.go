@@ -38,15 +38,12 @@ func NewDeleteAccountRequest(token string) *http.Request {
 }
 
 // Auth
-func NewAuthRequest(handler interface{}) *http.Request {
-	path := BaseAuthPath
-	switch handler.(type) {
-	case *handlers.SignUpInfo:
-		path += "/signup"
-	case *handlers.LoginInfo:
-		path += "/login"
-	}
-	return NewRequest(http.MethodPost, path, "", handler)
+func NewSignUpRequest(handler interface{}) *http.Request {
+	return NewRequest(http.MethodPost, BaseAuthPath+"/signup", "", handler)
+}
+
+func NewLoginRequest(handler interface{}) *http.Request {
+	return NewRequest(http.MethodPost, BaseAuthPath+"/login", "", handler)
 }
 
 // Parties
