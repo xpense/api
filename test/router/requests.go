@@ -45,7 +45,6 @@ var AuthRequestFactory = map[string]func(handler interface{}) *http.Request{
 	},
 }
 
-// Parties
 var PartyRequestFactory = map[string]func(token string, id uint, party *handlers.Party) *http.Request{
 	"create": func(token string, _ uint, party *handlers.Party) *http.Request {
 		return NewRequest(http.MethodPost, BasePartiesPath, token, party)
@@ -67,7 +66,6 @@ var PartyRequestFactory = map[string]func(token string, id uint, party *handlers
 	},
 }
 
-// Transactions
 var TransactionRequestFactory = map[string]func(token string, id uint, transaction *handlers.Transaction) *http.Request{
 	"create": func(token string, _ uint, transaction *handlers.Transaction) *http.Request {
 		return NewRequest(http.MethodPost, BaseTransactionsPath, token, transaction)
@@ -86,27 +84,23 @@ var TransactionRequestFactory = map[string]func(token string, id uint, transacti
 	},
 }
 
-// Wallets
-func NewCreateWalletRequest(wallet *handlers.Wallet, token string) *http.Request {
-	return NewRequest(http.MethodPost, BaseWalletsPath, token, wallet)
-}
-
-func NewGetWalletRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, nil)
-}
-
-func NewUpdateWalletRequest(id uint, wallet *handlers.Wallet, token string) *http.Request {
-	return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, wallet)
-}
-
-func NewDeleteWalletRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, nil)
-}
-
-func NewListWalletsRequest(token string) *http.Request {
-	return NewRequest(http.MethodGet, BaseWalletsPath, token, nil)
-}
-
-func NewListTransactionsByWalletRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d/transactions", BaseWalletsPath, id), token, nil)
+var WalletRequestFactory = map[string]func(token string, id uint, wallet *handlers.Wallet) *http.Request{
+	"create": func(token string, _ uint, wallet *handlers.Wallet) *http.Request {
+		return NewRequest(http.MethodPost, BaseWalletsPath, token, wallet)
+	},
+	"get": func(token string, id uint, _ *handlers.Wallet) *http.Request {
+		return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, nil)
+	},
+	"update": func(token string, id uint, wallet *handlers.Wallet) *http.Request {
+		return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, wallet)
+	},
+	"delete": func(token string, id uint, _ *handlers.Wallet) *http.Request {
+		return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, nil)
+	},
+	"list_all": func(token string, _ uint, _ *handlers.Wallet) *http.Request {
+		return NewRequest(http.MethodGet, BaseWalletsPath, token, nil)
+	},
+	"list_by_wallet": func(token string, id uint, _ *handlers.Wallet) *http.Request {
+		return NewRequest(http.MethodGet, fmt.Sprintf("%s%d/transactions", BaseWalletsPath, id), token, nil)
+	},
 }

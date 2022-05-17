@@ -74,7 +74,7 @@ func TestIntegration(t *testing.T) {
 				Name: "cash",
 			}
 
-			createWalletReq := router_test.NewCreateWalletRequest(wallet, authToken)
+			createWalletReq := router_test.WalletRequestFactory["create"](authToken, 0, wallet)
 			createWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(createWalletRes, createWalletReq)
@@ -87,7 +87,7 @@ func TestIntegration(t *testing.T) {
 			walletID = createWalletResponseBody.ID
 
 			// Get wallet
-			getWalletReq := router_test.NewGetWalletRequest(walletID, authToken)
+			getWalletReq := router_test.WalletRequestFactory["get"](authToken, walletID, nil)
 			getWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(getWalletRes, getWalletReq)
@@ -107,7 +107,7 @@ func TestIntegration(t *testing.T) {
 				Name: "groceries",
 			}
 
-			updateWalletReq := router_test.NewUpdateWalletRequest(walletID, updateWallet, authToken)
+			updateWalletReq := router_test.WalletRequestFactory["update"](authToken, walletID, updateWallet)
 			updateWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(updateWalletRes, updateWalletReq)
@@ -123,7 +123,7 @@ func TestIntegration(t *testing.T) {
 
 		{
 			// List wallets
-			listWalletsReq := router_test.NewListWalletsRequest(authToken)
+			listWalletsReq := router_test.WalletRequestFactory["list_all"](authToken, 0, nil)
 			listWalletsRes := httptest.NewRecorder()
 
 			r.ServeHTTP(listWalletsRes, listWalletsReq)
@@ -285,7 +285,7 @@ func TestIntegration(t *testing.T) {
 	t.Run("List transactions by wallet and party", func(t *testing.T) {
 		{
 			// List transactions by wallet
-			listTransactionsByWalletReq := router_test.NewListTransactionsByWalletRequest(walletID, authToken)
+			listTransactionsByWalletReq := router_test.WalletRequestFactory["list_by_wallet"](authToken, walletID, nil)
 			listTransactionsByWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(listTransactionsByWalletRes, listTransactionsByWalletReq)
@@ -347,14 +347,14 @@ func TestIntegration(t *testing.T) {
 
 		{
 			// Delete wallet
-			deleteWalletReq := router_test.NewDeleteWalletRequest(walletID, authToken)
+			deleteWalletReq := router_test.WalletRequestFactory["delete"](authToken, walletID, nil)
 			deleteWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(deleteWalletRes, deleteWalletReq)
 			router_test.AssertStatusCode(t, deleteWalletRes, http.StatusNoContent)
 
 			// Get wallet
-			getWalletReq := router_test.NewGetWalletRequest(walletID, authToken)
+			getWalletReq := router_test.WalletRequestFactory["get"](authToken, walletID, nil)
 			getWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(getWalletRes, getWalletReq)
