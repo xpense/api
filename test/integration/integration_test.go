@@ -41,7 +41,7 @@ func TestIntegration(t *testing.T) {
 			Password:  password,
 		}
 
-		signUpReq := router_test.NewSignUpRequest(signUpInfo)
+		signUpReq := router_test.AuthRequestFactory["sign_up"](signUpInfo)
 		signUpRes := httptest.NewRecorder()
 
 		r.ServeHTTP(signUpRes, signUpReq)
@@ -54,7 +54,7 @@ func TestIntegration(t *testing.T) {
 			Password: password,
 		}
 
-		loginReq := router_test.NewLoginRequest(loginInfo)
+		loginReq := router_test.AuthRequestFactory["login"](loginInfo)
 		loginRes := httptest.NewRecorder()
 
 		r.ServeHTTP(loginRes, loginReq)

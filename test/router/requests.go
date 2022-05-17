@@ -36,13 +36,13 @@ var AccountRequestFactory = map[string]func(token string, user *handlers.Account
 	},
 }
 
-// Auth
-func NewSignUpRequest(handler interface{}) *http.Request {
-	return NewRequest(http.MethodPost, BaseAuthPath+"/signup", "", handler)
-}
-
-func NewLoginRequest(handler interface{}) *http.Request {
-	return NewRequest(http.MethodPost, BaseAuthPath+"/login", "", handler)
+var AuthRequestFactory = map[string]func(handler interface{}) *http.Request{
+	"sign_up": func(handler interface{}) *http.Request {
+		return NewRequest(http.MethodPost, BaseAuthPath+"/signup", "", handler)
+	},
+	"login": func(handler interface{}) *http.Request {
+		return NewRequest(http.MethodPost, BaseAuthPath+"/login", "", handler)
+	},
 }
 
 // Parties
