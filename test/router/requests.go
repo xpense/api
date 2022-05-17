@@ -68,24 +68,22 @@ var PartyRequestFactory = map[string]func(token string, id uint, party *handlers
 }
 
 // Transactions
-func NewCreateTransactionRequest(transaction *handlers.Transaction, token string) *http.Request {
-	return NewRequest(http.MethodPost, BaseTransactionsPath, token, transaction)
-}
-
-func NewGetTransactionRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, nil)
-}
-
-func NewUpdateTransactionRequest(id uint, transaction *handlers.Transaction, token string) *http.Request {
-	return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, transaction)
-}
-
-func NewDeleteTransactionRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, nil)
-}
-
-func NewListTransactionsRequest(token string) *http.Request {
-	return NewRequest(http.MethodGet, BaseTransactionsPath, token, nil)
+var TransactionRequestFactory = map[string]func(token string, id uint, transaction *handlers.Transaction) *http.Request{
+	"create": func(token string, _ uint, transaction *handlers.Transaction) *http.Request {
+		return NewRequest(http.MethodPost, BaseTransactionsPath, token, transaction)
+	},
+	"get": func(token string, id uint, _ *handlers.Transaction) *http.Request {
+		return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, nil)
+	},
+	"update": func(token string, id uint, transaction *handlers.Transaction) *http.Request {
+		return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, transaction)
+	},
+	"delete": func(token string, id uint, _ *handlers.Transaction) *http.Request {
+		return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, nil)
+	},
+	"list_all": func(token string, _ uint, _ *handlers.Transaction) *http.Request {
+		return NewRequest(http.MethodGet, BaseTransactionsPath, token, nil)
+	},
 }
 
 // Wallets

@@ -218,7 +218,7 @@ func TestIntegration(t *testing.T) {
 				PartyID:  partyID,
 			}
 
-			createTransactionReq := router_test.NewCreateTransactionRequest(transaction, authToken)
+			createTransactionReq := router_test.TransactionRequestFactory["create"](authToken, 0, transaction)
 			createTransactionRes := httptest.NewRecorder()
 
 			r.ServeHTTP(createTransactionRes, createTransactionReq)
@@ -231,7 +231,7 @@ func TestIntegration(t *testing.T) {
 			transactionID = createTransactionResponseBody.ID
 
 			// Get transaction
-			getTransactionReq := router_test.NewGetTransactionRequest(transactionID, authToken)
+			getTransactionReq := router_test.TransactionRequestFactory["get"](authToken, transactionID, nil)
 			getTransactionRes := httptest.NewRecorder()
 
 			r.ServeHTTP(getTransactionRes, getTransactionReq)
@@ -251,7 +251,7 @@ func TestIntegration(t *testing.T) {
 				Amount: decimal.NewFromFloat(99.99),
 			}
 
-			updateTransactionReq := router_test.NewUpdateTransactionRequest(transactionID, updateTransaction, authToken)
+			updateTransactionReq := router_test.TransactionRequestFactory["update"](authToken, transactionID, updateTransaction)
 			updateTransactionRes := httptest.NewRecorder()
 
 			r.ServeHTTP(updateTransactionRes, updateTransactionReq)
@@ -267,7 +267,7 @@ func TestIntegration(t *testing.T) {
 
 		{
 			// List transactions
-			listTransactionsReq := router_test.NewListTransactionsRequest(authToken)
+			listTransactionsReq := router_test.TransactionRequestFactory["list_all"](authToken, 0, nil)
 			listTransactionsRes := httptest.NewRecorder()
 
 			r.ServeHTTP(listTransactionsRes, listTransactionsReq)
@@ -331,14 +331,14 @@ func TestIntegration(t *testing.T) {
 	t.Run("Delete transaction, wallet, party and account", func(t *testing.T) {
 		{
 			// Delete transaction
-			deleteTransactionReq := router_test.NewDeleteTransactionRequest(transactionID, authToken)
+			deleteTransactionReq := router_test.TransactionRequestFactory["delete"](authToken, transactionID, nil)
 			deleteTransactionRes := httptest.NewRecorder()
 
 			r.ServeHTTP(deleteTransactionRes, deleteTransactionReq)
 			router_test.AssertStatusCode(t, deleteTransactionRes, http.StatusNoContent)
 
 			// Get transaction
-			getTransactionReq := router_test.NewGetTransactionRequest(transactionID, authToken)
+			getTransactionReq := router_test.TransactionRequestFactory["get"](authToken, transactionID, nil)
 			getTransactionRes := httptest.NewRecorder()
 
 			r.ServeHTTP(getTransactionRes, getTransactionReq)
