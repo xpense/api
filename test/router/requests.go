@@ -46,28 +46,25 @@ var AuthRequestFactory = map[string]func(handler interface{}) *http.Request{
 }
 
 // Parties
-func NewCreatePartyRequest(party *handlers.Party, token string) *http.Request {
-	return NewRequest(http.MethodPost, BasePartiesPath, token, party)
-}
-
-func NewGetPartyRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BasePartiesPath, id), token, nil)
-}
-
-func NewUpdatePartyRequest(id uint, party *handlers.Party, token string) *http.Request {
-	return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BasePartiesPath, id), token, party)
-}
-
-func NewDeletePartyRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BasePartiesPath, id), token, nil)
-}
-
-func NewListPartiesRequest(token string) *http.Request {
-	return NewRequest(http.MethodGet, BasePartiesPath, token, nil)
-}
-
-func NewListTransactionsByPartyRequest(id uint, token string) *http.Request {
-	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d/transactions", BasePartiesPath, id), token, nil)
+var PartyRequestFactory = map[string]func(token string, id uint, party *handlers.Party) *http.Request{
+	"create": func(token string, _ uint, party *handlers.Party) *http.Request {
+		return NewRequest(http.MethodPost, BasePartiesPath, token, party)
+	},
+	"get": func(token string, id uint, _ *handlers.Party) *http.Request {
+		return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BasePartiesPath, id), token, nil)
+	},
+	"update": func(token string, id uint, party *handlers.Party) *http.Request {
+		return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BasePartiesPath, id), token, party)
+	},
+	"delete": func(token string, id uint, _ *handlers.Party) *http.Request {
+		return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BasePartiesPath, id), token, nil)
+	},
+	"list_all": func(token string, _ uint, _ *handlers.Party) *http.Request {
+		return NewRequest(http.MethodGet, BasePartiesPath, token, nil)
+	},
+	"list_by_party_request": func(token string, id uint, _ *handlers.Party) *http.Request {
+		return NewRequest(http.MethodGet, fmt.Sprintf("%s%d/transactions", BasePartiesPath, id), token, nil)
+	},
 }
 
 // Transactions

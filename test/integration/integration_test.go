@@ -145,7 +145,7 @@ func TestIntegration(t *testing.T) {
 				Name: "soviets",
 			}
 
-			createPartyReq := router_test.NewCreatePartyRequest(party, authToken)
+			createPartyReq := router_test.PartyRequestFactory["create"](authToken, 0, party)
 			createPartyRes := httptest.NewRecorder()
 
 			r.ServeHTTP(createPartyRes, createPartyReq)
@@ -158,7 +158,7 @@ func TestIntegration(t *testing.T) {
 			partyID = createPartyResponseBody.ID
 
 			// Get party
-			getWalletReq := router_test.NewGetPartyRequest(partyID, authToken)
+			getWalletReq := router_test.PartyRequestFactory["get"](authToken, partyID, nil)
 			getWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(getWalletRes, getWalletReq)
@@ -178,7 +178,7 @@ func TestIntegration(t *testing.T) {
 				Name: "groceries",
 			}
 
-			updatePartyReq := router_test.NewUpdatePartyRequest(partyID, updateParty, authToken)
+			updatePartyReq := router_test.PartyRequestFactory["update"](authToken, partyID, updateParty)
 			updatePartyRes := httptest.NewRecorder()
 
 			r.ServeHTTP(updatePartyRes, updatePartyReq)
@@ -194,7 +194,7 @@ func TestIntegration(t *testing.T) {
 
 		{
 			// List parties
-			listPartiesReq := router_test.NewListPartiesRequest(authToken)
+			listPartiesReq := router_test.PartyRequestFactory["list_all"](authToken, 0, nil)
 			listPartiesRes := httptest.NewRecorder()
 
 			r.ServeHTTP(listPartiesRes, listPartiesReq)
@@ -307,7 +307,7 @@ func TestIntegration(t *testing.T) {
 
 		{
 			// List transactions by party
-			listTransactionsByPartyReq := router_test.NewListTransactionsByPartyRequest(partyID, authToken)
+			listTransactionsByPartyReq := router_test.PartyRequestFactory["list_by_party_request"](authToken, partyID, nil)
 			listTransactionsByPartyRes := httptest.NewRecorder()
 
 			r.ServeHTTP(listTransactionsByPartyRes, listTransactionsByPartyReq)
@@ -363,14 +363,14 @@ func TestIntegration(t *testing.T) {
 
 		{
 			// Delete party
-			deletePartyReq := router_test.NewDeletePartyRequest(partyID, authToken)
+			deletePartyReq := router_test.PartyRequestFactory["delete"](authToken, partyID, nil)
 			deletePartyRes := httptest.NewRecorder()
 
 			r.ServeHTTP(deletePartyRes, deletePartyReq)
 			router_test.AssertStatusCode(t, deletePartyRes, http.StatusNoContent)
 
 			// Get party
-			getWalletReq := router_test.NewGetPartyRequest(partyID, authToken)
+			getWalletReq := router_test.PartyRequestFactory["get"](authToken, partyID, nil)
 			getWalletRes := httptest.NewRecorder()
 
 			r.ServeHTTP(getWalletRes, getWalletReq)
