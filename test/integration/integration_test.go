@@ -379,7 +379,7 @@ func TestIntegration(t *testing.T) {
 
 		{
 			// Delete account
-			deleteAccountReq := router_test.NewDeleteAccountRequest(authToken)
+			deleteAccountReq := router_test.AccountRequestFactory["delete"](authToken, nil)
 			deleteAccountRes := httptest.NewRecorder()
 
 			r.ServeHTTP(deleteAccountRes, deleteAccountReq)
@@ -391,7 +391,7 @@ func TestIntegration(t *testing.T) {
 				Password: password,
 			}
 
-			loginReq := router_test.NewLoginRequest(loginInfo)
+			loginReq := router_test.AuthRequestFactory["login"](loginInfo)
 			loginRes := httptest.NewRecorder()
 
 			r.ServeHTTP(loginRes, loginReq)

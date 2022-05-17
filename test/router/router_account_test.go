@@ -22,8 +22,8 @@ func TestGetAccount(t *testing.T) {
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := NewGetAccountRequest(token)
-		invalidTokenReq := NewGetAccountRequest(token)
+		missingTokenReq := AccountRequestFactory["get"](token, nil)
+		invalidTokenReq := AccountRequestFactory["get"](token, nil)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -42,7 +42,7 @@ func TestGetAccount(t *testing.T) {
 			repoSpy.On("UserGet", claims.ID).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewGetAccountRequest(token)
+			req := AccountRequestFactory["get"](token, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -55,7 +55,7 @@ func TestGetAccount(t *testing.T) {
 			repoSpy.On("UserGet", claims.ID).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewGetAccountRequest(token)
+			req := AccountRequestFactory["get"](token, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -76,8 +76,8 @@ func TestUpdateAccount(t *testing.T) {
 		account := &handlers.Account{}
 		token := "invalid-token"
 
-		missingTokenReq := NewUpdateAccountRequest(account, token)
-		invalidTokenReq := NewUpdateAccountRequest(account, token)
+		missingTokenReq := AccountRequestFactory["update"](token, account)
+		invalidTokenReq := AccountRequestFactory["update"](token, account)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -102,7 +102,7 @@ func TestUpdateAccount(t *testing.T) {
 			repoSpy.On("UserUpdate", claims.ID, account.FirstName, account.LastName, account.Email).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(account, token)
+			req := AccountRequestFactory["update"](token, account)
 
 			r.ServeHTTP(res, req)
 
@@ -113,7 +113,7 @@ func TestUpdateAccount(t *testing.T) {
 			account := &handlers.Account{}
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(account, token)
+			req := AccountRequestFactory["update"](token, account)
 
 			r.ServeHTTP(res, req)
 
@@ -127,7 +127,7 @@ func TestUpdateAccount(t *testing.T) {
 			account := &handlers.Account{Email: "@"}
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(account, token)
+			req := AccountRequestFactory["update"](token, account)
 
 			r.ServeHTTP(res, req)
 
@@ -144,7 +144,7 @@ func TestUpdateAccount(t *testing.T) {
 			repoSpy.On("UserUpdate", claims.ID, user.FirstName, user.LastName, user.Email).Return(user, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateAccountRequest(account, token)
+			req := AccountRequestFactory["update"](token, account)
 
 			r.ServeHTTP(res, req)
 
@@ -164,8 +164,8 @@ func TestDeleteAccount(t *testing.T) {
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := NewDeleteAccountRequest(token)
-		invalidTokenReq := NewDeleteAccountRequest(token)
+		missingTokenReq := AccountRequestFactory["delete"](token, nil)
+		invalidTokenReq := AccountRequestFactory["delete"](token, nil)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -184,7 +184,7 @@ func TestDeleteAccount(t *testing.T) {
 			repoSpy.On("UserDelete", claims.ID).Return(repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewDeleteAccountRequest(token)
+			req := AccountRequestFactory["delete"](token, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -195,7 +195,7 @@ func TestDeleteAccount(t *testing.T) {
 			repoSpy.On("UserDelete", claims.ID).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewDeleteAccountRequest(token)
+			req := AccountRequestFactory["delete"](token, nil)
 
 			r.ServeHTTP(res, req)
 

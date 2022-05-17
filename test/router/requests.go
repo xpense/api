@@ -24,17 +24,16 @@ func NewRequest(method, path, token string, handler interface{}) *http.Request {
 	return req
 }
 
-// Account
-func NewGetAccountRequest(token string) *http.Request {
-	return NewRequest(http.MethodGet, BaseAccountPath, token, nil)
-}
-
-func NewUpdateAccountRequest(user *handlers.Account, token string) *http.Request {
-	return NewRequest(http.MethodPatch, BaseAccountPath, token, user)
-}
-
-func NewDeleteAccountRequest(token string) *http.Request {
-	return NewRequest(http.MethodDelete, BaseAccountPath, token, nil)
+var AccountRequestFactory = map[string]func(token string, user *handlers.Account) *http.Request{
+	"get": func(token string, _ *handlers.Account) *http.Request {
+		return NewRequest(http.MethodGet, BaseAccountPath, token, nil)
+	},
+	"update": func(token string, user *handlers.Account) *http.Request {
+		return NewRequest(http.MethodPatch, BaseAccountPath, token, user)
+	},
+	"delete": func(token string, _ *handlers.Account) *http.Request {
+		return NewRequest(http.MethodDelete, BaseAccountPath, token, nil)
+	},
 }
 
 // Auth
