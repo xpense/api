@@ -62,7 +62,7 @@ func TestIntegration(t *testing.T) {
 		router_test.AssertStatusCode(t, loginRes, http.StatusOK)
 
 		var loginTokenResponseBody handlers.LoginToken
-		router_test.ParseLoginTokenJSONResponse(t, loginRes, &loginTokenResponseBody)
+		router_test.ParseJSONtoResponse(t, loginRes, &loginTokenResponseBody)
 		// Set auth token
 		authToken = loginTokenResponseBody.Token
 	})
@@ -81,7 +81,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, createWalletRes, http.StatusCreated)
 
 			var createWalletResponseBody handlers.Wallet
-			router_test.ParseWalletJSONResponse(t, createWalletRes, &createWalletResponseBody)
+			router_test.ParseJSONtoResponse(t, createWalletRes, &createWalletResponseBody)
 
 			// Set wallet id
 			walletID = createWalletResponseBody.ID
@@ -94,7 +94,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, getWalletRes, http.StatusOK)
 
 			var getWalletResponseBody handlers.Wallet
-			router_test.ParseWalletJSONResponse(t, getWalletRes, &getWalletResponseBody)
+			router_test.ParseJSONtoResponse(t, getWalletRes, &getWalletResponseBody)
 
 			if wallet.Name != getWalletResponseBody.Name {
 				t.Errorf("Expected wallet name: %s, got: %s", wallet.Name, getWalletResponseBody.Name)
@@ -114,7 +114,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, updateWalletRes, http.StatusOK)
 
 			var updateWalletResponseBody handlers.Wallet
-			router_test.ParseWalletJSONResponse(t, updateWalletRes, &updateWalletResponseBody)
+			router_test.ParseJSONtoResponse(t, updateWalletRes, &updateWalletResponseBody)
 
 			if updateWallet.Name != updateWalletResponseBody.Name {
 				t.Errorf("Expected wallet name: %s, got: %s", updateWallet.Name, updateWalletResponseBody.Name)
@@ -130,7 +130,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, listWalletsRes, http.StatusOK)
 
 			var listWalletsResponseBody router_test.WalletListResponse
-			router_test.ParseWalletListJSONResponse(t, listWalletsRes, &listWalletsResponseBody)
+			router_test.ParseJSONtoResponse(t, listWalletsRes, &listWalletsResponseBody)
 
 			if count := listWalletsResponseBody.Count; count != 1 {
 				t.Errorf("Expected count: 1, got: %d", count)
@@ -152,7 +152,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, createPartyRes, http.StatusCreated)
 
 			var createPartyResponseBody handlers.Party
-			router_test.ParsePartyJSONResponse(t, createPartyRes, &createPartyResponseBody)
+			router_test.ParseJSONtoResponse(t, createPartyRes, &createPartyResponseBody)
 
 			// Set party id
 			partyID = createPartyResponseBody.ID
@@ -165,7 +165,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, getWalletRes, http.StatusOK)
 
 			var getPartyResponseBody handlers.Party
-			router_test.ParsePartyJSONResponse(t, getWalletRes, &getPartyResponseBody)
+			router_test.ParseJSONtoResponse(t, getWalletRes, &getPartyResponseBody)
 
 			if party.Name != getPartyResponseBody.Name {
 				t.Errorf("Expected wallet name: %s, got: %s", party.Name, getPartyResponseBody.Name)
@@ -185,7 +185,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, updatePartyRes, http.StatusOK)
 
 			var updatePartyResponseBody handlers.Party
-			router_test.ParsePartyJSONResponse(t, updatePartyRes, &updatePartyResponseBody)
+			router_test.ParseJSONtoResponse(t, updatePartyRes, &updatePartyResponseBody)
 
 			if updateParty.Name != updatePartyResponseBody.Name {
 				t.Errorf("Expected wallet name: %s, got: %s", updateParty.Name, updatePartyResponseBody.Name)
@@ -201,7 +201,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, listPartiesRes, http.StatusOK)
 
 			var listPartiesResponseBody router_test.PartyListResponse
-			router_test.ParsePartyListJSONResponse(t, listPartiesRes, &listPartiesResponseBody)
+			router_test.ParseJSONtoResponse(t, listPartiesRes, &listPartiesResponseBody)
 
 			if count := listPartiesResponseBody.Count; count != 1 {
 				t.Errorf("Expected count: 1, got: %d", count)
@@ -225,7 +225,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, createTransactionRes, http.StatusCreated)
 
 			var createTransactionResponseBody handlers.Transaction
-			router_test.ParseTransactionJSONResponse(t, createTransactionRes, &createTransactionResponseBody)
+			router_test.ParseJSONtoResponse(t, createTransactionRes, &createTransactionResponseBody)
 
 			// Set transaction id
 			transactionID = createTransactionResponseBody.ID
@@ -238,7 +238,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, getTransactionRes, http.StatusOK)
 
 			var getTransactionResponseBody handlers.Transaction
-			router_test.ParseTransactionJSONResponse(t, getTransactionRes, &getTransactionResponseBody)
+			router_test.ParseJSONtoResponse(t, getTransactionRes, &getTransactionResponseBody)
 
 			if transaction.Amount.Cmp(getTransactionResponseBody.Amount) != 0 {
 				t.Errorf("Expected transaction amount: %v, got: %v", transaction.Amount, getTransactionResponseBody.Amount)
@@ -258,7 +258,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, updateTransactionRes, http.StatusOK)
 
 			var updateTransactionResponseBody handlers.Transaction
-			router_test.ParseTransactionJSONResponse(t, updateTransactionRes, &updateTransactionResponseBody)
+			router_test.ParseJSONtoResponse(t, updateTransactionRes, &updateTransactionResponseBody)
 
 			if updateTransaction.Amount.Cmp(updateTransactionResponseBody.Amount) != 0 {
 				t.Errorf("Expected transaction amount: %v, got: %v", updateTransaction.Amount, updateTransactionResponseBody.Amount)
@@ -274,7 +274,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, listTransactionsRes, http.StatusOK)
 
 			var listTransactionsResponseBody router_test.TransactionListResponse
-			router_test.ParseTransactionListJSONResponse(t, listTransactionsRes, &listTransactionsResponseBody)
+			router_test.ParseJSONtoResponse(t, listTransactionsRes, &listTransactionsResponseBody)
 
 			if count := listTransactionsResponseBody.Count; count != 1 {
 				t.Errorf("Expected count: 1, got: %d", count)
@@ -292,7 +292,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, listTransactionsByWalletRes, http.StatusOK)
 
 			var transactions router_test.TransactionListResponse
-			router_test.ParseTransactionListJSONResponse(t, listTransactionsByWalletRes, &transactions)
+			router_test.ParseJSONtoResponse(t, listTransactionsByWalletRes, &transactions)
 
 			if count := transactions.Count; count != 1 {
 				t.Errorf("Expected count: 1, got: %d", count)
@@ -314,7 +314,7 @@ func TestIntegration(t *testing.T) {
 			router_test.AssertStatusCode(t, listTransactionsByPartyRes, http.StatusOK)
 
 			var transactions router_test.TransactionListResponse
-			router_test.ParseTransactionListJSONResponse(t, listTransactionsByPartyRes, &transactions)
+			router_test.ParseJSONtoResponse(t, listTransactionsByPartyRes, &transactions)
 
 			if count := transactions.Count; count != 1 {
 				t.Errorf("Expected count: 1, got: %d", count)

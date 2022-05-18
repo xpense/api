@@ -16,171 +16,103 @@ var (
 	BaseWalletsPath      = BasePath + "/wallets/"
 )
 
-// Account
-
-func NewGetAccountRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BaseAccountPath, nil)
+func NewRequest(method, path, token string, handler interface{}) *http.Request {
+	body := createRequestBody(handler)
+	req, _ := http.NewRequest(method, path, bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	return req
+}
+
+// Account
+func NewGetAccountRequest(token string) *http.Request {
+	return NewRequest(http.MethodGet, BaseAccountPath, token, nil)
 }
 
 func NewUpdateAccountRequest(user *handlers.Account, token string) *http.Request {
-	body := createRequestBody(user)
-	req, _ := http.NewRequest(http.MethodPatch, BaseAccountPath, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodPatch, BaseAccountPath, token, user)
 }
 
 func NewDeleteAccountRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodDelete, BaseAccountPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodDelete, BaseAccountPath, token, nil)
 }
 
 // Auth
-
-func NewSignUpRequest(signUp *handlers.SignUpInfo) *http.Request {
-	body := createRequestBody(signUp)
-	req, _ := http.NewRequest(http.MethodPost, BaseAuthPath+"/signup", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	return req
+func NewSignUpRequest(handler interface{}) *http.Request {
+	return NewRequest(http.MethodPost, BaseAuthPath+"/signup", "", handler)
 }
 
-func NewLoginRequest(login *handlers.LoginInfo) *http.Request {
-	body := createRequestBody(login)
-	req, _ := http.NewRequest(http.MethodPost, BaseAuthPath+"/login", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	return req
+func NewLoginRequest(handler interface{}) *http.Request {
+	return NewRequest(http.MethodPost, BaseAuthPath+"/login", "", handler)
 }
 
-// Parties`
-
+// Parties
 func NewCreatePartyRequest(party *handlers.Party, token string) *http.Request {
-	body := createRequestBody(party)
-	req, _ := http.NewRequest(http.MethodPost, BasePartiesPath, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodPost, BasePartiesPath, token, party)
 }
 
 func NewGetPartyRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BasePartiesPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BasePartiesPath, id), token, nil)
 }
 
 func NewUpdatePartyRequest(id uint, party *handlers.Party, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BasePartiesPath, id)
-	body := createRequestBody(party)
-	req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BasePartiesPath, id), token, party)
 }
 
 func NewDeletePartyRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BasePartiesPath, id)
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BasePartiesPath, id), token, nil)
 }
 
 func NewListPartiesRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BasePartiesPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, BasePartiesPath, token, nil)
 }
 
 func NewListTransactionsByPartyRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d/transactions", BasePartiesPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d/transactions", BasePartiesPath, id), token, nil)
 }
 
 // Transactions
-
 func NewCreateTransactionRequest(transaction *handlers.Transaction, token string) *http.Request {
-	body := createRequestBody(transaction)
-	req, _ := http.NewRequest(http.MethodPost, BaseTransactionsPath, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodPost, BaseTransactionsPath, token, transaction)
 }
 
 func NewGetTransactionRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseTransactionsPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, nil)
 }
 
 func NewUpdateTransactionRequest(id uint, transaction *handlers.Transaction, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseTransactionsPath, id)
-	body := createRequestBody(transaction)
-	req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, transaction)
 }
 
 func NewDeleteTransactionRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseTransactionsPath, id)
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BaseTransactionsPath, id), token, nil)
 }
 
 func NewListTransactionsRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BaseTransactionsPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, BaseTransactionsPath, token, nil)
 }
 
 // Wallets
-
 func NewCreateWalletRequest(wallet *handlers.Wallet, token string) *http.Request {
-	body := createRequestBody(wallet)
-	req, _ := http.NewRequest(http.MethodPost, BaseWalletsPath, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodPost, BaseWalletsPath, token, wallet)
 }
 
 func NewGetWalletRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseWalletsPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, nil)
 }
 
 func NewUpdateWalletRequest(id uint, wallet *handlers.Wallet, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseWalletsPath, id)
-	body := createRequestBody(wallet)
-	req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, wallet)
 }
 
 func NewDeleteWalletRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d", BaseWalletsPath, id)
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", BaseWalletsPath, id), token, nil)
 }
 
 func NewListWalletsRequest(token string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, BaseWalletsPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, BaseWalletsPath, token, nil)
 }
 
 func NewListTransactionsByWalletRequest(id uint, token string) *http.Request {
-	url := fmt.Sprintf("%s%d/transactions", BaseWalletsPath, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	return req
+	return NewRequest(http.MethodGet, fmt.Sprintf("%s%d/transactions", BaseWalletsPath, id), token, nil)
 }
