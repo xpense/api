@@ -23,8 +23,8 @@ func TestCreateWallet(t *testing.T) {
 		wallet := &handlers.Wallet{}
 		token := "invalid-token"
 
-		missingTokenReq := NewCreateWalletRequest(wallet, token)
-		invalidTokenReq := NewCreateWalletRequest(wallet, token)
+		missingTokenReq := WalletRequestFactory["create"](token, 0, wallet)
+		invalidTokenReq := WalletRequestFactory["create"](token, 0, wallet)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -47,9 +47,9 @@ func TestCreateWallet(t *testing.T) {
 			repoSpy.On("WalletCreate", wallet).Return(repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := NewCreateWalletRequest(&handlers.Wallet{
+			req := WalletRequestFactory["create"](token, 0, &handlers.Wallet{
 				Name: wallet.Name,
-			}, token)
+			})
 
 			r.ServeHTTP(res, req)
 
@@ -68,9 +68,9 @@ func TestCreateWallet(t *testing.T) {
 			repoSpy.On("WalletCreate", wallet).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewCreateWalletRequest(&handlers.Wallet{
+			req := WalletRequestFactory["create"](token, 0, &handlers.Wallet{
 				Name: wallet.Name,
-			}, token)
+			})
 
 			r.ServeHTTP(res, req)
 
@@ -93,8 +93,8 @@ func TestGetWallet(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := NewGetWalletRequest(id, token)
-		invalidTokenReq := NewGetWalletRequest(id, token)
+		missingTokenReq := WalletRequestFactory["get"](token, id, nil)
+		invalidTokenReq := WalletRequestFactory["get"](token, id, nil)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -112,7 +112,7 @@ func TestGetWallet(t *testing.T) {
 			id := uint(0)
 
 			res := httptest.NewRecorder()
-			req := NewGetWalletRequest(id, token)
+			req := WalletRequestFactory["get"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -125,7 +125,7 @@ func TestGetWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewGetWalletRequest(id, token)
+			req := WalletRequestFactory["get"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -142,7 +142,7 @@ func TestGetWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewGetWalletRequest(id, token)
+			req := WalletRequestFactory["get"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -159,7 +159,7 @@ func TestGetWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Twice()
 
 			res := httptest.NewRecorder()
-			req := NewGetWalletRequest(id, token)
+			req := WalletRequestFactory["get"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -183,8 +183,8 @@ func TestUpdateWallet(t *testing.T) {
 		wallet := &handlers.Wallet{}
 		token := "invalid-token"
 
-		missingTokenReq := NewUpdateWalletRequest(id, wallet, token)
-		invalidTokenReq := NewUpdateWalletRequest(id, wallet, token)
+		missingTokenReq := WalletRequestFactory["update"](token, id, wallet)
+		invalidTokenReq := WalletRequestFactory["update"](token, id, wallet)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -207,7 +207,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateWalletRequest(id, wallet, token)
+			req := WalletRequestFactory["update"](token, id, wallet)
 
 			r.ServeHTTP(res, req)
 
@@ -224,7 +224,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
+			req := WalletRequestFactory["update"](token, id, &handlers.Wallet{Name: wallet.Name})
 
 			r.ServeHTTP(res, req)
 
@@ -242,7 +242,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletUpdate", id, wallet).Return(nil, repository.ErrorUniqueConstaintViolation).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
+			req := WalletRequestFactory["update"](token, id, &handlers.Wallet{Name: wallet.Name})
 
 			r.ServeHTTP(res, req)
 
@@ -263,7 +263,7 @@ func TestUpdateWallet(t *testing.T) {
 			repoSpy.On("WalletUpdate", id, wallet).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewUpdateWalletRequest(id, &handlers.Wallet{Name: wallet.Name}, token)
+			req := WalletRequestFactory["update"](token, id, &handlers.Wallet{Name: wallet.Name})
 
 			r.ServeHTTP(res, req)
 
@@ -286,8 +286,8 @@ func TestDeleteWallet(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := NewDeleteWalletRequest(id, token)
-		invalidTokenReq := NewDeleteWalletRequest(id, token)
+		missingTokenReq := WalletRequestFactory["delete"](token, id, nil)
+		invalidTokenReq := WalletRequestFactory["delete"](token, id, nil)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -307,7 +307,7 @@ func TestDeleteWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewDeleteWalletRequest(id, token)
+			req := WalletRequestFactory["delete"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -324,7 +324,7 @@ func TestDeleteWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewDeleteWalletRequest(id, token)
+			req := WalletRequestFactory["delete"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -342,7 +342,7 @@ func TestDeleteWallet(t *testing.T) {
 			repoSpy.On("WalletDelete", id).Return(nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewDeleteWalletRequest(id, token)
+			req := WalletRequestFactory["delete"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -368,8 +368,8 @@ func TestListWallets(t *testing.T) {
 	t.Run("Missing/Invalid authorization token cases", func(t *testing.T) {
 		token := "invalid-token"
 
-		missingTokenReq := NewListWalletsRequest(token)
-		invalidTokenReq := NewListWalletsRequest(token)
+		missingTokenReq := WalletRequestFactory["list_all"](token, 0, nil)
+		invalidTokenReq := WalletRequestFactory["list_all"](token, 0, nil)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -388,7 +388,7 @@ func TestListWallets(t *testing.T) {
 			repoSpy.On("WalletList", userID).Return(wallets, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewListWalletsRequest(token)
+			req := WalletRequestFactory["list_all"](token, 0, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -404,7 +404,7 @@ func TestListWallets(t *testing.T) {
 			repoSpy.On("WalletList", userID).Return(wallets, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewListWalletsRequest(token)
+			req := WalletRequestFactory["list_all"](token, 0, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -434,8 +434,8 @@ func TestListTransactionsByWallet(t *testing.T) {
 		id := uint(1)
 		token := "invalid-token"
 
-		missingTokenReq := NewListTransactionsByWalletRequest(id, token)
-		invalidTokenReq := NewListTransactionsByWalletRequest(id, token)
+		missingTokenReq := WalletRequestFactory["list_by_wallet"](token, id, nil)
+		invalidTokenReq := WalletRequestFactory["list_by_wallet"](token, id, nil)
 
 		unauthorizedTestCases := UnauthorizedTestCases(missingTokenReq, invalidTokenReq, r, jwtServiceSpy)
 		t.Run("Unauthorized test cases", unauthorizedTestCases)
@@ -454,7 +454,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(nil, repository.ErrorRecordNotFound).Once()
 
 			res := httptest.NewRecorder()
-			req := NewListTransactionsByWalletRequest(id, token)
+			req := WalletRequestFactory["list_by_wallet"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -468,7 +468,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("WalletGet", id).Return(wallet, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewListTransactionsByWalletRequest(id, token)
+			req := WalletRequestFactory["list_by_wallet"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -485,7 +485,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("TransactionListByWallet", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewListTransactionsByWalletRequest(id, token)
+			req := WalletRequestFactory["list_by_wallet"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
@@ -505,7 +505,7 @@ func TestListTransactionsByWallet(t *testing.T) {
 			repoSpy.On("TransactionListByWallet", userID, id).Return(transactions, nil).Once()
 
 			res := httptest.NewRecorder()
-			req := NewListTransactionsByWalletRequest(id, token)
+			req := WalletRequestFactory["list_by_wallet"](token, id, nil)
 
 			r.ServeHTTP(res, req)
 
